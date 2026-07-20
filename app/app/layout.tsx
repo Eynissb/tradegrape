@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -23,19 +24,14 @@ export default async function AppLayout({
     <div className="flex min-h-full flex-col">
       <header className="app-bar">
         <div className="app-bar-in">
-          <Link href="/app" className="app-brand">
-            <span className="logomark h-7 w-7">
-              <svg viewBox="0 0 24 24" fill="none" width="15" height="15">
-                <path
-                  d="M3 17l5-6 4 4 5-8 4 5"
-                  stroke="var(--on-accent)"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            Tradegrape
+          <Link href="/" className="app-brand" aria-label="Tradegrape — accueil">
+            <Image
+              src="/brand/logo.png"
+              alt="Tradegrape"
+              width={116}
+              height={29}
+              priority
+            />
             <span className="app-pill">journal</span>
           </Link>
 

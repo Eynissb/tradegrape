@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 /** Enveloppe centrée + glows pour les écrans d'authentification. */
@@ -14,30 +15,16 @@ export default function AuthLayout({
       <div className="relative z-10 w-full max-w-md">
         <Link
           href="/"
-          className="mb-7 flex items-center justify-center gap-3"
-          style={{ textDecoration: 'none', color: 'var(--ink)' }}
+          className="mb-7 flex items-center justify-center"
+          aria-label="Tradegrape — accueil"
         >
-          <span className="logomark h-9 w-9">
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
-              <path
-                d="M3 17l5-6 4 4 5-8 4 5"
-                stroke="var(--on-accent)"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '20px',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            Tradegrape
-          </span>
+          <Image
+            src="/brand/logo.png"
+            alt="Tradegrape"
+            width={176}
+            height={44}
+            priority
+          />
         </Link>
 
         {children}
