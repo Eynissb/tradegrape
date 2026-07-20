@@ -64,6 +64,23 @@ export async function saveFirm(formData: FormData) {
   redirect('/admin/firms');
 }
 
+export async function toggleFirmPublish(formData: FormData) {
+  const id = str(formData, 'id');
+  const back = str(formData, 'back') ?? '/admin/firms';
+  const next = str(formData, 'next') === '1';
+  if (!id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('firms')
+    .update({ is_published: next })
+    .eq('id', id);
+  if (error) backWithError(back, error.message);
+
+  revalidatePath(back);
+  redirect(back);
+}
+
 export async function deleteFirm(formData: FormData) {
   const id = str(formData, 'id');
   if (!id) redirect('/admin/firms');

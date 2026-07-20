@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import PublishToggle from '@/app/admin/_components/PublishToggle';
+import { toggleFirmPublish } from './actions';
 
 export const metadata = { title: 'Firms — Admin Tradawave' };
 
@@ -67,13 +69,12 @@ export default async function FirmsList() {
                   <td>{f.market_type}</td>
                   <td className="num">{f.health_score ?? '—'}</td>
                   <td>
-                    <span
-                      className={
-                        f.is_published ? 'admin-badge is-on' : 'admin-badge'
-                      }
-                    >
-                      {f.is_published ? 'publiée' : 'brouillon'}
-                    </span>
+                    <PublishToggle
+                      action={toggleFirmPublish}
+                      id={f.id}
+                      isPublished={f.is_published}
+                      back="/admin/firms"
+                    />
                   </td>
                   <td className="admin-row-actions">
                     <Link href={`/admin/firms/${f.id}`} className="link-accent">

@@ -152,6 +152,23 @@ export async function duplicateOffers(formData: FormData) {
   redirect(`${failPath}?message=${encodeURIComponent(parts.join(' · '))}`);
 }
 
+export async function toggleOfferPublish(formData: FormData) {
+  const id = str(formData, 'id');
+  const back = str(formData, 'back') ?? '/admin/firms';
+  const next = str(formData, 'next') === '1';
+  if (!id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('offers')
+    .update({ is_published: next })
+    .eq('id', id);
+  if (error) backWithError(back, error.message);
+
+  revalidatePath(back);
+  redirect(back);
+}
+
 export async function deleteOffer(formData: FormData) {
   const id = str(formData, 'id');
   const planId = str(formData, 'plan_id');

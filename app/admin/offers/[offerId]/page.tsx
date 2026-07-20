@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import OfferForm, { type OfferValues } from '../OfferForm';
-import { deleteOffer } from '../actions';
+import { deleteOffer, toggleOfferPublish } from '../actions';
+import PublishToggle from '@/app/admin/_components/PublishToggle';
 
 export const metadata = { title: 'Éditer une offre — Admin Tradawave' };
 
@@ -27,10 +28,19 @@ export default async function EditOffer({
 
   const { data: plan } = await supabase
     .from('plans')
-    .select('id, name, firm_id')
+    .select('id, name, firm_id, is_published')
     .eq('id', offer.plan_id)
-    .single<{ id: string; name: string; firm_id: string }>();
+    .single<{ id: string; name: string; firm_id: string; is_published: boolean }>();
 
+  const { data: firm } = plan
+    ? await supabase
+        .from('firms')
+        .select('id, name, is_published')
+        .eq('id', plan.firm_id)
+        .single<{ id: string; name: string; is_published: boolean }>()
+    : { data: null };
+
+  const parentDraft = (plan && !plan.is_published) || (firm && !firm.is_published);
   const sizeLabel =
     offer.account_size != null ? offer.account_size.toLocaleString('fr-FR') : '';
 
@@ -46,9 +56,29 @@ export default async function EditOffer({
         ) : null}
         / Offre {sizeLabel}
       </nav>
-      <h1 className="admin-h1">Offre {sizeLabel}</h1>
+      <div className="admin-title-row">
+        <h1 className="admin-h1">Offre {sizeLabel}</h1>
+        <PublishToggle
+          action={toggleOfferPublish}
+          id={offerId}
+          isPublished={!!offer.is_published}
+          back={`/admin/offers/${offerId}`}
+        />
+      </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
+
+      {offer.is_published && parentDraft ? (
+        <div className="notice notice-warn mt-4">
+          Cette offre est publiée mais <strong>masquée en public</strong> :{' '}
+          {firm && !firm.is_published ? 'sa firm' : 'son plan'} est en brouillon.{' '}
+          {plan ? (
+            <Link href={`/admin/plans/${plan.id}`} className="link-accent">
+              Ouvrir le plan
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <OfferForm offer={offer} />

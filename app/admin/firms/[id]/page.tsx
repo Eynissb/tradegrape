@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import PublishToggle from '@/app/admin/_components/PublishToggle';
+import { togglePlanPublish } from '@/app/admin/plans/actions';
 import FirmForm, { type FirmValues } from '../FirmForm';
-import { deleteFirm } from '../actions';
+import { deleteFirm, toggleFirmPublish } from '../actions';
 
 export const metadata = { title: 'Éditer une firm — Admin Tradawave' };
 
@@ -52,9 +54,24 @@ export default async function EditFirm({
         </Link>{' '}
         / {firm.name ?? 'Éditer'}
       </nav>
-      <h1 className="admin-h1">{firm.name}</h1>
+      <div className="admin-title-row">
+        <h1 className="admin-h1">{firm.name}</h1>
+        <PublishToggle
+          action={toggleFirmPublish}
+          id={id}
+          isPublished={!!firm.is_published}
+          back={`/admin/firms/${id}`}
+        />
+      </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
+
+      {!firm.is_published ? (
+        <div className="notice notice-warn mt-4">
+          Cette firm est en <strong>brouillon</strong> — rien de ce qu’elle contient
+          n’apparaît en public, même les plans et offres publiés.
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <FirmForm firm={firm} />
@@ -100,9 +117,14 @@ export default async function EditFirm({
                   <td>{p.account_kind}</td>
                   <td className="num">{p.rating ?? '—'}</td>
                   <td>
-                    <span className={p.is_published ? 'admin-badge is-on' : 'admin-badge'}>
-                      {p.is_published ? 'publié' : 'brouillon'}
-                    </span>
+                    <PublishToggle
+                      action={togglePlanPublish}
+                      id={p.id}
+                      isPublished={p.is_published}
+                      back={`/admin/firms/${id}`}
+                      onLabel="Publié"
+                      hidden={p.is_published && !firm.is_published}
+                    />
                   </td>
                   <td className="admin-row-actions">
                     <Link href={`/admin/plans/${p.id}`} className="link-accent">

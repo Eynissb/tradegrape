@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PlanForm, { type PlanValues } from '../PlanForm';
-import { deletePlan } from '../actions';
-import { duplicateOffers } from '@/app/admin/offers/actions';
+import { deletePlan, publishAllOffers, togglePlanPublish } from '../actions';
+import { duplicateOffers, toggleOfferPublish } from '@/app/admin/offers/actions';
+import PublishToggle from '@/app/admin/_components/PublishToggle';
 
 export const metadata = { title: 'Éditer un plan — Admin Tradawave' };
 
@@ -36,7 +37,11 @@ export default async function EditPlan({
   if (!plan) notFound();
 
   const [{ data: firm }, { data: offersData }] = await Promise.all([
-    supabase.from('firms').select('id, name').eq('id', plan.firm_id).single<{ id: string; name: string }>(),
+    supabase
+      .from('firms')
+      .select('id, name, is_published')
+      .eq('id', plan.firm_id)
+      .single<{ id: string; name: string; is_published: boolean }>(),
     supabase
       .from('offers')
       .select('id, account_size, price, drawdown_type, is_published')
@@ -46,6 +51,8 @@ export default async function EditPlan({
   ]);
 
   const offers = offersData ?? [];
+  const firmDraft = !!firm && !firm.is_published;
+  const planDraft = !plan.is_published;
 
   return (
     <div className="admin-page">
@@ -58,10 +65,34 @@ export default async function EditPlan({
         ) : null}
         / {plan.name}
       </nav>
-      <h1 className="admin-h1">{plan.name}</h1>
+      <div className="admin-title-row">
+        <h1 className="admin-h1">{plan.name}</h1>
+        <PublishToggle
+          action={togglePlanPublish}
+          id={plan.id!}
+          isPublished={!planDraft}
+          back={`/admin/plans/${plan.id}`}
+          onLabel="Publié"
+        />
+      </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
       {message ? <div className="notice notice-info mt-4">{message}</div> : null}
+
+      {firmDraft ? (
+        <div className="notice notice-warn mt-4">
+          La firm <strong>{firm!.name}</strong> est en brouillon — ce plan et ses offres
+          n’apparaissent pas en public, même publiés.{' '}
+          <Link href={`/admin/firms/${firm!.id}`} className="link-accent">
+            Publier la firm
+          </Link>
+        </div>
+      ) : planDraft ? (
+        <div className="notice notice-warn mt-4">
+          Ce plan est en <strong>brouillon</strong> — ses offres publiées n’apparaissent
+          pas en public.
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <PlanForm plan={plan} />
@@ -75,9 +106,17 @@ export default async function EditPlan({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {offers.length > 0 ? (
-            <a href={`/admin/offers/export?plan=${plan.id}`} className="btn-ghost">
-              Export CSV
-            </a>
+            <>
+              <form action={publishAllOffers}>
+                <input type="hidden" name="plan_id" value={plan.id} />
+                <button type="submit" className="btn-ghost" title="Publier le plan et toutes ses offres">
+                  Tout publier
+                </button>
+              </form>
+              <a href={`/admin/offers/export?plan=${plan.id}`} className="btn-ghost">
+                Export CSV
+              </a>
+            </>
           ) : null}
           <Link href={`/admin/offers/import?plan=${plan.id}`} className="btn-ghost">
             Import CSV
@@ -115,9 +154,13 @@ export default async function EditPlan({
                   <td className="num">{o.price.toLocaleString('fr-FR')}</td>
                   <td>{o.drawdown_type}</td>
                   <td>
-                    <span className={o.is_published ? 'admin-badge is-on' : 'admin-badge'}>
-                      {o.is_published ? 'publiée' : 'brouillon'}
-                    </span>
+                    <PublishToggle
+                      action={toggleOfferPublish}
+                      id={o.id}
+                      isPublished={o.is_published}
+                      back={`/admin/plans/${plan.id}`}
+                      hidden={o.is_published && (planDraft || firmDraft)}
+                    />
                   </td>
                   <td className="admin-row-actions">
                     <Link href={`/admin/offers/${o.id}`} className="link-accent">Éditer</Link>

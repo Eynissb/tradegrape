@@ -52,6 +52,46 @@ export async function savePlan(formData: FormData) {
   redirect(`/admin/plans/${data!.id}`);
 }
 
+export async function togglePlanPublish(formData: FormData) {
+  const id = str(formData, 'id');
+  const back = str(formData, 'back') ?? '/admin/firms';
+  const next = str(formData, 'next') === '1';
+  if (!id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('plans')
+    .update({ is_published: next })
+    .eq('id', id);
+  if (error) backWithError(back, error.message);
+
+  revalidatePath(back);
+  redirect(back);
+}
+
+/** « Tout publier » : publie le plan ET toutes ses offres d'un coup. */
+export async function publishAllOffers(formData: FormData) {
+  const planId = str(formData, 'plan_id');
+  if (!planId) redirect('/admin/firms');
+  const back = `/admin/plans/${planId}`;
+
+  const supabase = await createClient();
+  const { error: planErr } = await supabase
+    .from('plans')
+    .update({ is_published: true })
+    .eq('id', planId);
+  if (planErr) backWithError(back, planErr.message);
+
+  const { error: offersErr } = await supabase
+    .from('offers')
+    .update({ is_published: true })
+    .eq('plan_id', planId);
+  if (offersErr) backWithError(back, offersErr.message);
+
+  revalidatePath(back);
+  redirect(`${back}?message=${encodeURIComponent('Plan et offres publiés.')}`);
+}
+
 export async function deletePlan(formData: FormData) {
   const id = str(formData, 'id');
   const firmId = str(formData, 'firm_id');
