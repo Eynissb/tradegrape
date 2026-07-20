@@ -135,6 +135,8 @@ h1, h2, h3 {
   box-shadow: 0 0 0 3px rgba(192, 75, 255, 0.15);
 }
 .input::placeholder { color: var(--ink3); }
+textarea.input { resize: vertical; min-height: 44px; line-height: 1.5; }
+select.input { cursor: pointer; }
 
 .btn-grad {
   display: inline-flex;
@@ -227,6 +229,7 @@ h1, h2, h3 {
 .admin-page { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
 .admin-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .admin-h1 { font-family: var(--font-display); font-weight: 700; font-size: 28px; letter-spacing: -0.5px; }
+.admin-h2 { font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.4px; }
 .admin-sub { color: var(--ink2); font-size: 14px; margin-top: 4px; }
 .admin-crumb { font-size: 13px; color: var(--ink3); margin-bottom: 8px; }
 

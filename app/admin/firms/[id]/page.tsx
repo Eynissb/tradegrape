@@ -6,6 +6,15 @@ import { deleteFirm } from '../actions';
 
 export const metadata = { title: 'Éditer une firm — Admin Tradawave' };
 
+interface PlanRow {
+  id: string;
+  name: string;
+  slug: string;
+  account_kind: string;
+  rating: number | null;
+  is_published: boolean;
+}
+
 export default async function EditFirm({
   params,
   searchParams,
@@ -25,6 +34,16 @@ export default async function EditFirm({
 
   if (!firm) notFound();
 
+  const { data: plansData } = await supabase
+    .from('plans')
+    .select('id, name, slug, account_kind, rating, is_published')
+    .eq('firm_id', id)
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true })
+    .returns<PlanRow[]>();
+
+  const plans = plansData ?? [];
+
   return (
     <div className="admin-page">
       <nav className="admin-crumb">
@@ -40,6 +59,62 @@ export default async function EditFirm({
       <div className="mt-6">
         <FirmForm firm={firm} />
       </div>
+
+      {/* Plans de la firm */}
+      <div className="admin-page-head mt-12">
+        <div>
+          <h2 className="admin-h2">Plans</h2>
+          <p className="admin-sub">{plans.length} plan(s) — la notation vit ici.</p>
+        </div>
+        <Link href={`/admin/plans/new?firm=${id}`} className="btn-grad">
+          + Nouveau plan
+        </Link>
+      </div>
+
+      {plans.length === 0 ? (
+        <div className="glass admin-empty">
+          Aucun plan.{' '}
+          <Link href={`/admin/plans/new?firm=${id}`} className="link-accent">
+            Ajouter le premier
+          </Link>
+          .
+        </div>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Slug</th>
+                <th>Type</th>
+                <th>Note</th>
+                <th>Statut</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((p) => (
+                <tr key={p.id}>
+                  <td className="admin-strong">{p.name}</td>
+                  <td className="num">{p.slug}</td>
+                  <td>{p.account_kind}</td>
+                  <td className="num">{p.rating ?? '—'}</td>
+                  <td>
+                    <span className={p.is_published ? 'admin-badge is-on' : 'admin-badge'}>
+                      {p.is_published ? 'publié' : 'brouillon'}
+                    </span>
+                  </td>
+                  <td className="admin-row-actions">
+                    <Link href={`/admin/plans/${p.id}`} className="link-accent">
+                      Éditer
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <form action={deleteFirm} className="admin-danger">
         <input type="hidden" name="id" value={id} />

@@ -3,33 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-
-/* Helpers de parsing formData → types DB (chaîne vide = null). */
-function str(fd: FormData, key: string): string | null {
-  const v = fd.get(key);
-  const s = typeof v === 'string' ? v.trim() : '';
-  return s === '' ? null : s;
-}
-function req(fd: FormData, key: string): string {
-  return str(fd, key) ?? '';
-}
-function num(fd: FormData, key: string): number | null {
-  const s = str(fd, key);
-  if (s === null) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
-}
-function bool(fd: FormData, key: string): boolean {
-  return fd.get(key) === 'on';
-}
-function arr(fd: FormData, key: string): string[] {
-  const s = str(fd, key);
-  if (s === null) return [];
-  return s
-    .split(',')
-    .map((x) => x.trim().toUpperCase())
-    .filter(Boolean);
-}
+import { arr, backWithError, bool, num, req, str } from '@/lib/admin/form';
 
 function buildFirmPayload(fd: FormData) {
   return {
@@ -54,7 +28,7 @@ function buildFirmPayload(fd: FormData) {
     max_funded_accounts: num(fd, 'max_funded_accounts'),
     max_eval_accounts: num(fd, 'max_eval_accounts'),
     inactivity_days: num(fd, 'inactivity_days'),
-    restricted_countries: arr(fd, 'restricted_countries'),
+    restricted_countries: arr(fd, 'restricted_countries', { upper: true }),
     collects_eu_vat: bool(fd, 'collects_eu_vat'),
     daily_flat_time: str(fd, 'daily_flat_time'),
     overnight_allowed: bool(fd, 'overnight_allowed'),
@@ -63,10 +37,6 @@ function buildFirmPayload(fd: FormData) {
     is_published: bool(fd, 'is_published'),
     sort_order: num(fd, 'sort_order') ?? 0,
   };
-}
-
-function backWithError(basePath: string, message: string): never {
-  redirect(`${basePath}?error=${encodeURIComponent(message)}`);
 }
 
 export async function saveFirm(formData: FormData) {

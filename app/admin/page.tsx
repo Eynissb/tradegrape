@@ -21,15 +21,15 @@ export default async function AdminHome() {
           <span className="admin-card-d">Créer, éditer, publier</span>
         </Link>
 
-        <div className="admin-card is-disabled">
-          <span className="admin-card-k num">—</span>
+        <div className="admin-card">
+          <span className="admin-card-k num">↳</span>
           <span className="admin-card-l">Plans · Offers</span>
-          <span className="admin-card-d">Prochaine tranche</span>
+          <span className="admin-card-d">Édités depuis chaque firm</span>
         </div>
 
         <div className="admin-card is-disabled">
           <span className="admin-card-k num">—</span>
-          <span className="admin-card-l">Import / export CSV</span>
+          <span className="admin-card-l">Duplication · CSV</span>
           <span className="admin-card-d">Prochaine tranche</span>
         </div>
       </div>
