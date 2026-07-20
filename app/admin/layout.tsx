@@ -39,6 +39,7 @@ export default async function AdminLayout({
 
           <nav className="admin-nav">
             <Link href="/admin/firms">Firms</Link>
+            <Link href="/admin/requested-firms">Demandes</Link>
             <span className="admin-soon">Plans · Offers · Promos (à venir)</span>
           </nav>
 

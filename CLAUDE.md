@@ -293,3 +293,155 @@ comparatifs deux à deux, classements par critère, « moins cher du mois ».
 
 Le contenu **éditorial** (guides, verdicts) reste **écrit à la main**. L'IA visible dans les
 guides est un défaut de la concurrence, pas un modèle à suivre (cf. §9).
+
+---
+
+## 11. Journal (pièce maîtresse)
+
+> Périmètre v1 complet à garder en tête. Livré en **3 tranches** pour validation au fur et
+> à mesure. Objectif : meilleur que TradeZella, Tradervue, Edgewonk — **parce qu'eux ne sont
+> pas pensés pour les prop firms**. C'est le levier de rétention n°1 et la source de la
+> donnée propriétaire (filtre « compatible avec mon style », stats d'échec par offre).
+
+**Calculs de règles : toujours via `lib/rules/futures-engine.ts`.** Ne jamais réimplémenter
+le drawdown, le payout ou la cohérence ailleurs. `evaluateAccount(rules, start, trades)` et
+`evaluatePayout(payout, start, balance, cycleTrades)`.
+
+### Modèle de données — deux granularités dans `trades`
+
+La table `trades` accepte les deux niveaux dans une seule table :
+- **Entrée journalière** : `trade_date` + `pnl`, champs `symbol`/`entry_price`/`exit_price`
+  vides (`symbol = ''`). C'est le mode par défaut.
+- **Trade détaillé** : symbole, direction, quantité, entrée/sortie, durée, tags, notes.
+
+Le moteur ne lit que `tradeDate`, `closedAt`, `pnl`, `fees` → les deux granularités le
+nourrissent indifféremment. `rules_snapshot` (jsonb sur `journal_accounts`) fige les règles
+de l'offre à l'ajout : l'offre peut changer ensuite, le compte garde ses règles + une alerte.
+
+**Concevoir les analytics et le module « ailleurs » dès le modèle**, même non codés.
+
+### Périmètre complet
+
+**Socle prop firm** — jauges de règles temps réel, compteur de payout avec *ce qu'il manque*,
+alertes de changement de règles (`rules_changed_at` vs `rules_ack_at`), multi-comptes.
+
+**Saisie** — P&L journalier par défaut, trade détaillé en option, **édition et suppression
+d'une entrée** (clic sur la ligne → formulaire pré-rempli → le moteur recalcule aussitôt),
+import CSV Tradovate/NinjaTrader/Rithmic, tags prédéfinis en **3 familles** (setup, émotion,
+erreur), notes, screenshots.
+
+**Vue calendrier (vue principale du journal)** — grille mensuelle, un jour par case, en haut
+de la page compte. Par case : P&L du jour (fond vert/rouge, **intensité ∝ montant**), nombre
+de trades ; total par semaine sur le côté ; navigation mois précédent / suivant ; clic sur un
+jour → détail des entrées du jour. **Ce que les concurrents n'ont pas, superposé au
+calendrier** : marquer les jours où le **daily loss** a été approché/dépassé, les **jours de
+trading validés**, et surtout **le jour qui casse la cohérence** (celui qui pèse trop dans le
+profit total) — le calendrier doit montrer d'un coup d'œil quel jour est responsable.
+
+**Analytics** — courbe d'équité **avec le plancher de drawdown superposé**, win rate,
+expectancy, R moyen, perf par symbole / heure / jour de semaine / setup / émotion,
+distribution gains-pertes, séries.
+
+**Modules exclusifs** (le fossé concurrentiel) :
+- Calculateur de risque avant trade : « avec ton daily loss restant, tu peux prendre X
+  contrats avec un stop de Y ticks ».
+- « Aurais-tu passé ce challenge ailleurs ? » — rejoue l'historique réel contre les règles
+  des autres offres du comparateur, **route vers l'affiliation**.
+- Score de discipline · revue de session guidée.
+- Leaderboard anonymisé, classé sur la **discipline**, jamais sur le profit.
+
+### Découpage en tranches
+
+1. **Socle** — `/app` liste des comptes + état ; ajout d'un compte (offre publiée →
+   `rules_snapshot`) ; page compte avec jauges (`evaluateAccount`) + bloc payout
+   (`evaluatePayout`) ; saisie rapide journalière + trade détaillé ; tags prédéfinis ;
+   édition des entrées ; calendrier mensuel. **(livré)**
+2. **Analytics** — courbe d'équité + plancher, métriques, ventilations, distributions.
+   Plus, indispensables :
+   - **Plage de dates + filtres** — sélecteur de période (ce mois, ce trimestre, depuis le
+     début, personnalisé) qui **recalcule toutes les statistiques**. Sans ça l'outil devient
+     inutilisable dès quelques mois d'historique. Filtres complémentaires : par symbole, par
+     setup, par résultat.
+   - **Vue multi-comptes agrégée** — sélecteur « Tous les comptes » consolidant la
+     performance globale (un trader cumule souvent plusieurs comptes). ⚠️ **Les jauges de
+     règles restent par compte** (chaque offre a ses propres règles) ; **seules les analytics
+     s'agrègent**.
+   - **Export des données** — export CSV de ses trades par l'utilisateur (confiance + RGPD).
+3. **Modules exclusifs** — calculateur de risque avant trade, « aurais-tu passé ailleurs ? »,
+   score de discipline, leaderboard, import CSV des trades. Plus :
+   - **Notebook** — notes libres non rattachées à un trade (plan de trading, observations de
+     marché, règles perso). C'est ce qui fait ouvrir l'outil **les jours sans trade**.
+   - **Playbook** — définition structurée des setups (nom, critères d'entrée, gestion,
+     invalidation) puis **mesure de la performance réelle par setup**. Les tags `setup`
+     existants doivent pouvoir s'y relier. Le passage du journal *qui enregistre* au journal
+     *qui améliore*.
+
+### Compte personnalisé — firm non listée
+
+Le choix d'une offre du catalogue **n'est pas obligatoire**. Un trader dont la firm n'est
+pas encore listée saisit lui-même ses règles (nom de firm en champ libre, taille, type +
+montant de drawdown, objectif, daily loss, cohérence, jours min, payout optionnel).
+
+- `journal_accounts.offer_id` reste **null**, `rules_snapshot` est rempli depuis la saisie.
+  **Le moteur fonctionne à l'identique** — il ne lit que le snapshot.
+- Écran d'ajout : **deux chemins visibles** — « Choisir une offre du catalogue »
+  (recommandé, pré-rempli) et « Ma firm n'est pas listée » (saisie manuelle).
+- Le nom saisi alimente `requested_firms` (nom, compteur, dernière demande) via la fonction
+  `record_firm_request()` — **l'admin voit les firms les plus demandées**, ça pilote les
+  priorités d'ajout au comparateur. Table dédup par nom normalisé, lecture staff.
+
+### Module — Bilan financier prop firm (priorité haute, exclusif)
+
+La question que tout trader prop firm se pose sans jamais avoir la réponse : **est-ce que je
+gagne réellement de l'argent avec ça ?** Aucun concurrent ne le calcule.
+
+Page dédiée agrégeant **tous les comptes** : total dépensé (challenges + resets + activations),
+nombre de comptes achetés / en cours / passés / échoués, total des payouts reçus, **résultat
+net**, taux de réussite personnel, coût moyen d'un compte financé, délai moyen jusqu'au
+premier payout, répartition par firm.
+
+Schéma à prévoir — table `account_purchases` :
+
+```
+journal_account_id  uuid references journal_accounts(id) on delete cascade
+kind                text        -- challenge | reset | activation
+amount              numeric
+currency            text
+purchased_at        date
+```
+
+Quand un compte est créé depuis une offre du catalogue, **pré-remplir le montant depuis le
+prix de l'offre** — mais modifiable, car les promos changent le prix réellement payé. Les
+payouts existent déjà (`journal_payouts`).
+
+Cette donnée, agrégée et anonymisée, alimente un contenu que personne ne peut produire :
+**quelles firms font réellement gagner de l'argent aux traders.**
+
+### Module — Calendrier économique (priorité moyenne)
+
+Annonces à venir (FOMC, NFP, CPI…) avec horaire et impact attendu, depuis une **source
+gratuite**. Angle distinctif : **croiser avec `firm_style_rules`** pour avertir quand une
+annonce approche et que la firm de l'utilisateur **restreint le news trading**.
+
+Pas de flux de news temps réel (type Financial Juice) pour l'instant : dépendance à une API
+payante, hors de notre axe. À reconsidérer plus tard.
+
+### Ce qu'on ne fait PAS (journal)
+
+- **Pas de backtesting ni de trade replay** : nécessite des données de marché historiques,
+  c'est un produit à part entière.
+- **Pas de score composite en radar** : on garde un **score de discipline lié aux règles
+  réelles de la prop firm**, qui a un sens concret. Pas de note fourre-tout.
+
+### Rappel de cadrage
+
+Notre différence n'est **pas de refaire TradeZella**. Eux disent *comment on a tradé*, nous
+disons *si le challenge va passer*. Restent **prioritaires sur toute fonctionnalité copiée à
+la concurrence** : les jauges de règles, le calcul de payout, le calculateur de risque avant
+trade, le module « aurais-tu passé ailleurs », le calendrier de conformité et le bilan
+financier.
+
+### Style
+
+`docs/homepage-reference.html` : glassmorphism, indigo→fuchsia, états **lime/amber/red**
+(jamais l'accent de marque pour un état), chiffres en **JetBrains Mono tabulaire**.

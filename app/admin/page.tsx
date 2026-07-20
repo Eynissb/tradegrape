@@ -27,11 +27,11 @@ export default async function AdminHome() {
           <span className="admin-card-d">Édités depuis chaque firm</span>
         </div>
 
-        <div className="admin-card is-disabled">
-          <span className="admin-card-k num">—</span>
-          <span className="admin-card-l">Duplication · CSV</span>
-          <span className="admin-card-d">Prochaine tranche</span>
-        </div>
+        <Link href="/admin/requested-firms" className="admin-card">
+          <span className="admin-card-k num">★</span>
+          <span className="admin-card-l">Firms demandées</span>
+          <span className="admin-card-d">Priorités d’ajout au catalogue</span>
+        </Link>
       </div>
     </div>
   );
