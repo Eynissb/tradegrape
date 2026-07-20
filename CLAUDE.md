@@ -443,5 +443,15 @@ financier.
 
 ### Style
 
-`docs/homepage-reference.html` : glassmorphism, indigo→fuchsia, états **lime/amber/red**
-(jamais l'accent de marque pour un état), chiffres en **JetBrains Mono tabulaire**.
+**Base visuelle de travail : `docs/tradegrape-design-system.html`** (Liquid Glass iOS 26),
+qui **remplace `docs/homepage-reference.html`**. Direction : verre réfractif réservé à la
+couche de navigation flottante (header, menus, dropdowns, modales, panneaux) — **jamais sur
+le contenu** ; les tableaux d'offres, jauges de règles et chiffres financiers restent sur
+surface **solide** et chirurgicalement lisibles. Échelle de rayons unique (`--r-xs`→`--r-pill`),
+hauteurs de contrôle (`--h-sm/md/lg`), focus double anneau, états **lime/amber/red** (jamais
+l'accent de marque pour un état), chiffres en **JetBrains Mono tabulaire**.
+
+Transposition : tokens + classes dans `app/design-system.css` (importé par `globals.css`),
+composants React dans `components/ui/`. **Cette référence reste susceptible d'évoluer** — les
+finitions seront affinées une fois appliquée sur de vrais écrans ; concevoir les composants
+pour que ces ajustements soient faciles (variables centralisées, aucune valeur en dur).

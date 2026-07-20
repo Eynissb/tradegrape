@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./design-system.css";
 
 /* =====================================================================
    Tradegrape — design tokens (verrouillés)
@@ -114,29 +115,8 @@ h1, h2, h3 {
   box-shadow: 0 0 22px rgba(192, 110, 255, 0.5);
 }
 
-/* Contrôles de formulaire (auth) */
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: 13px; font-weight: 500; color: var(--ink2); }
-
-.input {
-  width: 100%;
-  background: rgba(8, 11, 20, 0.6);
-  border: 1px solid rgba(120, 150, 220, 0.2);
-  border-radius: var(--r-md);
-  padding: 12px 14px;
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.input:focus {
-  border-color: rgba(192, 75, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(192, 75, 255, 0.15);
-}
-.input::placeholder { color: var(--ink3); }
-textarea.input { resize: vertical; min-height: 44px; line-height: 1.5; }
-select.input { cursor: pointer; }
+/* Contrôles de formulaire (auth) — .input/.field désormais fournis par
+   design-system.css (DS v1). Voir app/design-system.css. */
 
 .btn-grad {
   display: inline-flex;
