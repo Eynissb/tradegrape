@@ -241,3 +241,55 @@ la signature du partenariat affilié.
   paysage en constante évolution », pas d'enfilade de tournures creuses. Ton direct,
   phrases courtes, chiffres concrets. Un guide doit se lire comme écrit par un trader.
 - Pas de promesse de gain. ~14% passent un challenge, ~7% touchent un payout : on le dit.
+
+---
+
+## 10. Automatisation
+
+> Spec d'architecture à garder en tête pendant la construction. **Ne pas coder ces jobs
+> maintenant** — mais ne rien concevoir qui les bloque plus tard.
+
+**Principe.** Tradawave doit être le plus automatisé possible. Toute donnée qui change
+régulièrement a un **chemin de mise à jour automatique**, avec **validation humaine avant
+publication** dès que l'erreur coûte cher.
+
+**Règle d'or.** L'automatisation **alerte et propose**, l'humain **valide ce qui est
+publié**. Une donnée fausse détruit le positionnement honnêteté, qui est le cœur du projet.
+
+### Jobs à prévoir
+
+Supabase Edge Functions planifiées ou cron Vercel.
+
+| Job | Fréquence | Rôle |
+|---|---|---|
+| `sync-prices` | quotidien | Visite les pages tarifaires des firms, extrait prix + frais d'activation, compare à la base. Écart → entrée dans `data_alerts` (ancienne/nouvelle valeur + source). **Ne publie jamais directement.** |
+| `sync-promos` | quotidien | Détecte codes promo expirés/modifiés, met à jour `promo_codes.is_active`, alerte sur les nouveaux codes repérés. |
+| `compute-health-scores` | hebdo | Recalcule `firms.health_score` : ancienneté, nb de changements de règles sur 90 j (`offer_rule_versions`), payout proofs vérifiés + délais moyens, note Trustpilot. Détail dans `health_breakdown`. |
+| `sync-trustpilot` | hebdo | Met à jour note et nombre d'avis. |
+| `generate-stats` | quotidien | Agrège le journal **anonymisé** : taux d'échec par offre, règle la plus souvent cassée, temps moyen de passage. Alimente des pages de contenu automatiques. |
+| `check-firm-health` | quotidien | Détecte les signaux d'alerte (site inaccessible, délais de payout qui s'allongent, pic de reviews négatives) et notifie le staff. |
+| `digest-emails` | hebdo | Résumé personnalisé aux utilisateurs du journal : progression, alertes de règles, promos pertinentes. |
+
+### Table tampon — `data_alerts`
+
+Le tampon entre l'automatisation et la publication. Rien passe en prod sans revue.
+
+```
+source_table   text        -- ex "offers"
+record_id      uuid
+field          text        -- ex "price"
+old_value      text
+new_value      text
+source_url     text        -- d'où vient la valeur détectée
+detected_at    timestamptz
+status         text         -- pending | applied | dismissed
+reviewed_by    uuid references profiles(id)
+```
+
+### Contenu programmatique
+
+Pages **générées depuis la base et régénérées à chaque changement de données (ISR)** :
+comparatifs deux à deux, classements par critère, « moins cher du mois ».
+
+Le contenu **éditorial** (guides, verdicts) reste **écrit à la main**. L'IA visible dans les
+guides est un défaut de la concurrence, pas un modèle à suivre (cf. §9).
