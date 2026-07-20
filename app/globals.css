@@ -279,6 +279,13 @@ select.input { cursor: pointer; }
 .admin-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink2); cursor: pointer; align-self: end; padding-bottom: 10px; }
 .admin-check input { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
 
+.admin-dup { margin-top: 40px; padding: 22px 24px; }
+.admin-dup-form {
+  display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 14px; align-items: end; margin-top: 16px;
+}
+.admin-dup-form .btn-grad { height: 44px; }
+@media (max-width: 860px) { .admin-dup-form { grid-template-columns: 1fr; } }
+
 .admin-danger {
   margin-top: 34px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
   border: 1px solid rgba(255, 77, 94, 0.28); border-radius: var(--r-md);

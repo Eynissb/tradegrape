@@ -84,6 +84,74 @@ export async function saveOffer(formData: FormData) {
   redirect(`/admin/plans/${payload.plan_id}`);
 }
 
+/**
+ * Duplique une offre modèle sur plusieurs tailles de compte.
+ * Crée un brouillon par taille (règles copiées, à ajuster ensuite).
+ * Ignore les tailles déjà présentes sur le plan (contrainte unique plan+taille).
+ */
+export async function duplicateOffers(formData: FormData) {
+  const planId = req(formData, 'plan_id');
+  const templateId = req(formData, 'template_id');
+  const failPath = `/admin/plans/${planId}`;
+
+  if (!planId || !templateId) {
+    backWithError(failPath, 'Plan et offre modèle requis.');
+  }
+
+  // Tailles cibles : liste de nombres > 0, dédupliquées.
+  const sizes = arr(formData, 'sizes')
+    .map((s) => Number(s.replace(/[\s_]/g, '')))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  const uniqueSizes = [...new Set(sizes)];
+
+  if (uniqueSizes.length === 0) {
+    backWithError(failPath, 'Indique au moins une taille valide (ex : 25000, 50000).');
+  }
+
+  const supabase = await createClient();
+
+  const { data: template } = await supabase
+    .from('offers')
+    .select('*')
+    .eq('id', templateId)
+    .single<Record<string, unknown>>();
+
+  if (!template || template.plan_id !== planId) {
+    backWithError(failPath, 'Offre modèle introuvable pour ce plan.');
+  }
+
+  const { data: existingRows } = await supabase
+    .from('offers')
+    .select('account_size')
+    .eq('plan_id', planId)
+    .returns<{ account_size: number }[]>();
+  const existing = new Set((existingRows ?? []).map((r) => Number(r.account_size)));
+
+  const clone = { ...template };
+  delete clone.id;
+  delete clone.created_at;
+  delete clone.updated_at;
+
+  const rows = uniqueSizes
+    .filter((size) => !existing.has(size))
+    .map((size) => ({ ...clone, account_size: size, is_published: false }));
+
+  const skipped = uniqueSizes.length - rows.length;
+
+  if (rows.length === 0) {
+    backWithError(failPath, `Rien à créer : ${skipped} taille(s) déjà présente(s).`);
+  }
+
+  const { error } = await supabase.from('offers').insert(rows);
+  if (error) backWithError(failPath, error.message);
+
+  const parts = [`${rows.length} offre(s) créée(s) en brouillon`];
+  if (skipped > 0) parts.push(`${skipped} ignorée(s) (déjà présentes)`);
+
+  revalidatePath(failPath);
+  redirect(`${failPath}?message=${encodeURIComponent(parts.join(' · '))}`);
+}
+
 export async function deleteOffer(formData: FormData) {
   const id = str(formData, 'id');
   const planId = str(formData, 'plan_id');

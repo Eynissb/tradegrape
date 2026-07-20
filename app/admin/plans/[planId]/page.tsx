@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PlanForm, { type PlanValues } from '../PlanForm';
 import { deletePlan } from '../actions';
+import { duplicateOffers } from '@/app/admin/offers/actions';
 
 export const metadata = { title: 'Éditer un plan — Admin Tradawave' };
 
@@ -19,10 +20,10 @@ export default async function EditPlan({
   searchParams,
 }: {
   params: Promise<{ planId: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; message?: string }>;
 }) {
   const { planId } = await params;
-  const { error } = await searchParams;
+  const { error, message } = await searchParams;
 
   const supabase = await createClient();
 
@@ -60,6 +61,7 @@ export default async function EditPlan({
       <h1 className="admin-h1">{plan.name}</h1>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
+      {message ? <div className="notice notice-info mt-4">{message}</div> : null}
 
       <div className="mt-6">
         <PlanForm plan={plan} />
@@ -116,6 +118,35 @@ export default async function EditPlan({
           </table>
         </div>
       )}
+
+      {/* Duplication d'une offre modèle sur plusieurs tailles */}
+      {offers.length > 0 ? (
+        <div className="admin-dup glass">
+          <h2 className="admin-h2">Dupliquer sur plusieurs tailles</h2>
+          <p className="admin-sub">
+            Génère un brouillon d’offre par taille à partir d’une offre modèle.
+            Les règles sont copiées — tu ajustes ensuite les montants par taille.
+          </p>
+          <form action={duplicateOffers} className="admin-dup-form">
+            <input type="hidden" name="plan_id" value={plan.id} />
+            <div className="field">
+              <label htmlFor="template_id">Offre modèle</label>
+              <select className="input" id="template_id" name="template_id" defaultValue={offers[0].id}>
+                {offers.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.account_size.toLocaleString('fr-FR')} · {o.drawdown_type}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="sizes">Tailles cibles (séparées par virgule)</label>
+              <input className="input" id="sizes" name="sizes" placeholder="25000, 50000, 100000, 150000" />
+            </div>
+            <button type="submit" className="btn-grad">Générer</button>
+          </form>
+        </div>
+      ) : null}
 
       <form action={deletePlan} className="admin-danger">
         <input type="hidden" name="id" value={plan.id} />
