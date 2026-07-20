@@ -1,43 +1,38 @@
-import { getProfile } from '@/lib/auth/roles';
-import { signout } from '@/app/(auth)/actions';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata = { title: 'Admin — Tradawave' };
 
-/** Stub — le back-office sera construit plus tard. Sert à valider la garde staff. */
 export default async function AdminHome() {
-  const profile = await getProfile();
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from('firms')
+    .select('*', { count: 'exact', head: true });
 
   return (
-    <main className="relative flex flex-1 items-center justify-center px-6 py-16">
-      <div className="glow glow-a" style={{ top: '-10%', left: '-8%' }} />
+    <div className="admin-page">
+      <h1 className="admin-h1">Back-office</h1>
+      <p className="admin-sub">Gère le catalogue, les guides et la modération.</p>
 
-      <section className="glass relative z-10 w-full max-w-lg px-8 py-9 text-center">
-        <span
-          className="text-xs font-semibold uppercase tracking-[0.2em]"
-          style={{ color: 'var(--ink3)' }}
-        >
-          Back-office · /admin
-        </span>
-        <h1 className="mt-3 text-3xl font-bold">
-          <span className="grad-text">Zone staff</span>
-        </h1>
-        <p className="mt-3 text-sm" style={{ color: 'var(--ink2)' }}>
-          Accès accordé à{' '}
-          <span className="num" style={{ color: 'var(--ink)' }}>
-            {profile?.email ?? '—'}
-          </span>
-          {' · '}rôle{' '}
-          <span className="num" style={{ color: 'var(--c2)' }}>
-            {profile?.role ?? 'user'}
-          </span>
-        </p>
+      <div className="admin-cards">
+        <Link href="/admin/firms" className="admin-card">
+          <span className="admin-card-k num">{count ?? 0}</span>
+          <span className="admin-card-l">Firms</span>
+          <span className="admin-card-d">Créer, éditer, publier</span>
+        </Link>
 
-        <form action={signout} className="mt-7">
-          <button type="submit" className="btn-ghost w-full">
-            Se déconnecter
-          </button>
-        </form>
-      </section>
-    </main>
+        <div className="admin-card is-disabled">
+          <span className="admin-card-k num">—</span>
+          <span className="admin-card-l">Plans · Offers</span>
+          <span className="admin-card-d">Prochaine tranche</span>
+        </div>
+
+        <div className="admin-card is-disabled">
+          <span className="admin-card-k num">—</span>
+          <span className="admin-card-l">Import / export CSV</span>
+          <span className="admin-card-d">Prochaine tranche</span>
+        </div>
+      </div>
+    </div>
   );
 }
