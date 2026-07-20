@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-24">
@@ -22,18 +24,13 @@ export default function Home() {
           « Ne choisis pas ta prop firm. Teste-la d'abord. »
         </p>
 
-        <div
-          className="mt-8 flex items-center justify-center gap-2 text-sm"
-          style={{ color: "var(--ink3)" }}
-        >
-          <span
-            className="inline-block h-2 w-2 rounded-full"
-            style={{ background: "var(--lime)" }}
-          />
-          Base installée — Next.js + Supabase + moteur de règles
-          <span className="num" style={{ color: "var(--lime)" }}>
-            (24/24 ✓)
-          </span>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link href="/signup" className="btn-grad">
+            Ouvrir mon journal gratuit
+          </Link>
+          <Link href="/login" className="btn-ghost">
+            Se connecter
+          </Link>
         </div>
       </section>
     </main>

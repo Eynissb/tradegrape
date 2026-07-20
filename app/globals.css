@@ -103,3 +103,85 @@ h1, h2, h3 {
 .state-warning           { color: var(--amber); }
 .state-danger,
 .state-failed            { color: var(--red); }
+
+/* Logo mark — carré dégradé indigo→fuchsia */
+.logomark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--grad);
+  box-shadow: 0 0 22px rgba(192, 110, 255, 0.5);
+}
+
+/* Contrôles de formulaire (auth) */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 500; color: var(--ink2); }
+
+.input {
+  width: 100%;
+  background: rgba(8, 11, 20, 0.6);
+  border: 1px solid rgba(120, 150, 220, 0.2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus {
+  border-color: rgba(192, 75, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(192, 75, 255, 0.15);
+}
+.input::placeholder { color: var(--ink3); }
+
+.btn-grad {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--grad);
+  color: var(--on-accent);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 20px;
+  border-radius: var(--r-md);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(91, 63, 255, 0.45);
+  transition: transform 0.15s, box-shadow 0.25s, opacity 0.2s;
+}
+.btn-grad:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(192, 75, 255, 0.6); }
+.btn-grad:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(120, 150, 220, 0.25);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 20px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+
+.link-accent { color: var(--c2); text-decoration: none; }
+.link-accent:hover { text-decoration: underline; }
+
+/* Bandeau d'alerte (erreur / info sous les formulaires) */
+.notice {
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.notice-error { background: rgba(255, 77, 94, 0.1); border: 1px solid rgba(255, 77, 94, 0.3); color: #ffb3ba; }
+.notice-info  { background: rgba(56, 255, 176, 0.08); border: 1px solid rgba(56, 255, 176, 0.28); color: #9dffd8; }
