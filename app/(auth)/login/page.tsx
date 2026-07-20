@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { login } from '../actions';
 
-export const metadata = { title: 'Connexion — Tradawave' };
+export const metadata = { title: 'Connexion — Tradegrape' };
 
 export default async function LoginPage({
   searchParams,

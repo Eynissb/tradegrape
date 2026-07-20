@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata = { title: 'Firms demandées — Admin Tradawave' };
+export const metadata = { title: 'Firms demandées — Admin Tradegrape' };
 
 interface RequestedFirm {
   id: string;

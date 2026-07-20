@@ -6,7 +6,7 @@ import { togglePlanPublish } from '@/app/admin/plans/actions';
 import FirmForm, { type FirmValues } from '../FirmForm';
 import { deleteFirm, toggleFirmPublish } from '../actions';
 
-export const metadata = { title: 'Éditer une firm — Admin Tradawave' };
+export const metadata = { title: 'Éditer une firm — Admin Tradegrape' };
 
 interface PlanRow {
   id: string;

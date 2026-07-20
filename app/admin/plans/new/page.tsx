@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PlanForm from '../PlanForm';
 
-export const metadata = { title: 'Nouveau plan — Admin Tradawave' };
+export const metadata = { title: 'Nouveau plan — Admin Tradegrape' };
 
 export default async function NewPlan({
   searchParams,

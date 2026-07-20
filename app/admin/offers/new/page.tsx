@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import OfferForm from '../OfferForm';
 
-export const metadata = { title: 'Nouvelle offre — Admin Tradawave' };
+export const metadata = { title: 'Nouvelle offre — Admin Tradegrape' };
 
 export default async function NewOffer({
   searchParams,

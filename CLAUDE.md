@@ -1,4 +1,4 @@
-# Tradawave — Contexte projet
+# Tradegrape — Contexte projet
 
 > Lu automatiquement par Claude Code. Contient les décisions déjà arbitrées.
 > **Ne pas les remettre en question sans raison.**
@@ -7,7 +7,7 @@
 
 ## 1. Le produit
 
-**Tradawave** = comparateur de prop firms futures **+ journal de trading gratuit**, dans une
+**Tradegrape** = comparateur de prop firms futures **+ journal de trading gratuit**, dans une
 seule application, adossé à une **présence créateur** (chaîne, Discord, lives).
 
 **Modèle** : affiliation. Compare → journalise → achète/rachète via nos liens.
@@ -36,7 +36,7 @@ Une base unique alimente trois faces : comparateur public (SEO), journal authent
 
 | Sujet | Décision |
 |---|---|
-| Nom | **Tradawave** (tradawave.com) |
+| Nom | **Tradegrape** (tradegrape.com) |
 | Marché v1 | **Futures**, schéma prêt pour forex/crypto |
 | Langues | **FR + EN dès le départ** |
 | Stack | **Next.js (App Router) + Supabase** |
@@ -249,7 +249,7 @@ la signature du partenariat affilié.
 > Spec d'architecture à garder en tête pendant la construction. **Ne pas coder ces jobs
 > maintenant** — mais ne rien concevoir qui les bloque plus tard.
 
-**Principe.** Tradawave doit être le plus automatisé possible. Toute donnée qui change
+**Principe.** Tradegrape doit être le plus automatisé possible. Toute donnée qui change
 régulièrement a un **chemin de mise à jour automatique**, avec **validation humaine avant
 publication** dès que l'erreur coûte cher.
 

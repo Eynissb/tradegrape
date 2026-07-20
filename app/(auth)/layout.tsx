@@ -36,7 +36,7 @@ export default function AuthLayout({
               letterSpacing: '-0.5px',
             }}
           >
-            Tradawave
+            Tradegrape
           </span>
         </Link>
 

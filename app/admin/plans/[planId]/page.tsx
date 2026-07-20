@@ -6,7 +6,7 @@ import { deletePlan, publishAllOffers, togglePlanPublish } from '../actions';
 import { duplicateOffers, toggleOfferPublish } from '@/app/admin/offers/actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 
-export const metadata = { title: 'Éditer un plan — Admin Tradawave' };
+export const metadata = { title: 'Éditer un plan — Admin Tradegrape' };
 
 interface OfferRow {
   id: string;

@@ -5,7 +5,7 @@ import OfferForm, { type OfferValues } from '../OfferForm';
 import { deleteOffer, toggleOfferPublish } from '../actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 
-export const metadata = { title: 'Éditer une offre — Admin Tradawave' };
+export const metadata = { title: 'Éditer une offre — Admin Tradegrape' };
 
 export default async function EditOffer({
   params,

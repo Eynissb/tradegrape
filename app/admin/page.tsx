@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata = { title: 'Admin — Tradawave' };
+export const metadata = { title: 'Admin — Tradegrape' };
 
 export default async function AdminHome() {
   const supabase = await createClient();

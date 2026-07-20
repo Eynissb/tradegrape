@@ -21,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tradawave",
+  title: "Tradegrape",
   description:
     "Comparateur de prop firms futures + journal de trading gratuit.",
 };

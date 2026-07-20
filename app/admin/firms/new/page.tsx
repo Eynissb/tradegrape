@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import FirmForm from '../FirmForm';
 
-export const metadata = { title: 'Nouvelle firm — Admin Tradawave' };
+export const metadata = { title: 'Nouvelle firm — Admin Tradegrape' };
 
 export default async function NewFirm({
   searchParams,

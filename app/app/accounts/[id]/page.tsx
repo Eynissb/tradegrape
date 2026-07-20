@@ -22,7 +22,7 @@ import { deleteAccount, deleteTrade } from '@/app/app/actions';
 import EntryForms from './EntryForms';
 import MonthCalendar from './MonthCalendar';
 
-export const metadata = { title: 'Compte — Tradawave' };
+export const metadata = { title: 'Compte — Tradegrape' };
 
 interface AccountRow {
   id: string;

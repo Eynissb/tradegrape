@@ -1,5 +1,5 @@
 /**
- * Tradawave — moteur de règles FUTURES.
+ * Tradegrape — moteur de règles FUTURES.
  *
  * Fonction pure. Aucun accès réseau ni DB.
  *

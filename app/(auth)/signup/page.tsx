@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { signup } from '../actions';
 
-export const metadata = { title: 'Créer un compte — Tradawave' };
+export const metadata = { title: 'Créer un compte — Tradegrape' };
 
 export default async function SignupPage({
   searchParams,

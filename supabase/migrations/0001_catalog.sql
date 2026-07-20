@@ -1,5 +1,5 @@
 -- =====================================================================
--- Tradawave — schéma initial (complet)
+-- Tradegrape — schéma initial (complet)
 -- Comparateur prop firms futures + journal de trading + communauté
 -- =====================================================================
 

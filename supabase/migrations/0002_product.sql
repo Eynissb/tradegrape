@@ -1,5 +1,5 @@
 -- =====================================================================
--- Tradawave — schéma partie 2
+-- Tradegrape — schéma partie 2
 -- Journal, communauté, contenu, promos, créateur, système, RLS
 -- =====================================================================
 

@@ -17,7 +17,7 @@ export default function Home() {
         </span>
 
         <h1 className="mt-4 text-5xl font-extrabold leading-tight">
-          <span className="grad-text">Tradawave</span>
+          <span className="grad-text">Tradegrape</span>
         </h1>
 
         <p className="mt-5 text-lg" style={{ color: "var(--ink2)" }}>

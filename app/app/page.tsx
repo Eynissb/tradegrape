@@ -8,7 +8,7 @@ import {
 } from '@/lib/journal/snapshot';
 import { money, signed, StatusBadge, stateColor } from './_components/journal-ui';
 
-export const metadata = { title: 'Mon journal — Tradawave' };
+export const metadata = { title: 'Mon journal — Tradegrape' };
 
 interface AccountRow {
   id: string;

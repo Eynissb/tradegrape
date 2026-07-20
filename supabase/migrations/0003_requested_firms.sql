@@ -1,5 +1,5 @@
 -- =====================================================================
--- Tradawave — firms demandées (comptes personnalisés du journal)
+-- Tradegrape — firms demandées (comptes personnalisés du journal)
 -- Quand un trader crée un compte pour une firm non listée, on enregistre
 -- le nom : ça pilote les priorités d'ajout au comparateur.
 -- =====================================================================

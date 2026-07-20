@@ -1,5 +1,5 @@
 /**
- * Tradawave — types du moteur de règles.
+ * Tradegrape — types du moteur de règles.
  *
  * Le moteur est PUR : aucun accès réseau ni DB. Il prend un jeu de règles
  * et une liste de trades, il rend un statut. Testable, utilisable côté

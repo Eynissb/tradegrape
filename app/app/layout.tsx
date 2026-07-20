@@ -35,7 +35,7 @@ export default async function AppLayout({
                 />
               </svg>
             </span>
-            Tradawave
+            Tradegrape
             <span className="app-pill">journal</span>
           </Link>
 

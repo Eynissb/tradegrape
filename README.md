@@ -1,4 +1,4 @@
-# Tradawave — paquet de démarrage
+# Tradegrape — paquet de démarrage
 
 Comparateur de prop firms futures + journal de trading gratuit.
 Next.js (App Router) + Supabase. Bilingue FR/EN.
@@ -31,8 +31,8 @@ avec Claude Code.
 
 ```bash
 # 1. Projet
-npx create-next-app@latest tradawave --typescript --tailwind --app
-cd tradawave
+npx create-next-app@latest tradegrape --typescript --tailwind --app
+cd tradegrape
 
 # 2. Déposer CLAUDE.md, lib/, supabase/, docs/ à la racine
 

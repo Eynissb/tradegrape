@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import AddAccountForms, { type OfferOption } from './AddAccountForms';
 
-export const metadata = { title: 'Ajouter un compte — Tradawave' };
+export const metadata = { title: 'Ajouter un compte — Tradegrape' };
 
 export default async function NewAccount({
   searchParams,

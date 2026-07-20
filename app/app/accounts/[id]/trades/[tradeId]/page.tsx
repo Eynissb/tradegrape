@@ -5,7 +5,7 @@ import type { RulesSnapshot } from '@/lib/journal/snapshot';
 import EntryForms, { type TradeValues } from '../../EntryForms';
 import { deleteTrade } from '@/app/app/actions';
 
-export const metadata = { title: 'Modifier une entrée — Tradawave' };
+export const metadata = { title: 'Modifier une entrée — Tradegrape' };
 
 export default async function EditTrade({
   params,

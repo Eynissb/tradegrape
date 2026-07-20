@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 import { toggleFirmPublish } from './actions';
 
-export const metadata = { title: 'Firms — Admin Tradawave' };
+export const metadata = { title: 'Firms — Admin Tradegrape' };
 
 interface FirmRow {
   id: string;

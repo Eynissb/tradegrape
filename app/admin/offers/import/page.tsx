@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import ImportClient from './ImportClient';
 
-export const metadata = { title: 'Import CSV — Admin Tradawave' };
+export const metadata = { title: 'Import CSV — Admin Tradegrape' };
 
 export default async function ImportOffers({
   searchParams,

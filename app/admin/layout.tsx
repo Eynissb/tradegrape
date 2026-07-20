@@ -33,7 +33,7 @@ export default async function AdminLayout({
                 />
               </svg>
             </span>
-            Tradawave
+            Tradegrape
             <span className="admin-pill">admin</span>
           </Link>
 
