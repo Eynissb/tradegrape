@@ -8,6 +8,7 @@ node_modules/
 /out/
 /build
 next-env.d.ts
+*.tsbuildinfo
 
 # Env — jamais committer les clés
 .env
@@ -29,6 +30,9 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Claude Code — config locale (permissions), pas partagée
+.claude/settings.local.json
 
 # Tests / couverture
 /coverage

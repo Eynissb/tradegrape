@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   Tradawave — design tokens (verrouillés)
+   Source : docs/design-tokens.css
+   ===================================================================== */
+
+:root {
+  /* fonds — noir violacé profond */
+  --bg:        #070510;
+  --bg2:       #0b0818;
+
+  /* surfaces en verre */
+  --card:      rgba(28, 20, 48, 0.55);
+  --card-brd:  rgba(150, 110, 240, 0.16);
+
+  /* texte */
+  --ink:       #f2eefb;
+  --ink2:      #b6a8d4;
+  --ink3:      #7d6f9a;
+
+  /* accent signature : indigo → fuchsia */
+  --c1:        #5b3fff;
+  --c2:        #c04bff;
+  --hot:       #ff3ba6;   /* ponctuation chaude uniquement */
+
+  /* états — jamais l'accent de marque, la lisibilité du risque prime */
+  --lime:      #38ffb0;
+  --amber:     #ffb43b;
+  --red:       #ff4d5e;
+
+  --grad:      linear-gradient(100deg, var(--c1) 0%, var(--c2) 100%);
+  --grad-hot:  linear-gradient(100deg, #7b2fff 0%, var(--hot) 100%);
+  --on-accent: #0f0520;
+
+  /* Familles fournies par next/font (voir app/layout.tsx) */
+  --font-display: var(--font-sora), system-ui, sans-serif;
+  --font-body:    var(--font-inter), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --r-pill: 40px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Tous les chiffres de données : mono tabulaire, pas de sautillement */
+.num, .tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Surface de base du produit */
+.glass {
+  background: var(--card);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--card-brd);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Réservé aux titres forts */
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glows ambiants d'arrière-plan */
+.glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-a { width: 600px; height: 600px; background: #3a1bbf; }
+.glow-b { width: 520px; height: 520px; background: #7a1bbf; }
+.glow-c { width: 400px; height: 400px; background: #a81b8f; opacity: 0.28; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glow, [class*='anim'] { animation: none !important; }
+}
+
+/* États du moteur de règles */
+.state-ok, .state-passed { color: var(--lime); }
+.state-warning           { color: var(--amber); }
+.state-danger,
+.state-failed            { color: var(--red); }
