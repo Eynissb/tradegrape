@@ -73,9 +73,19 @@ export default async function EditPlan({
           <h2 className="admin-h2">Offres</h2>
           <p className="admin-sub">{offers.length} offre(s) — une par taille de compte.</p>
         </div>
-        <Link href={`/admin/offers/new?plan=${plan.id}`} className="btn-grad">
-          + Nouvelle offre
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {offers.length > 0 ? (
+            <a href={`/admin/offers/export?plan=${plan.id}`} className="btn-ghost">
+              Export CSV
+            </a>
+          ) : null}
+          <Link href={`/admin/offers/import?plan=${plan.id}`} className="btn-ghost">
+            Import CSV
+          </Link>
+          <Link href={`/admin/offers/new?plan=${plan.id}`} className="btn-grad">
+            + Nouvelle offre
+          </Link>
+        </div>
       </div>
 
       {offers.length === 0 ? (
