@@ -22,14 +22,19 @@ export function pnlColor(value: number): string {
   return value >= 0 ? 'var(--ok)' : 'var(--danger)';
 }
 
+// Montants financiers : TOUJOURS deux décimales. Un arrondi à l'entier fausse la
+// marge affichée vs le plancher de drawdown — « 12 USD » au lieu de « 11,50 USD »
+// peut décider d'un échec de challenge.
+const AMOUNT_FMT = { minimumFractionDigits: 2, maximumFractionDigits: 2 } as const;
+
 export function money(value: number, currency = 'USD'): string {
-  return `${value.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} ${currency}`;
+  return `${value.toLocaleString('fr-FR', AMOUNT_FMT)} ${currency}`;
 }
 
 /** Montant signé (+/−) pour un P&L. */
 export function signed(value: number, currency = 'USD'): string {
   const s = value >= 0 ? '+' : '−';
-  return `${s}${Math.abs(value).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} ${currency}`;
+  return `${s}${Math.abs(value).toLocaleString('fr-FR', AMOUNT_FMT)} ${currency}`;
 }
 
 const STATE_TO_BADGE: Record<RuleState, BadgeVariant> = {

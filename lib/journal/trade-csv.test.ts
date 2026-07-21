@@ -105,6 +105,42 @@ describe('parseTradesCsv — export Tradovate RÉEL', () => {
   });
 });
 
+describe('parseTradesCsv — centimes préservés (bug d’arrondi)', () => {
+  // Les 12 valeurs exactes du relevé : aucune ne doit être arrondie à l'entier.
+  const rows = [
+    ['$31.00', 31],
+    ['$26.50', 26.5],
+    ['$(21.50)', -21.5],
+    ['$43.50', 43.5],
+    ['$23.50', 23.5],
+    ['$11.50', 11.5],
+    ['$25.50', 25.5],
+    ['$19.50', 19.5],
+    ['$16.00', 16],
+    ['$22.50', 22.5],
+    ['$18.50', 18.5],
+    ['$(29.00)', -29],
+  ] as const;
+
+  const csv = [
+    'symbol,qty,pnl,boughtTimestamp,soldTimestamp',
+    ...rows.map(([raw], i) => `MNQU6,1,${raw},07/16/2026 15:${String(30 + i).padStart(2, '0')}:00,07/16/2026 15:${String(31 + i).padStart(2, '0')}:00`),
+  ].join('\r\n');
+
+  it('récupère chaque montant au centime près', () => {
+    const { trades, headerError } = parseTradesCsv(csv, 'tradovate');
+    expect(headerError).toBeUndefined();
+    expect(trades).toHaveLength(12);
+    expect(trades.map((t) => t.payload.pnl)).toEqual(rows.map(([, v]) => v));
+  });
+
+  it('la somme est exacte (187,50) — pas 188', () => {
+    const { trades } = parseTradesCsv(csv, 'tradovate');
+    const sum = trades.reduce((s, t) => s + t.payload.pnl, 0);
+    expect(Math.round(sum * 100) / 100).toBe(187.5);
+  });
+});
+
 describe('parseTradesCsv — NinjaTrader', () => {
   const csv = [
     'Instrument,Market pos.,Quantity,Entry price,Exit price,Entry time,Exit time,Profit,Commission',

@@ -6,7 +6,8 @@ const GREEN = '56, 255, 176';
 const RED = '255, 77, 94';
 
 function compact(n: number): string {
-  return `${n >= 0 ? '+' : '−'}${Math.abs(Math.round(n)).toLocaleString('fr-FR')}`;
+  // Deux décimales systématiques : un P&L journalier de 26,50 ne doit jamais s'afficher « 27 ».
+  return `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function cellBg(pnl: number | null, maxAbs: number): string {
