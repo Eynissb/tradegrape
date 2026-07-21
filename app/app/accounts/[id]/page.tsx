@@ -257,8 +257,17 @@ export default async function AccountPage({
 
             <div className="jpayout-figs">
               <div>
-                <div className="jcard-k num" style={{ color: 'var(--ok)' }}>{money(payout.withdrawable, currency)}</div>
-                <div className="jcard-l">Retirable maintenant</div>
+                <div
+                  className="jcard-k num"
+                  style={{ color: payout.eligible ? 'var(--ok)' : 'var(--text-3)' }}
+                >
+                  {money(payout.eligible ? payout.withdrawable : 0, currency)}
+                </div>
+                <div className="jcard-l">
+                  {payout.eligible
+                    ? 'Retirable maintenant'
+                    : `Retirable maintenant (potentiel : ${money(payout.withdrawable, currency)})`}
+                </div>
               </div>
               <div>
                 <div className="jcard-k num">{payout.profitDays.count} / {payout.profitDays.required}</div>
