@@ -1,14 +1,18 @@
+import { Target, Coins, Sigma, Ratio, Scale, TrendingUp, TrendingDown, Flame, type LucideIcon } from 'lucide-react';
 import type { Bucket, DistributionBin } from '@/lib/journal/analytics';
 import { money, pnlColor, signed } from '@/app/app/_components/journal-ui';
 
 const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 });
 
-/** Carte de métrique (surface solide, chiffre mono). */
-export function Stat({ label, value, color, sub }: { label: string; value: string; color?: string; sub?: string }) {
+/** Carte de métrique : icône + libellé gris en haut, valeur très grosse en dessous. */
+export function Stat({ label, value, color, sub, icon: Icon }: { label: string; value: string; color?: string; sub?: string; icon?: LucideIcon }) {
   return (
     <div className="acct2-stat">
+      <div className="acct2-stat-head">
+        {Icon ? <Icon aria-hidden="true" /> : null}
+        <span>{label}</span>
+      </div>
       <div className="acct2-stat-k" style={color ? { color } : undefined}>{value}</div>
-      <div className="acct2-stat-l">{label}</div>
       {sub ? <div className="acct2-stat-sub">{sub}</div> : null}
     </div>
   );
@@ -86,14 +90,14 @@ export function MetricsGrid({ metrics, currency }: { metrics: import('@/lib/jour
     m.profitFactor !== null ? m.profitFactor.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) : m.grossWin > 0 ? '∞' : '—';
   return (
     <div className="acct2-monthstats">
-      <Stat label="Taux de réussite" value={m.winRate === null ? '—' : `${m.winRate}%`} sub={`${m.wins} G · ${m.losses} P`} />
-      <Stat label="P&L net" value={signed(m.netPnl, currency)} color={pnlColor(m.netPnl)} />
-      <Stat label="Expectancy / entrée" value={signed(m.expectancy, currency)} color={pnlColor(m.expectancy)} />
-      <Stat label="R moyen" value={m.avgR === null ? '—' : `${m.avgR}R`} sub="1R = perte moyenne" />
-      <Stat label="Profit factor" value={profitFactor} />
-      <Stat label="Gain moyen" value={money(m.avgWin, currency)} color="var(--ok)" />
-      <Stat label="Perte moyenne" value={m.avgLoss ? `−${money(m.avgLoss, currency)}` : money(0, currency)} color="var(--danger)" />
-      <Stat label="Série gains / pertes" value={`${m.maxWinStreak} / ${m.maxLossStreak}`} sub="plus longues séries" />
+      <Stat icon={Target} label="Taux de réussite" value={m.winRate === null ? '—' : `${m.winRate}%`} sub={`${m.wins} G · ${m.losses} P`} />
+      <Stat icon={Coins} label="P&L net" value={signed(m.netPnl, currency)} color={pnlColor(m.netPnl)} />
+      <Stat icon={Sigma} label="Expectancy / entrée" value={signed(m.expectancy, currency)} color={pnlColor(m.expectancy)} />
+      <Stat icon={Ratio} label="R moyen" value={m.avgR === null ? '—' : `${m.avgR}R`} sub="1R = perte moyenne" />
+      <Stat icon={Scale} label="Profit factor" value={profitFactor} />
+      <Stat icon={TrendingUp} label="Gain moyen" value={money(m.avgWin, currency)} color="var(--ok)" />
+      <Stat icon={TrendingDown} label="Perte moyenne" value={m.avgLoss ? `−${money(m.avgLoss, currency)}` : money(0, currency)} color="var(--danger)" />
+      <Stat icon={Flame} label="Série gains / pertes" value={`${m.maxWinStreak} / ${m.maxLossStreak}`} sub="plus longues séries" />
     </div>
   );
 }

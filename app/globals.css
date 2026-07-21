@@ -636,12 +636,18 @@ h1, h2, h3 {
    ===================================================================== */
 
 /* ---- Shell : sidebar + zone principale ---- */
-.app-shell { display: flex; min-height: 100vh; background: var(--bg-0); }
+.app-shell { display: flex; min-height: 100vh; position: relative; }
+/* Glows ambiants : diffusent une lueur colorée que les cartes en verre laissent
+   transparaître (backdrop-filter). Fixes, très flous, faible opacité. */
+.app-glow { position: fixed; border-radius: 50%; filter: blur(160px); pointer-events: none; z-index: 0; }
+.app-glow-1 { width: 760px; height: 760px; background: #4a1fd8; opacity: .30; top: -260px; left: 40px; }
+.app-glow-2 { width: 600px; height: 600px; background: #b32fd0; opacity: .16; top: 90px; right: -200px; }
 .app-side {
   width: 240px; flex-shrink: 0; background: #05040d;
   display: flex; flex-direction: column; padding: 22px 14px 18px;
-  position: sticky; top: 0; height: 100vh;
+  position: sticky; top: 0; height: 100vh; z-index: 2;
 }
+.app-main { position: relative; z-index: 1; }
 .app-side-logo { display: block; padding: 6px 10px 28px; }
 .app-side-nav { display: flex; flex-direction: column; gap: 3px; }
 .app-side-group {
@@ -700,40 +706,100 @@ h1, h2, h3 {
 .app-content .jwrap-narrow { max-width: 620px; }
 .app-content .jwrap-wide { max-width: 100%; }
 
-/* ---- Page compte (.dash) : cartes sombres + un bloc dégradé ---- */
-.dash .card {
-  background: #0b0916; border: 1px solid rgba(150, 110, 240, .12);
-  border-radius: 18px; box-shadow: none;
-}
-.dash .acct2 { gap: 1.8rem; }
-.dash .acct2-console { gap: 1.6rem; }
-.dash .acct2-analytics, .dash .acct2-hist { gap: 1.6rem; }
-.dash .card { padding: 22px 24px; }
+/* Header : cloche + recherche désactivées (visuelles, « Bientôt ») */
+.app-icon-btn.is-soon, .app-search.is-soon { opacity: .5; cursor: not-allowed; }
+.app-search.is-soon input { cursor: not-allowed; }
 
-/* Bloc dégradé = payout (notre signature). Vif en haut → profond en bas. */
-.dash .card-grad {
-  background: linear-gradient(180deg, #8a44ff 0%, #6d34d6 44%, #2b1560 100%);
-  border: 1px solid rgba(192, 75, 255, .35);
+/* ---- Page compte (.dash) : cartes en VERRE (le halo transparaît) ---- */
+.dash .card {
+  /* double fond : intérieur en padding-box, bordure en dégradé (arête claire en haut) */
+  background:
+    linear-gradient(180deg, rgba(22, 16, 42, .66), rgba(12, 9, 24, .74)) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(150, 110, 240, .06) 34%, rgba(150, 110, 240, .04)) border-box;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .1);
+  padding: 26px 28px;
 }
-.dash .card-grad .acct-rules-title,
+.dash .acct2 { gap: 2.2rem; }
+.dash .acct2-console { gap: 2rem; }
+.dash .acct2-analytics, .dash .acct2-hist, .dash .acct2-work { gap: 2rem; }
+
+/* Bloc dégradé = payout (signature). Progression VERTICALE franche : vif → profond. */
+.dash .card-grad {
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(255, 255, 255, .18), transparent 60%),
+    linear-gradient(180deg, #a24dff 0%, #7a34e6 30%, #4a1f9e 62%, #1c0b47 100%) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(192, 75, 255, .18)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 26px 70px rgba(90, 30, 200, .32), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+/* Dans une carte dégradée : valeurs blanc pur, libellés blanc atténué, JAMAIS de
+   couleur sémantique. */
+.dash .card-grad,
+.dash .card-grad .jcard-k,
+.dash .card-grad .jcard-k .num,
+.dash .card-grad .ctitle-h { color: #fff !important; }
 .dash .card-grad .jsub,
 .dash .card-grad .jcard-l,
-.dash .card-grad .jmissing-t { color: rgba(255, 255, 255, .82); }
-.dash .card-grad .jcard-k,
-.dash .card-grad .badge { color: #fff; }
-.dash .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .18); }
-.dash .card-grad .jmissing ul { color: #ffdca8; }
-/* lignes internes en barres distinctes (fond légèrement plus clair) */
+.dash .card-grad .jmissing-t { color: rgba(255, 255, 255, .78) !important; }
+.dash .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .2); }
+.dash .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
+.dash .card-grad .ctitle-ic { background: rgba(255, 255, 255, .2); color: #fff; }
+/* badge d'état neutralisé sur fond dégradé */
+.dash .card-grad .badge { background: rgba(255, 255, 255, .16) !important; color: #fff !important; border-color: rgba(255, 255, 255, .28) !important; }
+.dash .card-grad .badge svg { color: #fff; }
+/* lignes internes en barres distinctes */
 .dash .card-grad .jpayout-figs { gap: 14px; }
-.dash .card-grad .jpayout-figs > div { background: rgba(255, 255, 255, .1); border-radius: 12px; padding: 12px 16px; flex: 1; }
+.dash .card-grad .jpayout-figs > div { background: rgba(255, 255, 255, .12); border-radius: 14px; padding: 14px 18px; flex: 1; }
 
-/* Onglets segmentés facon iOS */
-.dash .tabs { background: #0b0916; border: 1px solid rgba(150, 110, 240, .12); border-radius: 12px; padding: 4px; }
+/* Titre de bloc avec icône en carré arrondi (signature de la référence) */
+.ctitle { display: flex; align-items: center; gap: 13px; margin-bottom: 1.5rem; }
+.ctitle-ic {
+  width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
+  background: rgba(150, 110, 240, .16); color: var(--c2); flex-shrink: 0;
+}
+.ctitle-ic .lucide { width: 19px; height: 19px; }
+.ctitle-h { font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; color: var(--ink); margin: 0; }
+.ctitle-right { margin-left: auto; }
+
+/* Cartes de métriques : icône + libellé gris en HAUT, valeur très grosse en dessous */
+.dash .acct2-monthstats { gap: 14px; }
+.dash .acct2-stat { padding: 18px 20px; border-radius: 16px; }
+.acct2-stat-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); margin-bottom: 10px; }
+.acct2-stat-head .lucide { width: 15px; height: 15px; }
+.dash .acct2-stat-k { font-size: 1.55rem; }
+
+/* Blocs de règles façon « Goal Overview » : titre+icône, badge, colonnes requis/actuel */
+.acct2-balance { display: flex; flex-direction: column; gap: 4px; }
+.dash .acct2-balance .jbalance { font-size: 2.1rem; letter-spacing: -1px; }
+.rule-blocks { display: flex; flex-direction: column; gap: 14px; }
+.rule-block { border: 1px solid rgba(150, 110, 240, .12); border-radius: 16px; padding: 16px 18px; background: rgba(255, 255, 255, .015); }
+.rule-block-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.rule-ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(150, 110, 240, .14); color: var(--c2); flex-shrink: 0; }
+.rule-ic .lucide { width: 16px; height: 16px; }
+.rule-title { font-weight: 600; font-size: 14px; color: var(--ink); }
+.rule-block-head .rbadge { margin-left: auto; }
+.rule-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rule-col-l { display: block; font-size: 11.5px; color: var(--ink3); margin-bottom: 4px; }
+.rule-col-v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.05rem; }
+
+/* Badge d'état façon référence : pastille + point coloré + fond teinté */
+.rbadge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.rbadge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.rbadge.is-ok { color: var(--ok); background: rgba(56, 255, 176, .12); }
+.rbadge.is-warn { color: var(--warn); background: rgba(255, 180, 59, .12); }
+.rbadge.is-danger { color: var(--danger); background: rgba(255, 77, 94, .12); }
+.rbadge.is-brand { color: var(--c2); background: rgba(192, 75, 255, .12); }
+
+/* Onglets segmentés façon iOS (en verre) */
+.dash .tabs { background: rgba(12, 9, 24, .6); border: 1px solid rgba(150, 110, 240, .12); border-radius: 13px; padding: 4px; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .dash .tab { border-radius: 9px; }
-.dash .tab[aria-selected="true"] { background: rgba(150, 110, 240, .18); color: #fff; }
+.dash .tab[aria-selected="true"] { background: rgba(150, 110, 240, .2); color: #fff; }
 
-/* Tables & jauges : surfaces solides, chiffres lisibles (inchangé sémantiquement) */
-.dash .table-wrap { background: #0a0814; border-color: rgba(150, 110, 240, .1); }
+.dash .table-wrap { background: rgba(10, 8, 20, .5); border-color: rgba(150, 110, 240, .1); }
 
 @media (max-width: 860px) {
   .app-side { display: none; }

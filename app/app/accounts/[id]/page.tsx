@@ -10,14 +10,17 @@ import {
   type RulesSnapshot,
 } from '@/lib/journal/snapshot';
 import {
+  Banknote,
+  CalendarCheck,
   CircleCheck,
-  CircleX,
+  Gauge,
   Settings,
   Shield,
   Target,
   Trash2,
   TrendingUp,
   TriangleAlert,
+  Wallet,
 } from 'lucide-react';
 import { buildMonthView, monthKey, parseMonth } from '@/lib/journal/calendar';
 import { tagLabel } from '@/lib/journal/tags';
@@ -26,11 +29,13 @@ import {
   money,
   pnlColor,
   signed,
+  stateColor,
   StatusBadge,
 } from '@/app/app/_components/journal-ui';
 import Badge from '@/components/ui/Badge';
 import Button, { buttonClasses } from '@/components/ui/Button';
-import Progress, { type Tone } from '@/components/ui/Progress';
+import CardTitle from '@/components/ui/CardTitle';
+import RuleBlock, { type RuleTone } from '@/components/ui/RuleBlock';
 import { deleteTrade } from '@/app/app/actions';
 import { buildAnalytics, resolveRange, type AnalyticsTrade, type PeriodPreset } from '@/lib/journal/analytics';
 import EntryForms from './EntryForms';
@@ -38,6 +43,8 @@ import MonthCalendar from './MonthCalendar';
 import AccountViewTabs from './AccountViewTabs';
 import AnalyticsPanel from './AnalyticsPanel';
 import HistoryPanel, { type HistoryRow } from './HistoryPanel';
+import { Stat } from '@/app/app/_components/analytics-ui';
+import { CalendarDays, TrendingDown, Hash, Percent, Flame } from 'lucide-react';
 
 type AccountView = 'calendrier' | 'analytics' | 'historique';
 
@@ -45,18 +52,15 @@ const PERIODS: PeriodPreset[] = ['month', 'quarter', 'all', 'custom'];
 
 export const metadata = { title: 'Compte — Tradegrape' };
 
-/** État moteur → ton de jauge DS. */
-function toneOf(state: RuleState): Tone {
-  if (state === 'warning') return 'warn';
-  if (state === 'danger' || state === 'failed') return 'danger';
-  return 'ok';
-}
-
-/** Statut doublé (icône + libellé) pour warn/danger — jamais la couleur seule. */
-function statusFor(state: RuleState, warnLabel: string, dangerLabel: string) {
-  if (state === 'warning') return { icon: TriangleAlert, label: warnLabel };
-  if (state === 'danger' || state === 'failed') return { icon: CircleX, label: dangerLabel };
-  return undefined;
+/** État moteur → badge de règle (pastille + point coloré + libellé). */
+function stateBadge(state: RuleState): { tone: RuleTone; label: string } {
+  switch (state) {
+    case 'passed': return { tone: 'ok', label: 'Atteint' };
+    case 'warning': return { tone: 'warn', label: 'Attention' };
+    case 'danger': return { tone: 'danger', label: 'Zone rouge' };
+    case 'failed': return { tone: 'danger', label: 'Perdu' };
+    default: return { tone: 'ok', label: 'OK' };
+  }
 }
 
 interface AccountRow {
@@ -305,92 +309,93 @@ export default async function AccountPage({
       <div className={`acct2 mt-6${view === 'historique' ? ' acct2-stretch' : ''}`}>
         {/* Console gauche : état/règles + payout + saisie — toujours visibles */}
         <aside className="acct2-console">
-          {/* Cockpit : statut, solde, jauges, payout — surface solide, lisibilité max */}
+          {/* Solde du compte */}
           <div className="card acct2-cockpit">
-            <div className="acct2-cockpit-head">
-              <StatusBadge state={ev.status} />
-              <div className="acct2-cockpit-bal">
-                <div className="jbalance num">{money(ev.balance, currency)}</div>
-                <div className="jbalance-sub num" style={{ color: pnlColor(ev.netProfit) }}>
-                  {signed(ev.netProfit, currency)}
-                </div>
-              </div>
+            <CardTitle icon={Wallet} right={<StatusBadge state={ev.status} />}>Solde du compte</CardTitle>
+            <div className="acct2-balance">
+              <div className="jbalance num">{money(ev.balance, currency)}</div>
+              <div className="jbalance-sub num" style={{ color: pnlColor(ev.netProfit) }}>{signed(ev.netProfit, currency)}</div>
             </div>
+          </div>
 
-            <div className="acct-gauges">
+          {/* Règles en temps réel — façon Goal Overview (colonnes requis / actuel) */}
+          <div className="card">
+            <CardTitle icon={Gauge}>Règles en temps réel</CardTitle>
+            <div className="rule-blocks">
               {ev.dailyLoss ? (
-                <Progress
-                  label="Perte journalière restante"
-                  labelIcon={Shield}
-                  value={ev.dailyLoss.value}
-                  max={ev.dailyLoss.limit}
-                  display={`${money(ev.dailyLoss.value, currency)} / ${money(ev.dailyLoss.limit, currency)}`}
-                  tone={toneOf(ev.dailyLoss.state)}
-                  status={statusFor(ev.dailyLoss.state, 'Proche de la limite', 'Limite atteinte')}
+                <RuleBlock
+                  icon={Shield}
+                  title="Perte journalière"
+                  badge={stateBadge(ev.dailyLoss.state)}
+                  cols={[
+                    { label: 'Limite', value: money(ev.dailyLoss.limit, currency) },
+                    { label: 'Restant', value: money(ev.dailyLoss.value, currency), color: ev.dailyLoss.state === 'ok' ? undefined : stateColor(ev.dailyLoss.state) },
+                  ]}
                 />
               ) : null}
 
-              <Progress
-                label="Marge avant plancher"
-                labelIcon={Shield}
-                value={ev.drawdown.value}
-                max={ev.drawdown.limit}
-                display={money(ev.drawdown.value, currency)}
-                tone={toneOf(ev.drawdown.state)}
-                status={{
-                  icon: ev.drawdown.state === 'ok' ? CircleCheck : TriangleAlert,
-                  label: `Plancher ${money(ev.drawdownFloor, currency)} · plus haut ${money(ev.highWaterMark, currency)}`,
-                }}
+              <RuleBlock
+                icon={Shield}
+                title="Marge avant plancher"
+                badge={stateBadge(ev.drawdown.state)}
+                cols={[
+                  { label: 'Plancher', value: money(ev.drawdownFloor, currency) },
+                  { label: 'Marge restante', value: money(ev.drawdown.value, currency), color: ev.drawdown.state === 'ok' ? undefined : stateColor(ev.drawdown.state) },
+                ]}
               />
 
               {ev.profitTarget ? (
-                <Progress
-                  label="Objectif de profit"
-                  labelIcon={Target}
-                  value={ev.profitTarget.value}
-                  max={ev.profitTarget.limit}
-                  display={`${money(ev.profitTarget.value, currency)} / ${money(ev.profitTarget.limit, currency)}`}
-                  tone={ev.profitTarget.state === 'passed' ? 'ok' : 'brand'}
-                  status={ev.profitTarget.state === 'passed' ? { icon: CircleCheck, label: 'Objectif atteint' } : undefined}
+                <RuleBlock
+                  icon={Target}
+                  title="Objectif de profit"
+                  badge={ev.profitTarget.state === 'passed' ? { tone: 'ok', label: 'Atteint' } : { tone: 'brand', label: 'En cours' }}
+                  cols={[
+                    { label: 'Requis', value: money(ev.profitTarget.limit, currency) },
+                    { label: 'Actuel', value: money(ev.profitTarget.value, currency) },
+                  ]}
                 />
               ) : null}
 
               {ev.consistency ? (
-                <Progress
-                  label="Cohérence (meilleur jour)"
-                  labelIcon={TrendingUp}
-                  value={ev.consistency.value}
-                  max={ev.consistency.limit}
-                  display={`${ev.consistency.value}% / ${ev.consistency.limit}% max`}
-                  tone={ev.consistency.state === 'ok' ? 'ok' : 'warn'}
-                  status={ev.consistency.state === 'ok' ? undefined : { icon: TriangleAlert, label: 'Un jour pèse trop dans le profit' }}
+                <RuleBlock
+                  icon={TrendingUp}
+                  title="Cohérence"
+                  badge={ev.consistency.state === 'ok' ? { tone: 'ok', label: 'OK' } : { tone: 'warn', label: 'Attention' }}
+                  cols={[
+                    { label: 'Max autorisé', value: `${ev.consistency.limit}%` },
+                    { label: 'Meilleur jour', value: `${ev.consistency.value}%`, color: ev.consistency.state === 'ok' ? undefined : 'var(--warn)' },
+                  ]}
                 />
               ) : null}
 
-              <div className="acct-days">
-                <span className="progress-label">Jours de trading</span>
-                <span className="num" style={{ color: ev.tradingDays.met ? 'var(--ok)' : 'var(--text-1)' }}>
-                  {ev.tradingDays.count} validé{ev.tradingDays.count > 1 ? 's' : ''} · minimum {ev.tradingDays.required}
-                </span>
-              </div>
+              <RuleBlock
+                icon={CalendarCheck}
+                title="Jours de trading"
+                badge={ev.tradingDays.met ? { tone: 'ok', label: 'OK' } : { tone: 'warn', label: 'En cours' }}
+                cols={[
+                  { label: 'Minimum', value: String(ev.tradingDays.required) },
+                  { label: 'Validés', value: String(ev.tradingDays.count), color: ev.tradingDays.met ? 'var(--ok)' : undefined },
+                ]}
+              />
             </div>
           </div>
 
           {/* Payout — bloc en dégradé, notre signature produit */}
           <div className="card card-grad acct2-payout">
-              <div className="jpayout-head">
-                <h2 className="acct-rules-title" style={{ marginBottom: 0 }}>Retrait — compte financé</h2>
-                <Badge variant={payout.eligible ? 'ok' : 'warn'} icon={payout.eligible ? CircleCheck : TriangleAlert}>
-                  {payout.eligible ? 'Éligible' : 'Pas encore'}
-                </Badge>
-              </div>
+              <CardTitle
+                icon={Banknote}
+                right={
+                  <Badge variant={payout.eligible ? 'ok' : 'warn'} icon={payout.eligible ? CircleCheck : TriangleAlert}>
+                    {payout.eligible ? 'Éligible' : 'Pas encore'}
+                  </Badge>
+                }
+              >
+                Retrait — compte financé
+              </CardTitle>
 
               <div className="jpayout-figs">
                 <div>
-                  <div
-                    className="jcard-k num"
-                    style={{ color: payout.eligible ? 'var(--ok)' : 'var(--text-3)' }}
-                  >
+                  <div className="jcard-k num">
                     {money(payout.eligible ? payout.withdrawable : 0, currency)}
                   </div>
                   <div className="jcard-l">
@@ -445,21 +450,11 @@ export default async function AccountPage({
 
               {/* Totaux — remplit l'en-tête et donne le résumé du compte */}
               <div className="card">
-                <h3 className="acct-rules-title">Totaux</h3>
+                <CardTitle icon={Hash}>Totaux</CardTitle>
                 <div className="acct2-monthstats">
-                  <div className="acct2-stat">
-                    <div className="acct2-stat-k">{trades.length}</div>
-                    <div className="acct2-stat-l">Entrées</div>
-                  </div>
-                  <div className="acct2-stat">
-                    <div className="acct2-stat-k" style={{ color: pnlColor(ev.netProfit) }}>{signed(ev.netProfit, currency)}</div>
-                    <div className="acct2-stat-l">P&L net cumulé</div>
-                  </div>
-                  <div className="acct2-stat">
-                    <div className="acct2-stat-k">{winRate === null ? '—' : `${winRate}%`}</div>
-                    <div className="acct2-stat-l">Taux de réussite</div>
-                    {decidedCount ? <div className="acct2-stat-sub">{winCount} G · {lossCount} P</div> : null}
-                  </div>
+                  <Stat icon={Hash} label="Entrées" value={String(trades.length)} />
+                  <Stat icon={TrendingUp} label="P&L net cumulé" value={signed(ev.netProfit, currency)} color={pnlColor(ev.netProfit)} />
+                  <Stat icon={Percent} label="Taux de réussite" value={winRate === null ? '—' : `${winRate}%`} sub={decidedCount ? `${winCount} G · ${lossCount} P` : undefined} />
                 </div>
               </div>
 
@@ -554,41 +549,14 @@ export default async function AccountPage({
                   <>
                     {/* Récap du mois — relié au mois affiché par le calendrier */}
                     <div className="card">
-                      <h3 className="acct-rules-title">Récap de {monthView.label}</h3>
+                      <CardTitle icon={CalendarDays}>Récap de {monthView.label}</CardTitle>
                       <div className="acct2-monthstats">
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k" style={{ color: pnlColor(monthTotal) }}>{signed(monthTotal, currency)}</div>
-                          <div className="acct2-stat-l">Total du mois</div>
-                        </div>
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k">{monthActiveDays}</div>
-                          <div className="acct2-stat-l">Jours actifs</div>
-                        </div>
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k">{monthTradingDays}</div>
-                          <div className="acct2-stat-l">Jours validés</div>
-                        </div>
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k" style={{ color: bestDay ? pnlColor(bestDay.pnl) : undefined }}>
-                            {bestDay ? signed(bestDay.pnl, currency) : '—'}
-                          </div>
-                          <div className="acct2-stat-l">Meilleur jour</div>
-                          {bestDay ? <div className="acct2-stat-sub">{bestDay.date}</div> : null}
-                        </div>
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k" style={{ color: worstDay ? pnlColor(worstDay.pnl) : undefined }}>
-                            {worstDay ? signed(worstDay.pnl, currency) : '—'}
-                          </div>
-                          <div className="acct2-stat-l">Pire jour</div>
-                          {worstDay ? <div className="acct2-stat-sub">{worstDay.date}</div> : null}
-                        </div>
-                        <div className="acct2-stat">
-                          <div className="acct2-stat-k" style={{ color: streak === 0 ? undefined : streakSign > 0 ? 'var(--ok)' : 'var(--danger)' }}>
-                            {streak === 0 ? '—' : streak}
-                          </div>
-                          <div className="acct2-stat-l">Série en cours</div>
-                          {streak > 0 ? <div className="acct2-stat-sub">{streakLabel}</div> : null}
-                        </div>
+                        <Stat icon={TrendingUp} label="Total du mois" value={signed(monthTotal, currency)} color={pnlColor(monthTotal)} />
+                        <Stat icon={CalendarDays} label="Jours actifs" value={String(monthActiveDays)} />
+                        <Stat icon={CalendarCheck} label="Jours validés" value={String(monthTradingDays)} />
+                        <Stat icon={TrendingUp} label="Meilleur jour" value={bestDay ? signed(bestDay.pnl, currency) : '—'} color={bestDay ? pnlColor(bestDay.pnl) : undefined} sub={bestDay?.date} />
+                        <Stat icon={TrendingDown} label="Pire jour" value={worstDay ? signed(worstDay.pnl, currency) : '—'} color={worstDay ? pnlColor(worstDay.pnl) : undefined} sub={worstDay?.date} />
+                        <Stat icon={Flame} label="Série en cours" value={streak === 0 ? '—' : String(streak)} color={streak === 0 ? undefined : streakSign > 0 ? 'var(--ok)' : 'var(--danger)'} sub={streak > 0 ? streakLabel : undefined} />
                       </div>
                     </div>
 

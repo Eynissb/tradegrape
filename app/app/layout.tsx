@@ -20,17 +20,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="app-shell">
+      {/* Glows ambiants diffus — indigo (haut-gauche) + fuchsia, très faible opacité */}
+      <div className="app-glow app-glow-1" aria-hidden="true" />
+      <div className="app-glow app-glow-2" aria-hidden="true" />
+
       <AppSidebar staff={staff} />
 
       <div className="app-main">
         <header className="app-top">
-          <div className="app-search">
+          <div className="app-search is-soon" title="Bientôt disponible">
             <Search aria-hidden="true" />
-            <input type="search" placeholder="Rechercher…" aria-label="Rechercher" />
+            <input type="search" placeholder="Rechercher…" aria-label="Rechercher" disabled />
           </div>
 
           <div className="app-top-right">
-            <button type="button" className="app-icon-btn" aria-label="Notifications">
+            <button type="button" className="app-icon-btn is-soon" aria-label="Notifications — bientôt" title="Bientôt disponible" disabled>
               <Bell aria-hidden="true" />
             </button>
             <div className="app-profile">
