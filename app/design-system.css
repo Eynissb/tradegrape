@@ -71,9 +71,14 @@
   --surface-solid: #131121;
   --surface-solid-2: #0f0d1a;
   --nav-h: 64px;
-  /* Largeur de conteneur unique : pages ET contenu interne du header.
-     Changer ici répercute partout (le header suit le conteneur des pages). */
-  --container: 1200px;
+  /* Conteneurs FLUIDES et différenciés — remplissent les grands écrans sans
+     coller aux bords. Le header suit --container (le conteneur des pages).
+     - --container         : pages de données (journal, admin, comparateur)
+     - --container-content : contenu long (guides, blog)
+     - --container-narrow  : formulaires (auth, ajout de compte) */
+  --container: min(2000px, 94vw);
+  --container-content: min(1440px, 92vw);
+  --container-narrow: 620px;
   --container-pad: 24px;
 }
 

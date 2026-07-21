@@ -333,14 +333,14 @@ h1, h2, h3 {
 .app-signout:hover { color: var(--ink); }
 
 .jwrap { max-width: var(--container); margin: 0 auto; padding: 32px var(--container-pad) 72px; position: relative; z-index: 1; }
-.jwrap-narrow { max-width: 620px; }
+.jwrap-narrow { max-width: var(--container-narrow); }
 .jwrap-wide { max-width: var(--container); }
 
 /* Page compte : jauges + payout en colonne latérale au-delà de 1280px */
 .acct-grid { display: grid; gap: 1.6rem; }
 .acct-side { display: flex; flex-direction: column; gap: 1.4rem; }
 @media (min-width: 1280px) {
-  .acct-grid { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  .acct-grid { grid-template-columns: minmax(0, 1fr) 420px; align-items: start; gap: 2rem; }
   .acct-main { grid-column: 1; grid-row: 1; min-width: 0; }
   .acct-side { grid-column: 2; grid-row: 1; position: sticky; top: 84px; }
 }
@@ -439,8 +439,8 @@ h1, h2, h3 {
 .jcal-nav { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 9px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(120, 150, 220, 0.22); color: var(--ink2); text-decoration: none; font-size: 20px; line-height: 1; }
 .jcal-nav:hover { color: var(--ink); border-color: rgba(192, 75, 255, 0.4); }
 
-.jcal-grid { display: flex; flex-direction: column; gap: 6px; }
-.jcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 64px; gap: 6px; }
+.jcal-grid { display: flex; flex-direction: column; gap: 8px; }
+.jcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 72px; gap: 8px; }
 .jcal-wd { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink3); text-align: center; padding-bottom: 2px; }
 .jcal-wtot { text-align: right; }
 
@@ -449,9 +449,9 @@ h1, h2, h3 {
 .jcal-link.is-active .jcal-cell { outline: 2px solid var(--c2); outline-offset: -2px; }
 
 .jcal-cell {
-  position: relative; min-height: 70px; border-radius: 10px;
+  position: relative; min-height: 88px; border-radius: 12px;
   border: 1px solid rgba(120, 150, 220, 0.12);
-  padding: 6px 8px; display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 11px; display: flex; flex-direction: column; gap: 3px;
   transition: border-color 0.15s, transform 0.15s;
 }
 .jcal-link:hover .jcal-cell { border-color: rgba(192, 75, 255, 0.45); transform: translateY(-1px); }
