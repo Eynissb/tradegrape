@@ -196,6 +196,40 @@ describe('compte direct', () => {
   });
 });
 
+describe('objectif net de commissions (bug de règle)', () => {
+  // Apex documente que l'objectif est NET de commissions. Le moteur doit calculer
+  // la progression sur pnl − fees, jamais sur le brut, sinon il annonce un objectif
+  // atteint qui ne l'est pas.
+  const tf = (date: string, pnl: number, fees: number, id = `${date}-${pnl}`): Trade => ({
+    id,
+    tradeDate: date,
+    closedAt: `${date}T15:30:00Z`,
+    pnl,
+    fees,
+  });
+
+  it('brut au-dessus de l’objectif mais net en dessous → non atteint', () => {
+    // Relevé réel : brut 291.50, frais 14.56, net 276.94. Objectif 280.
+    const rules: OfferRules = { ...TOPSTEP_50K, profitTarget: 280, minTradingDays: 1 };
+    const r = evaluateFuturesAccount(rules, 50_000, [tf('2026-01-05', 291.5, 14.56)]);
+    expect(r.netProfit).toBe(276.94); // net, pas 291.50
+    expect(r.balance).toBe(50_276.94);
+    expect(r.profitTarget?.value).toBe(276.94);
+    expect(r.profitTarget?.ratio).toBeLessThan(1);
+    expect(r.profitTarget?.state).not.toBe('passed');
+    expect(r.canPass).toBe(false);
+  });
+
+  it('les frais réduisent la progression vers l’objectif', () => {
+    const rules: OfferRules = { ...TOPSTEP_50K, profitTarget: 3_000, minTradingDays: 1 };
+    const brut = evaluateFuturesAccount(rules, 50_000, [t('2026-01-05', 3_100)]);
+    const net = evaluateFuturesAccount(rules, 50_000, [tf('2026-01-05', 3_100, 300)]);
+    expect(brut.profitTarget?.state).toBe('passed'); // 3100 ≥ 3000
+    expect(net.profitTarget?.state).not.toBe('passed'); // 2800 < 3000
+    expect(net.profitTarget?.value).toBe(2_800);
+  });
+});
+
 /* =====================================================================
    PAYOUTS — le calcul que les comparateurs documentent sans l'exécuter
    ===================================================================== */
