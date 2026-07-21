@@ -636,15 +636,15 @@ h1, h2, h3 {
    ===================================================================== */
 
 /* ---- Shell : sidebar + zone principale ---- */
-/* Fond global avec matière : dégradé net (haut-gauche plus clair) — pas noir plat. */
+/* Le NOIR domine. Une lueur juste dans un coin, subtile — jamais envahissante.
+   Le fond reste franchement noir violacé (#070510) sur la majorité de l'écran. */
 .app-shell {
   display: flex; min-height: 100vh; position: relative;
-  background: radial-gradient(125% 105% at 12% -8%, #170b38 0%, #0b0620 42%, #060310 100%);
+  background: radial-gradient(70% 60% at 6% -10%, #0e0824 0%, #070510 34%, #060410 100%);
 }
-/* Glows ambiants forts, placés SOUS les cartes (le verre les laisse transparaître). */
-.app-glow { position: fixed; border-radius: 50%; filter: blur(180px); pointer-events: none; z-index: 0; }
-.app-glow-1 { width: 1300px; height: 1300px; background: #5a2ff0; opacity: .55; top: -360px; left: -220px; }
-.app-glow-2 { width: 900px; height: 900px; background: #c23fe0; opacity: .4; top: 24%; right: -280px; }
+.app-glow { position: fixed; border-radius: 50%; filter: blur(150px); pointer-events: none; z-index: 0; }
+.app-glow-1 { width: 640px; height: 640px; background: #5a2fd8; opacity: .15; top: -280px; left: -180px; }
+.app-glow-2 { width: 440px; height: 440px; background: #a83fce; opacity: .09; bottom: -220px; right: -160px; }
 .app-side {
   width: 240px; flex-shrink: 0;
   background: rgba(7, 5, 18, .55);
@@ -721,14 +721,16 @@ h1, h2, h3 {
 .dash .card {
   /* Fond FRANCHEMENT transparent → le flou et le halo ambiant traversent (vrai verre).
      Bordure en dégradé (arête haute plus claire = épaisseur du verre) + reflet interne. */
+  /* Presque noir : simple voile blanc très faible, AUCUNE teinte colorée. Le verre
+     vient du traitement (voile + backdrop-filter + arête haute claire + reflet). */
   background:
-    linear-gradient(180deg, rgba(34, 24, 66, .16), rgba(15, 10, 30, .22)) padding-box,
-    linear-gradient(180deg, rgba(255, 255, 255, .32), rgba(150, 110, 240, .05) 30%, rgba(150, 110, 240, .03)) border-box;
+    rgba(255, 255, 255, .04) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .03) 42%) border-box;
   border: 1px solid transparent;
   border-radius: 24px;
-  -webkit-backdrop-filter: blur(26px) saturate(185%);
-  backdrop-filter: blur(26px) saturate(185%);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .1);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .07);
   padding: 20px 22px;
 }
 .dash .acct2 { gap: 1.4rem; }
@@ -744,13 +746,15 @@ h1, h2, h3 {
 }
 
 /* Bloc dégradé = payout (signature). Progression VERTICALE franche : vif → profond. */
+/* Seule carte « colorée » : même fond sombre que les autres + une lueur violette
+   qui vient d'un coin et s'estompe vers le transparent (pas un bloc plein). */
 .dash .card-grad {
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(255, 255, 255, .18), transparent 60%),
-    linear-gradient(180deg, #a24dff 0%, #7a34e6 30%, #4a1f9e 62%, #1c0b47 100%) padding-box,
-    linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(192, 75, 255, .18)) border-box;
+    radial-gradient(95% 78% at 16% -6%, rgba(168, 90, 255, .5), transparent 62%) padding-box,
+    rgba(255, 255, 255, .04) padding-box,
+    linear-gradient(180deg, rgba(214, 158, 255, .3), rgba(255, 255, 255, .03)) border-box;
   border: 1px solid transparent;
-  box-shadow: 0 26px 70px rgba(90, 30, 200, .32), inset 0 1px 0 rgba(255, 255, 255, .22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .12);
 }
 /* Dans une carte dégradée : valeurs blanc pur, libellés blanc atténué, JAMAIS de
    couleur sémantique. */
