@@ -346,7 +346,9 @@ h1, h2, h3 {
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
 @media (min-width: 1280px) {
   .acct2 { grid-template-columns: 560px minmax(0, 1fr); align-items: start; gap: 2rem; }
-  .acct2-console { position: sticky; top: 84px; }
+  /* La console (haute : cockpit + saisie) défile ; l'espace de travail reste
+     épinglé pour ne jamais laisser un aplat vide à droite. */
+  .acct2-work { position: sticky; top: 84px; }
 }
 @media (min-width: 1800px) {
   .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
@@ -428,6 +430,20 @@ h1, h2, h3 {
 .jentry-tabs button.is-active { background: var(--grad); color: var(--on-accent); border-color: transparent; font-weight: 600; }
 .jentry-form { display: flex; flex-direction: column; gap: 16px; }
 .jentry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+
+/* Dépliages de saisie : garder la saisie quotidienne courte (date + montant) */
+.jentry-disclosures { display: flex; flex-wrap: wrap; gap: 8px; }
+.jentry-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--ink2);
+  background: rgba(150, 110, 240, 0.06); border: 1px solid var(--card-brd);
+  border-radius: var(--r-pill); padding: 7px 14px; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.jentry-toggle:hover { color: var(--ink); border-color: rgba(150, 110, 240, 0.32); }
+.jentry-toggle[aria-expanded="true"] { color: var(--ink); background: rgba(150, 110, 240, 0.12); }
+.jentry-toggle .lucide { width: 15px; height: 15px; transition: transform .15s; }
+.jentry-toggle[aria-expanded="true"] .lucide { transform: rotate(180deg); }
 
 .jtags { display: flex; flex-direction: column; gap: 12px; }
 .jtag-fam { display: flex; flex-direction: column; gap: 7px; }

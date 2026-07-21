@@ -302,11 +302,8 @@ export default async function AccountPage({
             </div>
           </div>
 
-          {/* Saisie — toujours à l'écran, sous le cockpit */}
-          <div className="card acct2-saisie">
-            <h2 className="acct-rules-title">Ajouter une entrée</h2>
-            <EntryForms accountId={account.id} currency={currency} today={today} />
-          </div>
+          {/* Saisie — toujours à l'écran, sous le cockpit (repliée par défaut) */}
+          <EntryForms accountId={account.id} currency={currency} today={today} title="Ajouter une entrée" />
         </aside>
 
         {/* Espace de travail : onglets (Calendrier | Historique), extensible tranche 2/3 */}
