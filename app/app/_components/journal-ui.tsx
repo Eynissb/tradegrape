@@ -1,18 +1,25 @@
+import { CircleCheck, CircleX, TriangleAlert } from 'lucide-react';
 import type { RuleState } from '@/lib/rules/types';
 import { STATUS_LABELS } from '@/lib/journal/snapshot';
+import Badge, { type BadgeVariant } from '@/components/ui/Badge';
 
 /** Couleur d'état — jamais l'accent de marque, la lisibilité du risque prime. */
 export function stateColor(state: RuleState): string {
   switch (state) {
     case 'ok':
     case 'passed':
-      return 'var(--lime)';
+      return 'var(--ok)';
     case 'warning':
-      return 'var(--amber)';
+      return 'var(--warn)';
     case 'danger':
     case 'failed':
-      return 'var(--red)';
+      return 'var(--danger)';
   }
+}
+
+/** Couleur d'un P&L : suit le SIGNE, jamais le statut de la règle. */
+export function pnlColor(value: number): string {
+  return value >= 0 ? 'var(--ok)' : 'var(--danger)';
 }
 
 export function money(value: number, currency = 'USD'): string {
@@ -25,14 +32,21 @@ export function signed(value: number, currency = 'USD'): string {
   return `${s}${Math.abs(value).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} ${currency}`;
 }
 
+const STATE_TO_BADGE: Record<RuleState, BadgeVariant> = {
+  ok: 'ok',
+  passed: 'ok',
+  warning: 'warn',
+  danger: 'danger',
+  failed: 'danger',
+};
+
 export function StatusBadge({ state }: { state: RuleState }) {
+  const icon =
+    state === 'warning' ? TriangleAlert : state === 'danger' || state === 'failed' ? CircleX : CircleCheck;
   return (
-    <span
-      className="jbadge"
-      style={{ color: stateColor(state), borderColor: stateColor(state) }}
-    >
+    <Badge variant={STATE_TO_BADGE[state]} icon={icon}>
       {STATUS_LABELS[state]}
-    </span>
+    </Badge>
   );
 }
 

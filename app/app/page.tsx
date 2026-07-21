@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LineChart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { evaluateAccount } from '@/lib/rules/futures-engine';
 import {
@@ -6,7 +7,9 @@ import {
   type DbTradeRow,
   type RulesSnapshot,
 } from '@/lib/journal/snapshot';
-import { money, signed, StatusBadge, stateColor } from './_components/journal-ui';
+import { buttonClasses } from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
+import { money, pnlColor, signed, StatusBadge, stateColor } from './_components/journal-ui';
 
 export const metadata = { title: 'Mon journal — Tradegrape' };
 
@@ -55,22 +58,22 @@ export default async function JournalHome() {
             Ajoute un compte, journalise, le moteur te place face aux règles en temps réel.
           </p>
         </div>
-        <Link href="/app/accounts/new" className="btn-grad">
+        <Link href="/app/accounts/new" className={buttonClasses()}>
           + Ajouter un compte
         </Link>
       </div>
 
       {accounts.length === 0 ? (
-        <div className="glass jempty">
-          <p>Aucun compte pour l’instant.</p>
-          <p className="jsub mt-2">
-            Choisis une offre du comparateur et le journal configure ses règles
-            automatiquement.
-          </p>
-          <Link href="/app/accounts/new" className="btn-grad mt-5">
-            Ajouter mon premier compte
-          </Link>
-        </div>
+        <EmptyState
+          icon={LineChart}
+          title="Aucun compte pour l’instant"
+          description="Choisis une offre du comparateur (ou saisis ta firm) et le journal configure ses règles automatiquement."
+          action={
+            <Link href="/app/accounts/new" className={buttonClasses()}>
+              Ajouter mon premier compte
+            </Link>
+          }
+        />
       ) : (
         <div className="jcards">
           {accounts.map((a) => {
@@ -80,7 +83,7 @@ export default async function JournalHome() {
             const currency = snap.display?.currency ?? 'USD';
 
             return (
-              <Link key={a.id} href={`/app/accounts/${a.id}`} className="jcard glass">
+              <Link key={a.id} href={`/app/accounts/${a.id}`} className="jcard card card-interactive">
                 <div className="jcard-head">
                   <div>
                     <div className="jcard-title">{a.label ?? 'Compte'}</div>
@@ -99,7 +102,7 @@ export default async function JournalHome() {
                   <div>
                     <div
                       className="jcard-k num"
-                      style={{ color: stateColor(evalr.status) }}
+                      style={{ color: pnlColor(evalr.netProfit) }}
                     >
                       {signed(evalr.netProfit, currency)}
                     </div>
