@@ -107,7 +107,7 @@ export async function applyTradesImport(formData: FormData) {
     .single<{ id: string }>();
   if (!account) redirect('/app');
 
-  const payload = rows.map((r) => ({ ...r, account_id: accountId, user_id: user.id, source: 'import' }));
+  const payload = rows.map((r) => ({ ...r, account_id: accountId, user_id: user.id, source: 'csv' }));
   const { error } = await supabase.from('trades').insert(payload);
   if (error) redirect(`${base}?error=${encodeURIComponent(error.message)}`);
 
