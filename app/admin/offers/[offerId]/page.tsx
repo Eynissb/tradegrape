@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import OfferForm, { type OfferValues } from '../OfferForm';
 import { deleteOffer, toggleOfferPublish } from '../actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
+import Button from '@/components/ui/Button';
 
 export const metadata = { title: 'Éditer une offre — Admin Tradegrape' };
 
@@ -88,7 +89,7 @@ export default async function EditOffer({
         <input type="hidden" name="id" value={offerId} />
         <input type="hidden" name="plan_id" value={offer.plan_id} />
         <span>Supprimer définitivement cette offre.</span>
-        <button type="submit" className="admin-btn-danger">Supprimer l’offre</button>
+        <Button type="submit" variant="danger" size="sm">Supprimer l’offre</Button>
       </form>
     </div>
   );

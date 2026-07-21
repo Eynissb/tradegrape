@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import Button, { buttonClasses } from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Checkbox from '@/components/ui/Checkbox';
 import { savePlan } from './actions';
 
 export interface PlanValues {
@@ -40,59 +44,35 @@ export default function PlanForm({
       <fieldset className="admin-section">
         <legend>Plan</legend>
         <div className="admin-grid">
+          <Input id="name" name="name" label="Nom" required defaultValue={v(plan?.name)} placeholder="Pro" />
+          <Input id="slug" name="slug" label="Slug" required defaultValue={v(plan?.slug)} placeholder="pro" />
           <div className="field">
-            <label htmlFor="name">
-              Nom<span style={{ color: 'var(--hot)' }}> *</span>
-            </label>
-            <input className="input" id="name" name="name" required defaultValue={v(plan?.name)} placeholder="Pro" />
-          </div>
-          <div className="field">
-            <label htmlFor="slug">
-              Slug<span style={{ color: 'var(--hot)' }}> *</span>
-            </label>
-            <input className="input" id="slug" name="slug" required defaultValue={v(plan?.slug)} placeholder="pro" />
-          </div>
-          <div className="field">
-            <label htmlFor="account_kind">Type de compte</label>
+            <label className="label" htmlFor="account_kind">Type de compte</label>
             <select className="input" id="account_kind" name="account_kind" defaultValue={plan?.account_kind ?? 'evaluation'}>
               <option value="evaluation">evaluation</option>
               <option value="direct">direct</option>
             </select>
           </div>
-          <div className="field">
-            <label htmlFor="rating">Note (0–10)</label>
-            <input className="input" id="rating" name="rating" type="number" step="0.1" defaultValue={v(plan?.rating)} placeholder="9.0" />
-          </div>
-          <div className="field">
-            <label htmlFor="sort_order">Ordre de tri</label>
-            <input className="input" id="sort_order" name="sort_order" type="number" defaultValue={v(plan?.sort_order)} />
-          </div>
+          <Input id="rating" name="rating" label="Note (0–10)" type="number" step="0.1" defaultValue={v(plan?.rating)} placeholder="9.0" />
+          <Input id="sort_order" name="sort_order" label="Ordre de tri" type="number" defaultValue={v(plan?.sort_order)} />
         </div>
       </fieldset>
 
       <fieldset className="admin-section">
         <legend>Éditorial</legend>
         <div className="flex flex-col gap-4">
-          <div className="field">
-            <label htmlFor="description">Description</label>
-            <textarea className="input" id="description" name="description" rows={2} defaultValue={v(plan?.description)} />
-          </div>
-          <div className="field">
-            <label htmlFor="rating_note">Note éditoriale (justification)</label>
-            <textarea className="input" id="rating_note" name="rating_note" rows={2} defaultValue={v(plan?.rating_note)} />
-          </div>
-          <label className="admin-check" style={{ alignSelf: 'start', paddingBottom: 0 }}>
-            <input type="checkbox" name="is_published" defaultChecked={!!plan?.is_published} />
-            <span>Publié (visible public)</span>
-          </label>
+          <Textarea id="description" name="description" label="Description" rows={2} defaultValue={v(plan?.description)} />
+          <Textarea id="rating_note" name="rating_note" label="Note éditoriale (justification)" rows={2} defaultValue={v(plan?.rating_note)} />
+          <Checkbox name="is_published" label="Publié (visible public)" defaultChecked={!!plan?.is_published} />
         </div>
       </fieldset>
 
       <div className="flex items-center gap-3">
-        <button type="submit" className="btn-grad">
-          {isEdit ? 'Enregistrer' : 'Créer le plan'}
-        </button>
-        <Link href={parentFirm ? `/admin/firms/${parentFirm}` : '/admin/firms'} className="btn-ghost">
+        <Button type="submit">{isEdit ? 'Enregistrer' : 'Créer le plan'}</Button>
+        <Link
+          href={parentFirm ? `/admin/firms/${parentFirm}` : '/admin/firms'}
+          className={buttonClasses({ variant: 'ghost' })}
+        >
           Annuler
         </Link>
       </div>

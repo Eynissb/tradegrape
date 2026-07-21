@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import Button, { buttonClasses } from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Checkbox from '@/components/ui/Checkbox';
 import { saveOffer } from './actions';
 
 export interface OfferValues {
@@ -67,22 +70,16 @@ function Text({
   placeholder?: string;
 }) {
   return (
-    <div className="field">
-      <label htmlFor={name}>
-        {label}
-        {required ? <span style={{ color: 'var(--hot)' }}> *</span> : null}
-      </label>
-      <input
-        className="input"
-        id={name}
-        name={name}
-        type={type}
-        step={step}
-        required={required}
-        placeholder={placeholder}
-        defaultValue={val(value)}
-      />
-    </div>
+    <Input
+      id={name}
+      name={name}
+      label={label}
+      type={type}
+      step={step}
+      required={required}
+      placeholder={placeholder}
+      defaultValue={val(value)}
+    />
   );
 }
 
@@ -101,7 +98,7 @@ function Select({
 }) {
   return (
     <div className="field">
-      <label htmlFor={name}>{label}</label>
+      <label className="label" htmlFor={name}>{label}</label>
       <select className="input" id={name} name={name} defaultValue={value ?? (allowEmpty ? '' : options[0])}>
         {allowEmpty ? <option value="">—</option> : null}
         {options.map((o) => (
@@ -123,12 +120,7 @@ function Check({
   label: string;
   checked?: boolean | null;
 }) {
-  return (
-    <label className="admin-check">
-      <input type="checkbox" name={name} defaultChecked={!!checked} />
-      <span>{label}</span>
-    </label>
-  );
+  return <Checkbox name={name} label={label} defaultChecked={!!checked} />;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -201,10 +193,11 @@ export default function OfferForm({
       </Section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" className="btn-grad">
-          {isEdit ? 'Enregistrer' : 'Créer l’offre'}
-        </button>
-        <Link href={parentPlan ? `/admin/plans/${parentPlan}` : '/admin/firms'} className="btn-ghost">
+        <Button type="submit">{isEdit ? 'Enregistrer' : 'Créer l’offre'}</Button>
+        <Link
+          href={parentPlan ? `/admin/plans/${parentPlan}` : '/admin/firms'}
+          className={buttonClasses({ variant: 'ghost' })}
+        >
           Annuler
         </Link>
       </div>

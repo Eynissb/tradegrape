@@ -5,6 +5,8 @@ import PlanForm, { type PlanValues } from '../PlanForm';
 import { deletePlan, publishAllOffers, togglePlanPublish } from '../actions';
 import { duplicateOffers, toggleOfferPublish } from '@/app/admin/offers/actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
+import Button, { buttonClasses } from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 export const metadata = { title: 'Éditer un plan — Admin Tradegrape' };
 
@@ -109,26 +111,24 @@ export default async function EditPlan({
             <>
               <form action={publishAllOffers}>
                 <input type="hidden" name="plan_id" value={plan.id} />
-                <button type="submit" className="btn-ghost" title="Publier le plan et toutes ses offres">
-                  Tout publier
-                </button>
+                <Button type="submit" variant="secondary" size="sm">Tout publier</Button>
               </form>
-              <a href={`/admin/offers/export?plan=${plan.id}`} className="btn-ghost">
+              <a href={`/admin/offers/export?plan=${plan.id}`} className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
                 Export CSV
               </a>
             </>
           ) : null}
-          <Link href={`/admin/offers/import?plan=${plan.id}`} className="btn-ghost">
+          <Link href={`/admin/offers/import?plan=${plan.id}`} className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
             Import CSV
           </Link>
-          <Link href={`/admin/offers/new?plan=${plan.id}`} className="btn-grad">
+          <Link href={`/admin/offers/new?plan=${plan.id}`} className={buttonClasses({ size: 'sm' })}>
             + Nouvelle offre
           </Link>
         </div>
       </div>
 
       {offers.length === 0 ? (
-        <div className="glass admin-empty">
+        <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
           Aucune offre.{' '}
           <Link href={`/admin/offers/new?plan=${plan.id}`} className="link-accent">
             Ajouter la première
@@ -136,12 +136,12 @@ export default async function EditPlan({
           .
         </div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="table-wrap">
+          <table className="table">
             <thead>
               <tr>
-                <th>Taille</th>
-                <th>Prix</th>
+                <th className="num">Taille</th>
+                <th className="num">Prix</th>
                 <th>Drawdown</th>
                 <th>Statut</th>
                 <th></th>
@@ -150,10 +150,10 @@ export default async function EditPlan({
             <tbody>
               {offers.map((o) => (
                 <tr key={o.id}>
-                  <td className="admin-strong num">{o.account_size.toLocaleString('fr-FR')}</td>
-                  <td className="num">{o.price.toLocaleString('fr-FR')}</td>
-                  <td>{o.drawdown_type}</td>
-                  <td>
+                  <td data-label="Taille" className="num">{o.account_size.toLocaleString('fr-FR')}</td>
+                  <td data-label="Prix" className="num">{o.price.toLocaleString('fr-FR')}</td>
+                  <td data-label="Drawdown">{o.drawdown_type}</td>
+                  <td data-label="Statut">
                     <PublishToggle
                       action={toggleOfferPublish}
                       id={o.id}
@@ -174,7 +174,7 @@ export default async function EditPlan({
 
       {/* Duplication d'une offre modèle sur plusieurs tailles */}
       {offers.length > 0 ? (
-        <div className="admin-dup glass">
+        <div className="admin-dup card">
           <h2 className="admin-h2">Dupliquer sur plusieurs tailles</h2>
           <p className="admin-sub">
             Génère un brouillon d’offre par taille à partir d’une offre modèle.
@@ -183,7 +183,7 @@ export default async function EditPlan({
           <form action={duplicateOffers} className="admin-dup-form">
             <input type="hidden" name="plan_id" value={plan.id} />
             <div className="field">
-              <label htmlFor="template_id">Offre modèle</label>
+              <label className="label" htmlFor="template_id">Offre modèle</label>
               <select className="input" id="template_id" name="template_id" defaultValue={offers[0].id}>
                 {offers.map((o) => (
                   <option key={o.id} value={o.id}>
@@ -192,11 +192,8 @@ export default async function EditPlan({
                 ))}
               </select>
             </div>
-            <div className="field">
-              <label htmlFor="sizes">Tailles cibles (séparées par virgule)</label>
-              <input className="input" id="sizes" name="sizes" placeholder="25000, 50000, 100000, 150000" />
-            </div>
-            <button type="submit" className="btn-grad">Générer</button>
+            <Input id="sizes" name="sizes" label="Tailles cibles (séparées par virgule)" placeholder="25000, 50000, 100000, 150000" />
+            <Button type="submit">Générer</Button>
           </form>
         </div>
       ) : null}
@@ -205,7 +202,7 @@ export default async function EditPlan({
         <input type="hidden" name="id" value={plan.id} />
         <input type="hidden" name="firm_id" value={plan.firm_id} />
         <span>Supprimer ce plan et toutes ses offres.</span>
-        <button type="submit" className="admin-btn-danger">Supprimer le plan</button>
+        <Button type="submit" variant="danger" size="sm">Supprimer le plan</Button>
       </form>
     </div>
   );
