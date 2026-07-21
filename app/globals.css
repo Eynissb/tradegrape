@@ -390,6 +390,7 @@ h1, h2, h3 {
  * Sur l'onglet Historique, la colonne s'étire à la hauteur de la console
  * (voir .acct2-stretch) et la table remplit — surface solide, pas de vide noir. */
 .acct2-hist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
+.acct2-hist-tools { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
 .acct2-hist-table { flex: 1; }
 .acct2-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 24px; text-align: center; color: var(--ink3); }
 

@@ -397,6 +397,15 @@ export default async function AccountPage({
 
           {view === 'historique' ? (
             <div className="acct2-hist">
+              <div className="acct2-hist-tools">
+                <Link href={`/app/accounts/${account.id}/import`} className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
+                  Importer CSV
+                </Link>
+                <a href={`/app/accounts/${account.id}/export`} className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
+                  Exporter CSV
+                </a>
+              </div>
+
               {/* Totaux — remplit l'en-tête et donne le résumé du compte */}
               <div className="card">
                 <h3 className="acct-rules-title">Totaux</h3>
