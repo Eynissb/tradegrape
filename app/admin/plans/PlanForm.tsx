@@ -38,7 +38,7 @@ export default function PlanForm({
   const parentFirm = plan?.firm_id ?? firmId ?? '';
 
   return (
-    <form action={savePlan} className="flex flex-col gap-6">
+    <form action={savePlan} className="flex flex-col gap-6 ds-form">
       {isEdit ? <input type="hidden" name="id" value={plan!.id} /> : null}
       <input type="hidden" name="firm_id" value={parentFirm} />
 

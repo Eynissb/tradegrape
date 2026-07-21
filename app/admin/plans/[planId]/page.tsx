@@ -175,7 +175,7 @@ export default async function EditPlan({
 
       {/* Duplication d'une offre modèle sur plusieurs tailles */}
       {offers.length > 0 ? (
-        <div className="admin-dup card">
+        <div className="admin-dup card ds-form">
           <h2 className="admin-h2">Dupliquer sur plusieurs tailles</h2>
           <p className="admin-sub">
             Génère un brouillon d’offre par taille à partir d’une offre modèle.

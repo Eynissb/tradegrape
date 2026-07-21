@@ -26,6 +26,8 @@ export interface SelectProps {
   required?: boolean;
   /** Nom du champ caché pour la soumission de formulaire. */
   name?: string;
+  /** Largeur du champ selon la nature de la donnée (défaut : pleine colonne). */
+  width?: 'sm' | 'md' | 'lg';
 }
 
 /** Select custom DS (liste glass). Jamais le <select> natif. */
@@ -41,6 +43,7 @@ export default function Select({
   hint,
   required,
   name,
+  width,
 }: SelectProps) {
   const controlled = value !== undefined;
   const [internal, setInternal] = useState<string | null>(defaultValue ?? null);
@@ -93,7 +96,7 @@ export default function Select({
   const describedBy = error ? `${labelId}-err` : hint ? `${labelId}-hint` : undefined;
 
   return (
-    <div className="field">
+    <div className={cn('field', width && `field-${width}`)}>
       {label ? (
         <span className="label" id={`${labelId}-label`}>
           {label}

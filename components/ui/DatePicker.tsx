@@ -43,6 +43,8 @@ export interface DatePickerProps {
   required?: boolean;
   hint?: string;
   error?: string;
+  /** Largeur du champ (défaut : sm — une date est courte). */
+  width?: 'sm' | 'md' | 'lg';
 }
 
 export default function DatePicker({
@@ -54,6 +56,7 @@ export default function DatePicker({
   required,
   hint,
   error,
+  width = 'sm',
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [focusDay, setFocusDay] = useState(value || todayStr());
@@ -216,7 +219,7 @@ export default function DatePicker({
   );
 
   return (
-    <div className="field">
+    <div className={cn('field', width && `field-${width}`)}>
       {label ? (
         <label className="label" htmlFor={fieldId}>
           {label}

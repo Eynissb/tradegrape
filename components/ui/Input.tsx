@@ -13,6 +13,8 @@ export interface InputProps
   suffix?: ReactNode;
   /** JetBrains Mono + tabular-nums (champs numériques). */
   mono?: boolean;
+  /** Largeur du champ selon la nature de la donnée (défaut : pleine colonne). */
+  width?: 'sm' | 'md' | 'lg';
 }
 
 /**
@@ -28,6 +30,7 @@ export default function Input({
   icon: Icon,
   suffix,
   mono = false,
+  width,
   required,
   className,
   ...props
@@ -40,7 +43,7 @@ export default function Input({
       : undefined;
 
   return (
-    <div className="field">
+    <div className={cn('field', width && `field-${width}`)}>
       {label ? (
         <label className="label" htmlFor={fieldId}>
           {label}

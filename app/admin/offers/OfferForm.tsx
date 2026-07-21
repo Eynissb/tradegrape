@@ -142,7 +142,7 @@ export default function OfferForm({
   const parentPlan = offer?.plan_id ?? planId ?? '';
 
   return (
-    <form action={saveOffer} className="flex flex-col gap-6">
+    <form action={saveOffer} className="flex flex-col gap-6 ds-form-wide">
       {isEdit ? <input type="hidden" name="id" value={offer!.id} /> : null}
       <input type="hidden" name="plan_id" value={parentPlan} />
 

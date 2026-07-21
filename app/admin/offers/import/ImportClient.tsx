@@ -16,7 +16,7 @@ export default function ImportClient({ planId }: { planId: string }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Étape 1 — choix du fichier */}
-      <form action={formAction} className="card">
+      <form action={formAction} className="card ds-form">
         <input type="hidden" name="plan_id" value={planId} />
         <span className="label" style={{ display: 'block', marginBottom: '.45rem' }}>Fichier CSV</span>
         <label className={cn('dropzone', fileName && 'has-file')}>

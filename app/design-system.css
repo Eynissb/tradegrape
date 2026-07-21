@@ -157,15 +157,20 @@
   cursor: pointer; text-decoration: none; white-space: nowrap;
   max-width: 100%; overflow: hidden; position: relative;
   height: var(--btn-h, var(--h-md));
+  /* Largeur NATURELLE par défaut : suit le contenu, jamais le parent.
+     `fit-content` empêche l'étirement en flex-col (align-items:stretch).
+     fullWidth = exception explicite. */
+  width: fit-content;
   transition: transform var(--transition), box-shadow var(--transition),
               background-color var(--transition), border-color var(--transition),
               color var(--transition), opacity var(--transition);
 }
 .btn-sm { --btn-h: var(--h-sm); font-size: .82rem; padding: 0 1.25rem; gap: .4rem; }
-.btn-md { --btn-h: var(--h-md); font-size: .92rem; padding: 0 1.8rem; }
-.btn-lg { --btn-h: var(--h-lg); font-size: 1rem; padding: 0 2.25rem; }
-.btn-icon { width: var(--btn-h, var(--h-md)); padding: 0; flex: none; }
-.btn-full { width: 100%; }
+/* Largeur minimale raisonnable pour les boutons d'action standard (submit). */
+.btn-md { --btn-h: var(--h-md); font-size: .92rem; padding: 0 1.8rem; min-width: 10rem; }
+.btn-lg { --btn-h: var(--h-lg); font-size: 1rem; padding: 0 2.25rem; min-width: 11rem; }
+.btn-icon { width: var(--btn-h, var(--h-md)); min-width: var(--btn-h, var(--h-md)); padding: 0; flex: none; }
+.btn-full { width: 100%; min-width: 0; }
 @media (pointer: coarse) { .btn-sm, .btn-md { --btn-h: 44px; } }
 .btn .lucide { width: 1em; height: 1em; }
 
@@ -764,3 +769,69 @@ th[aria-sort="ascending"] .th-sort .lucide, th[aria-sort="descending"] .th-sort 
 .dropzone-label { color: var(--text-1); font-weight: 500; word-break: break-all; }
 .dropzone .icon-tile { width: 44px; height: 44px; margin-bottom: 0; }
 .dropzone .icon-tile .lucide { width: 20px; height: 20px; }
+
+/* =====================================================================
+   PROPORTIONS & LARGEURS
+   Règle : la largeur d'un élément suit son CONTENU, pas son parent.
+   - Boutons  : largeur naturelle (fit-content) ; fullWidth = exception.
+   - Champs   : largeur par nature de donnée (.field-sm/md/lg) ; texte libre plein.
+   - Formulaires : plafonnés (--form-max) pour la lisibilité libellé ↔ champ.
+   ===================================================================== */
+:root {
+  --form-max: 720px;
+  --form-max-wide: 1040px;
+  --field-sm: 220px;
+  --field-md: 360px;
+  --field-lg: 560px;
+}
+.ds-form { max-width: var(--form-max); }
+.ds-form-wide { max-width: var(--form-max-wide); }
+
+.field { width: 100%; }
+.field-sm { max-width: var(--field-sm); }
+.field-md { max-width: var(--field-md); }
+.field-lg { max-width: var(--field-lg); }
+.field-full { max-width: none; }
+
+/* Mobile : les boutons de formulaire passent pleine largeur (ergonomie tactile). */
+@media (max-width: 520px) {
+  .ds-form .btn:not(.btn-icon), form .btn[type="submit"] { width: 100%; min-width: 0; }
+}
+
+/* =====================================================================
+   RÉINITIALISATION DES ÉLÉMENTS NATIFS (cohérence thème sombre)
+   ===================================================================== */
+/* Spinners des inputs number — inutiles sur des montants, cassent le thème. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+/* Croix / décorations des inputs search. */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
+
+/* Autofill Chrome : le fond jaune casse le verre sombre — neutralisé. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text-1);
+  -webkit-box-shadow: 0 0 0 1000px rgba(11, 8, 24, .92) inset;
+  box-shadow: 0 0 0 1000px rgba(11, 8, 24, .92) inset;
+  caret-color: var(--text-1);
+  border-radius: inherit;
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+/* Sélection de texte + placeholder. */
+::selection { background: color-mix(in srgb, var(--magenta) 75%, #14051a); color: #fff; }
+::placeholder { color: var(--text-3); opacity: 1; }
+
+/* Scrollbar. */
+html { scrollbar-color: var(--indigo) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--indigo), var(--fuchsia));
+  border-radius: var(--r-pill); border: 2.5px solid var(--bg-0);
+}

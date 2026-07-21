@@ -455,3 +455,31 @@ Transposition : tokens + classes dans `app/design-system.css` (importé par `glo
 composants React dans `components/ui/`. **Cette référence reste susceptible d'évoluer** — les
 finitions seront affinées une fois appliquée sur de vrais écrans ; concevoir les composants
 pour que ces ajustements soient faciles (variables centralisées, aucune valeur en dur).
+
+### Proportions & largeurs (règle : la largeur suit le CONTENU, pas le parent)
+
+Piège flexbox : dans un `flex flex-col`, `align-items` vaut `stretch` → tous les enfants
+s'étirent sur toute la largeur. Corrigé **au niveau du DS**, pas écran par écran.
+
+- **Conteneurs fluides** : `--container: min(2000px, 94vw)` (pages de données),
+  `--container-content: min(1440px, 92vw)` (contenu long), `--container-narrow: 620px`
+  (auth). Le header suit `--container`.
+- **Boutons** : largeur **naturelle** par défaut (`.btn { width: fit-content }`), `min-width`
+  ~160px sur md/lg. `fullWidth` (`.btn-full`) = exception explicite ; pleine largeur réservée
+  au **mobile** (≤520px, automatique dans les formulaires).
+- **Champs** : largeur par nature de donnée via prop `width` → `.field-sm` (220px, montants/
+  dates), `.field-md` (360px), `.field-lg` (560px) ; texte libre = pleine colonne (défaut).
+  Le `DatePicker` est en `sm` par défaut.
+- **Formulaires plafonnés** : `.ds-form` (720px, lisibilité libellé↔champ) ; `.ds-form-wide`
+  (1040px, formulaires denses admin multi-colonnes). Jamais un formulaire pleine largeur.
+
+### Réinitialisation des éléments natifs (dans `design-system.css`)
+
+Aucun élément natif du navigateur ne doit casser le thème sombre :
+- **`<select>` natif interdit** → composant `Select` (liste glass). Idem `<input type="date">`
+  → `DatePicker` custom.
+- Spinners des `input[type=number]` masqués (inutiles sur des montants).
+- **Molette désactivée** sur les champs number (`InputGuards`, monté au layout racine) :
+  scroller sur un champ montant focalisé ne doit jamais changer sa valeur en silence.
+- **Autofill Chrome neutralisé** (le fond jaune casserait le verre) ; `::selection`,
+  `::placeholder`, scrollbar et `::-webkit-search-cancel-button` thémés.

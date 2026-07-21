@@ -105,7 +105,7 @@ export default function FirmForm({ firm }: { firm?: FirmValues }) {
   const isEdit = !!firm?.id;
 
   return (
-    <form action={saveFirm} className="flex flex-col gap-6">
+    <form action={saveFirm} className="flex flex-col gap-6 ds-form-wide">
       {isEdit ? <input type="hidden" name="id" value={firm!.id} /> : null}
 
       <Section title="Identité">

@@ -47,7 +47,7 @@ export default function EntryForms({
   const detailed = mode === 'detailed';
 
   return (
-    <div className="jentry card">
+    <div className="jentry card ds-form">
       <div className="mb-4">
         <Tabs
           tabs={[

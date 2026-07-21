@@ -41,7 +41,7 @@ export default function AddAccountForms({ offers }: { offers: OfferOption[] }) {
   }
 
   return (
-    <div className="mt-6 flex flex-col gap-5">
+    <div className="mt-6 flex flex-col gap-5 ds-form">
       <Tabs
         tabs={[
           { id: 'catalog', label: 'Choisir une offre du catalogue' },

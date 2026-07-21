@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import InputGuards from "@/components/ui/InputGuards";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -36,7 +37,10 @@ export default function RootLayout({
       lang="fr"
       className={`${sora.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <InputGuards />
+        {children}
+      </body>
     </html>
   );
 }
