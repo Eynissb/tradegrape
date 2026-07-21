@@ -349,6 +349,7 @@ h1, h2, h3 {
 .jsettings-link:hover { color: var(--ink); }
 .jsettings-link .lucide { width: 16px; height: 16px; }
 .jdanger { border-color: rgba(255, 77, 94, .3); }
+.jcout-add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 .acct2 { display: grid; gap: 1.6rem; }
 .acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
@@ -424,6 +425,9 @@ h1, h2, h3 {
 /* ===== Onglet Analytics (tranche 2) — surface solide, lisibilité chirurgicale ===== */
 .acct2-analytics { display: flex; flex-direction: column; gap: 1.2rem; }
 .agg-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.4rem; }
+.jbal-hero { text-align: center; padding: 2rem 1.5rem; }
+.jbal-hero-k { font-family: var(--font-mono); font-weight: 800; font-size: 2.6rem; letter-spacing: -1px; line-height: 1.05; }
+.jbal-hero-l { color: var(--ink2); margin-top: .5rem; font-size: 14px; }
 .cum-line-pos { stroke: var(--ok); stroke-width: 2.5; }
 .cum-line-neg { stroke: var(--danger); stroke-width: 2.5; }
 .cum-area-pos { fill: rgba(56, 255, 176, .1); stroke: none; }

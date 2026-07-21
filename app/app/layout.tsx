@@ -39,6 +39,7 @@ export default async function AppLayout({
           <nav className="app-nav">
             <Link href="/app">Mes comptes</Link>
             <Link href="/app/analytics">Analytics</Link>
+            <Link href="/app/balance">Bilan</Link>
             <Link href="/settings">Préférences</Link>
             {staff ? <Link href="/admin">Admin</Link> : null}
           </nav>

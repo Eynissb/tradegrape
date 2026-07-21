@@ -3,7 +3,11 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { RulesSnapshot } from '@/lib/journal/snapshot';
 import {
+  addPayout,
+  addPurchase,
   deleteAccount,
+  deletePayout,
+  deletePurchase,
   saveAccountCommission,
   saveAccountGeneral,
   saveAccountRules,
@@ -12,6 +16,8 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Checkbox from '@/components/ui/Checkbox';
 import Button, { buttonClasses } from '@/components/ui/Button';
+import { money, signed } from '@/app/app/_components/journal-ui';
+import FormDate from './FormDate';
 
 export const metadata = { title: 'Paramètres du compte — Tradegrape' };
 
@@ -67,6 +73,24 @@ export default async function AccountSettings({
     .eq('account_id', id)
     .eq('source', 'csv');
   const importedCount = count ?? 0;
+
+  const [{ data: purchasesData }, { data: payoutsData }] = await Promise.all([
+    supabase
+      .from('account_purchases')
+      .select('id, kind, amount, purchased_at')
+      .eq('journal_account_id', id)
+      .order('purchased_at', { ascending: true })
+      .returns<{ id: string; kind: string; amount: number; purchased_at: string }[]>(),
+    supabase
+      .from('journal_payouts')
+      .select('id, amount, received_at, requested_at')
+      .eq('account_id', id)
+      .order('received_at', { ascending: true, nullsFirst: false })
+      .returns<{ id: string; amount: number; received_at: string | null; requested_at: string | null }[]>(),
+  ]);
+  const purchases = purchasesData ?? [];
+  const payouts = payoutsData ?? [];
+  const KIND_LABEL: Record<string, string> = { challenge: 'Challenge', reset: 'Reset', activation: 'Activation' };
 
   return (
     <main className="jwrap jwrap-narrow">
@@ -155,6 +179,83 @@ export default async function AccountSettings({
           </p>
         </div>
       )}
+
+      {/* Coûts & payouts — alimentent le bilan financier */}
+      <div className="card ds-form mt-6" id="couts">
+        <h2 className="acct-rules-title">Coûts & payouts</h2>
+        <p className="jsub" style={{ marginBottom: '1rem' }}>
+          Ce que ce compte t’a coûté et rapporté — croisé avec les autres dans le{' '}
+          <Link href="/app/balance" className="link-accent">bilan financier</Link>. L’achat du challenge
+          est pré-rempli au prix de l’offre.
+        </p>
+
+        {/* Achats */}
+        {purchases.length > 0 ? (
+          <div className="table-wrap">
+            <table className="table">
+              <thead><tr><th>Type</th><th className="num">Montant</th><th>Date</th><th></th></tr></thead>
+              <tbody>
+                {purchases.map((p) => (
+                  <tr key={p.id}>
+                    <td data-label="Type">{KIND_LABEL[p.kind] ?? p.kind}</td>
+                    <td data-label="Montant" className="num">{money(Number(p.amount), currency)}</td>
+                    <td data-label="Date" className="num">{p.purchased_at}</td>
+                    <td className="admin-row-actions">
+                      <form action={deletePurchase}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <input type="hidden" name="account_id" value={account.id} />
+                        <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="jsub">Aucun achat enregistré.</p>}
+
+        <form action={addPurchase} className="jcout-add mt-3">
+          <input type="hidden" name="account_id" value={account.id} />
+          <Select name="kind" label="Type" defaultValue="reset" width="sm" options={[
+            { value: 'challenge', label: 'Challenge' }, { value: 'reset', label: 'Reset' }, { value: 'activation', label: 'Activation' },
+          ]} />
+          <Input id="p_amount" name="amount" label={`Montant (${currency})`} type="number" step="0.01" min="0" width="sm" mono required />
+          <FormDate id="purchased_at" name="purchased_at" label="Date" />
+          <Button type="submit" variant="secondary" size="sm">Ajouter l’achat</Button>
+        </form>
+
+        {/* Payouts */}
+        <h3 className="acct-rules-title mt-6" style={{ fontSize: '.95rem' }}>Payouts reçus</h3>
+        {payouts.length > 0 ? (
+          <div className="table-wrap">
+            <table className="table">
+              <thead><tr><th className="num">Montant</th><th>Reçu le</th><th></th></tr></thead>
+              <tbody>
+                {payouts.map((p) => (
+                  <tr key={p.id}>
+                    <td data-label="Montant" className="num" style={{ color: 'var(--ok)' }}>{signed(Number(p.amount), currency)}</td>
+                    <td data-label="Reçu le" className="num">{p.received_at ?? '— (en attente)'}</td>
+                    <td className="admin-row-actions">
+                      <form action={deletePayout}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <input type="hidden" name="account_id" value={account.id} />
+                        <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="jsub">Aucun payout enregistré.</p>}
+
+        <form action={addPayout} className="jcout-add mt-3">
+          <input type="hidden" name="account_id" value={account.id} />
+          <Input id="pay_amount" name="amount" label={`Montant (${currency})`} type="number" step="0.01" min="0" width="sm" mono required />
+          <FormDate id="received_at" name="received_at" label="Reçu le" />
+          <Button type="submit" variant="secondary" size="sm">Ajouter le payout</Button>
+        </form>
+      </div>
 
       {/* Zone de danger */}
       <div className="card mt-6 jdanger">
