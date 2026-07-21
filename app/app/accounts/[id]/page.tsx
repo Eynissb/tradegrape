@@ -14,6 +14,7 @@ import {
   CircleX,
   Shield,
   Target,
+  Trash2,
   TrendingUp,
   TriangleAlert,
 } from 'lucide-react';
@@ -190,6 +191,17 @@ export default async function AccountPage({
   // Dernières entrées, montrées sous le calendrier (vérifier sans changer d'onglet).
   const recentTrades = trades.slice(0, 8);
 
+  // Totaux tous comptes confondus — en-tête de l'onglet Historique.
+  let winCount = 0;
+  let lossCount = 0;
+  for (const t of trades) {
+    const p = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+    if (p > 0) winCount += 1;
+    else if (p < 0) lossCount += 1;
+  }
+  const decidedCount = winCount + lossCount;
+  const winRate = decidedCount ? Math.round((winCount / decidedCount) * 100) : null;
+
   return (
     <main className="jwrap jwrap-acct">
       <nav className="jcrumb">
@@ -215,7 +227,7 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <div className="acct2 mt-6">
+      <div className={`acct2 mt-6${view === 'historique' ? ' acct2-stretch' : ''}`}>
         {/* Console gauche : état/règles + payout + saisie — toujours visibles */}
         <aside className="acct2-console">
           {/* Cockpit : statut, solde, jauges, payout — surface solide, lisibilité max */}
@@ -346,67 +358,90 @@ export default async function AccountPage({
           </div>
 
           {view === 'historique' ? (
-            trades.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
-                Aucune entrée. Commence par un P&L journalier dans la console.
+            <div className="acct2-hist">
+              {/* Totaux — remplit l'en-tête et donne le résumé du compte */}
+              <div className="card">
+                <h3 className="acct-rules-title">Totaux</h3>
+                <div className="acct2-monthstats">
+                  <div className="acct2-stat">
+                    <div className="acct2-stat-k">{trades.length}</div>
+                    <div className="acct2-stat-l">Entrées</div>
+                  </div>
+                  <div className="acct2-stat">
+                    <div className="acct2-stat-k" style={{ color: pnlColor(ev.netProfit) }}>{signed(ev.netProfit, currency)}</div>
+                    <div className="acct2-stat-l">P&L net cumulé</div>
+                  </div>
+                  <div className="acct2-stat">
+                    <div className="acct2-stat-k">{winRate === null ? '—' : `${winRate}%`}</div>
+                    <div className="acct2-stat-l">Taux de réussite</div>
+                    {decidedCount ? <div className="acct2-stat-sub">{winCount} G · {lossCount} P</div> : null}
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="table-wrap">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th className="num">P&L</th>
-                      <th>Tags</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {trades.map((t) => {
-                      const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                      const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
-                      return (
-                        <tr key={t.id}>
-                          <td data-label="Date" className="num">
-                            <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
-                          </td>
-                          <td data-label="Type">
-                            <Link href={editHref} className="jrow-link">
-                              {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                            </Link>
-                          </td>
-                          <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                            <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
-                              {signed(pnlNet, currency)}
-                            </Link>
-                          </td>
-                          <td data-label="Tags">
-                            <div className="jchips">
-                              {t.tags.map((tag) => (
-                                <span key={tag} className="jchip">{tagLabel(tag)}</span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="admin-row-actions">
-                            <div className="flex items-center justify-end gap-2">
-                              <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
-                                Éditer
-                              </Link>
-                              <form action={deleteTrade}>
-                                <input type="hidden" name="id" value={t.id} />
-                                <input type="hidden" name="account_id" value={account.id} />
-                                <Button type="submit" variant="danger" size="sm">Supprimer</Button>
-                              </form>
-                            </div>
-                          </td>
+
+              {/* Table — grandit pour occuper la colonne, surface solide (pas d'aplat noir) */}
+              <div className="card acct2-hist-table">
+                {trades.length === 0 ? (
+                  <div className="acct2-empty">Aucune entrée. Commence par un P&L rapide dans la console.</div>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Type</th>
+                          <th className="num">P&L</th>
+                          <th>Tags</th>
+                          <th></th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {trades.map((t) => {
+                          const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                          const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                          return (
+                            <tr key={t.id}>
+                              <td data-label="Date" className="num">
+                                <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
+                              </td>
+                              <td data-label="Type">
+                                <Link href={editHref} className="jrow-link">
+                                  {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
+                                </Link>
+                              </td>
+                              <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
+                                <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
+                                  {signed(pnlNet, currency)}
+                                </Link>
+                              </td>
+                              <td data-label="Tags">
+                                <div className="jchips">
+                                  {t.tags.map((tag) => (
+                                    <span key={tag} className="jchip">{tagLabel(tag)}</span>
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="admin-row-actions">
+                                <div className="flex items-center justify-end gap-1">
+                                  <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
+                                    Éditer
+                                  </Link>
+                                  <form action={deleteTrade}>
+                                    <input type="hidden" name="id" value={t.id} />
+                                    <input type="hidden" name="account_id" value={account.id} />
+                                    <Button type="submit" variant="ghost" size="sm" iconOnly icon={Trash2} className="btn-danger-ghost" aria-label="Supprimer l’entrée" />
+                                  </form>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            )
+            </div>
           ) : (
             <div className="acct2-cal">
               <MonthCalendar
@@ -467,12 +502,12 @@ export default async function AccountPage({
                                     </div>
                                   </td>
                                   <td className="admin-row-actions">
-                                    <div className="flex items-center justify-end gap-2">
+                                    <div className="flex items-center justify-end gap-1">
                                       <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
                                       <form action={deleteTrade}>
                                         <input type="hidden" name="id" value={t.id} />
                                         <input type="hidden" name="account_id" value={account.id} />
-                                        <Button type="submit" variant="danger" size="sm">Supprimer</Button>
+                                        <Button type="submit" variant="ghost" size="sm" iconOnly icon={Trash2} className="btn-danger-ghost" aria-label="Supprimer l’entrée" />
                                       </form>
                                     </div>
                                   </td>

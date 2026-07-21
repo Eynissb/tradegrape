@@ -352,6 +352,9 @@ h1, h2, h3 {
   /* La console (état + saisie, priorités 1 et 2) reste épinglée : jauges et
      saisie visibles pendant qu'on parcourt calendrier et entrées à droite. */
   .acct2-console { position: sticky; top: 84px; }
+  /* Onglet Historique : la colonne de travail s'étire à la hauteur de la console
+     pour que la table remplisse (surface solide) au lieu de finir en aplat noir. */
+  .acct2-stretch { align-items: stretch; }
 }
 @media (min-width: 1800px) {
   .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
@@ -381,6 +384,18 @@ h1, h2, h3 {
 .acct2-stat-l { font-size: 11.5px; color: var(--ink3); margin-top: 3px; }
 .acct2-stat-sub { font-family: var(--font-mono); font-size: 11px; color: var(--ink3); margin-top: 2px; }
 .acct2-recent-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .4rem; }
+
+/* Onglet Historique : totaux + table qui grandit pour occuper la colonne, afin
+ * que la zone ne se termine pas en aplat noir quand il y a peu d'entrées.
+ * Sur l'onglet Historique, la colonne s'étire à la hauteur de la console
+ * (voir .acct2-stretch) et la table remplit — surface solide, pas de vide noir. */
+.acct2-hist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
+.acct2-hist-table { flex: 1; }
+.acct2-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 24px; text-align: center; color: var(--ink3); }
+
+/* Suppression d'une ligne : discrète (ghost teinté), ne concurrence pas l'action principale */
+.btn.btn-danger-ghost { color: var(--ink3); }
+.btn.btn-danger-ghost:hover { color: var(--danger); background: rgba(255, 77, 94, 0.1); border-color: rgba(255, 77, 94, 0.3); }
 
 .acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
 .acct-gauges { display: flex; flex-direction: column; gap: 1.15rem; }
