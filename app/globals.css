@@ -346,9 +346,9 @@ h1, h2, h3 {
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
 @media (min-width: 1280px) {
   .acct2 { grid-template-columns: 560px minmax(0, 1fr); align-items: start; gap: 2rem; }
-  /* La console (haute : cockpit + saisie) défile ; l'espace de travail reste
-     épinglé pour ne jamais laisser un aplat vide à droite. */
-  .acct2-work { position: sticky; top: 84px; }
+  /* La console (état + saisie, priorités 1 et 2) reste épinglée : jauges et
+     saisie visibles pendant qu'on parcourt calendrier et entrées à droite. */
+  .acct2-console { position: sticky; top: 84px; }
 }
 @media (min-width: 1800px) {
   .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
@@ -364,21 +364,20 @@ h1, h2, h3 {
 /* Espace de travail : onglets + contenu */
 .acct2-work-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 
-/* Vue calendrier : calendrier borné (~1000px) + panneau compagnon */
-.acct2-cal { display: grid; gap: 1.2rem; }
-.acct2-cal-main { min-width: 0; max-width: 1000px; }
-.acct2-cal-side { align-self: start; }
-@media (min-width: 1750px) {
-  .acct2-cal { grid-template-columns: minmax(0, 1fr) minmax(300px, 340px); align-items: start; }
-}
-.acct2-side-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.acct2-daylist { list-style: none; margin: 1rem 0 0; padding: 0; }
-.acct2-dayrow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-top: 1px solid var(--border); }
-.acct2-dayrow:first-child { border-top: 0; }
-.acct2-dayrow .num { font-family: var(--font-mono); font-weight: 700; }
-.acct2-recap { display: flex; flex-direction: column; gap: .7rem; margin-top: 1rem; }
-.acct2-recap-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.acct2-recap-row .num { font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; }
+/* Vue calendrier : calendrier borné (~1040px) puis un bandeau plein largeur
+ * dessous (récap du mois + dernières entrées, ou détail du jour cliqué).
+ * Pile centrée dans l'espace de travail → pas d'aplat latéral aux grandes largeurs. */
+.acct2-cal { display: flex; flex-direction: column; gap: 1.4rem; max-width: 1040px; margin: 0 auto; }
+.acct2-below { display: flex; flex-direction: column; gap: 1.2rem; }
+.acct2-below-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+/* Récap du mois — cartes de stats reliées au mois affiché */
+.acct2-monthstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.acct2-stat { padding: 14px 16px; border: 1px solid var(--card-brd); border-radius: var(--r-md); background: rgba(8, 11, 20, 0.4); }
+.acct2-stat-k { font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
+.acct2-stat-l { font-size: 11.5px; color: var(--ink3); margin-top: 3px; }
+.acct2-stat-sub { font-family: var(--font-mono); font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.acct2-recent-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .4rem; }
 
 .acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
 .acct-gauges { display: flex; flex-direction: column; gap: 1.15rem; }
@@ -430,6 +429,8 @@ h1, h2, h3 {
 .jentry-tabs button.is-active { background: var(--grad); color: var(--on-accent); border-color: transparent; font-weight: 600; }
 .jentry-form { display: flex; flex-direction: column; gap: 16px; }
 .jentry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+
+.jentry-hint { font-size: 12.5px; color: var(--ink3); margin-top: 8px; line-height: 1.45; }
 
 /* Dépliages de saisie : garder la saisie quotidienne courte (date + montant) */
 .jentry-disclosures { display: flex; flex-wrap: wrap; gap: 8px; }

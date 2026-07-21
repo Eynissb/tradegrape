@@ -151,11 +151,44 @@ export default async function AccountPage({
   // Détail d'un jour cliqué dans le calendrier (panneau compagnon).
   const dayTrades = dayParam ? trades.filter((t) => t.trade_date === dayParam) : [];
 
-  // Récap léger du mois affiché (compagnon quand aucun jour n'est sélectionné).
+  // Récap du mois affiché (bandeau sous le calendrier quand aucun jour cliqué).
   const monthCells = monthView.weeks.flatMap((w) => w.days).filter((d) => d.inMonth);
   const monthTotal = monthCells.reduce((s, d) => s + (d.pnl ?? 0), 0);
   const monthActiveDays = monthCells.filter((d) => d.pnl !== null).length;
   const monthTradingDays = monthCells.filter((d) => d.isTradingDay).length;
+
+  let bestDay: { date: string; pnl: number } | null = null;
+  let worstDay: { date: string; pnl: number } | null = null;
+  for (const d of monthCells) {
+    if (d.pnl === null) continue;
+    if (!bestDay || d.pnl > bestDay.pnl) bestDay = { date: d.date, pnl: d.pnl };
+    if (!worstDay || d.pnl < worstDay.pnl) worstDay = { date: d.date, pnl: d.pnl };
+  }
+
+  // Série en cours : jours consécutifs de même signe depuis le jour le plus récent.
+  const orderedDays = [...dayPnl.keys()].sort().reverse();
+  let streak = 0;
+  let streakSign = 0;
+  for (const d of orderedDays) {
+    const p = dayPnl.get(d) ?? 0;
+    const s = p > 0 ? 1 : p < 0 ? -1 : 0;
+    if (streakSign === 0) {
+      if (s === 0) break;
+      streakSign = s;
+      streak = 1;
+    } else if (s === streakSign) {
+      streak += 1;
+    } else {
+      break;
+    }
+  }
+  const streakLabel =
+    streak === 0
+      ? '—'
+      : `${streak} jour${streak > 1 ? 's' : ''} ${streakSign > 0 ? 'gagnant' : 'perdant'}${streak > 1 ? 's' : ''}`;
+
+  // Dernières entrées, montrées sous le calendrier (vérifier sans changer d'onglet).
+  const recentTrades = trades.slice(0, 8);
 
   return (
     <main className="jwrap jwrap-wide">
@@ -376,21 +409,19 @@ export default async function AccountPage({
             )
           ) : (
             <div className="acct2-cal">
-              <div className="acct2-cal-main">
-                <MonthCalendar
-                  view={monthView}
-                  accountId={account.id}
-                  activeDay={dayParam}
-                  consistency={consistencyInfo}
-                />
-              </div>
+              <MonthCalendar
+                view={monthView}
+                accountId={account.id}
+                activeDay={dayParam}
+                consistency={consistencyInfo}
+              />
 
-              {/* Panneau compagnon : détail d'un jour, sinon récap du mois */}
-              <aside className="acct2-cal-side card">
+              {/* Bandeau sous le calendrier : détail du jour cliqué, sinon récap + dernières entrées */}
+              <div className="acct2-below">
                 {dayParam ? (
-                  <>
-                    <div className="acct2-side-head">
-                      <h3 className="acct-rules-title" style={{ marginBottom: 0 }}>{dayParam}</h3>
+                  <div className="card">
+                    <div className="acct2-below-head">
+                      <h3 className="acct-rules-title" style={{ marginBottom: 0 }}>Détail du {dayParam}</h3>
                       <Link
                         href={`/app/accounts/${account.id}?view=calendrier&month=${monthKey(monthView.year, monthView.month)}`}
                         className="link-accent"
@@ -401,44 +432,159 @@ export default async function AccountPage({
                     {dayTrades.length === 0 ? (
                       <p className="jsub mt-3">Aucune entrée ce jour-là.</p>
                     ) : (
-                      <ul className="acct2-daylist">
-                        {dayTrades.map((t) => {
-                          const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                          return (
-                            <li key={t.id} className="acct2-dayrow">
-                              <Link href={`/app/accounts/${account.id}/trades/${t.id}`} className="jrow-link">
-                                {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                              </Link>
-                              <span className="num" style={{ color: pnlColor(pnlNet) }}>
-                                {signed(pnlNet, currency)}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                      <div className="table-wrap mt-4">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Type</th>
+                              <th className="num">P&L</th>
+                              <th>Tags</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dayTrades.map((t) => {
+                              const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                              const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                              return (
+                                <tr key={t.id}>
+                                  <td data-label="Type">
+                                    <Link href={editHref} className="jrow-link">
+                                      {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
+                                    </Link>
+                                  </td>
+                                  <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
+                                    <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
+                                      {signed(pnlNet, currency)}
+                                    </Link>
+                                  </td>
+                                  <td data-label="Tags">
+                                    <div className="jchips">
+                                      {t.tags.map((tag) => (
+                                        <span key={tag} className="jchip">{tagLabel(tag)}</span>
+                                      ))}
+                                    </div>
+                                  </td>
+                                  <td className="admin-row-actions">
+                                    <div className="flex items-center justify-end gap-2">
+                                      <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                                      <form action={deleteTrade}>
+                                        <input type="hidden" name="id" value={t.id} />
+                                        <input type="hidden" name="account_id" value={account.id} />
+                                        <Button type="submit" variant="danger" size="sm">Supprimer</Button>
+                                      </form>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
-                  </>
+                  </div>
                 ) : (
                   <>
-                    <h3 className="acct-rules-title">Aperçu du mois</h3>
-                    <div className="acct2-recap">
-                      <div className="acct2-recap-row">
-                        <span className="jcard-l">Total du mois</span>
-                        <span className="num" style={{ color: pnlColor(monthTotal) }}>{signed(monthTotal, currency)}</span>
-                      </div>
-                      <div className="acct2-recap-row">
-                        <span className="jcard-l">Jours actifs</span>
-                        <span className="num">{monthActiveDays}</span>
-                      </div>
-                      <div className="acct2-recap-row">
-                        <span className="jcard-l">Jours validés</span>
-                        <span className="num">{monthTradingDays}</span>
+                    {/* Récap du mois — relié au mois affiché par le calendrier */}
+                    <div className="card">
+                      <h3 className="acct-rules-title">Récap de {monthView.label}</h3>
+                      <div className="acct2-monthstats">
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k" style={{ color: pnlColor(monthTotal) }}>{signed(monthTotal, currency)}</div>
+                          <div className="acct2-stat-l">Total du mois</div>
+                        </div>
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k">{monthActiveDays}</div>
+                          <div className="acct2-stat-l">Jours actifs</div>
+                        </div>
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k">{monthTradingDays}</div>
+                          <div className="acct2-stat-l">Jours validés</div>
+                        </div>
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k" style={{ color: bestDay ? pnlColor(bestDay.pnl) : undefined }}>
+                            {bestDay ? signed(bestDay.pnl, currency) : '—'}
+                          </div>
+                          <div className="acct2-stat-l">Meilleur jour</div>
+                          {bestDay ? <div className="acct2-stat-sub">{bestDay.date}</div> : null}
+                        </div>
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k" style={{ color: worstDay ? pnlColor(worstDay.pnl) : undefined }}>
+                            {worstDay ? signed(worstDay.pnl, currency) : '—'}
+                          </div>
+                          <div className="acct2-stat-l">Pire jour</div>
+                          {worstDay ? <div className="acct2-stat-sub">{worstDay.date}</div> : null}
+                        </div>
+                        <div className="acct2-stat">
+                          <div className="acct2-stat-k" style={{ color: streak === 0 ? undefined : streakSign > 0 ? 'var(--ok)' : 'var(--danger)' }}>
+                            {streak === 0 ? '—' : streak}
+                          </div>
+                          <div className="acct2-stat-l">Série en cours</div>
+                          {streak > 0 ? <div className="acct2-stat-sub">{streakLabel}</div> : null}
+                        </div>
                       </div>
                     </div>
-                    <p className="jsub mt-3">Clique un jour du calendrier pour voir le détail de ses entrées.</p>
+
+                    {/* Dernières entrées — vérifier une saisie sans changer d'onglet */}
+                    <div className="card">
+                      <div className="acct2-recent-head">
+                        <h3 className="acct-rules-title" style={{ marginBottom: 0 }}>Dernières entrées</h3>
+                        {trades.length > recentTrades.length ? (
+                          <Link href={`/app/accounts/${account.id}?view=historique`} className="link-accent">
+                            Voir tout ({trades.length})
+                          </Link>
+                        ) : null}
+                      </div>
+                      {recentTrades.length === 0 ? (
+                        <p className="jsub mt-3">Aucune entrée. Commence par un P&L rapide dans la console.</p>
+                      ) : (
+                        <div className="table-wrap mt-3">
+                          <table className="table">
+                            <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th className="num">P&L</th>
+                                <th>Tags</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {recentTrades.map((t) => {
+                                const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                                const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                                return (
+                                  <tr key={t.id}>
+                                    <td data-label="Date" className="num">
+                                      <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
+                                    </td>
+                                    <td data-label="Type">
+                                      <Link href={editHref} className="jrow-link">
+                                        {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
+                                      </Link>
+                                    </td>
+                                    <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
+                                      <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
+                                        {signed(pnlNet, currency)}
+                                      </Link>
+                                    </td>
+                                    <td data-label="Tags">
+                                      <div className="jchips">
+                                        {t.tags.map((tag) => (
+                                          <span key={tag} className="jchip">{tagLabel(tag)}</span>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
-              </aside>
+              </div>
             </div>
           )}
         </section>

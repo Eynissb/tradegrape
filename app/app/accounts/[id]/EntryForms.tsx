@@ -9,6 +9,7 @@ import DatePicker from '@/components/ui/DatePicker';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
+import Tabs from '@/components/ui/Tabs';
 
 export interface TradeValues {
   id: string;
@@ -42,24 +43,42 @@ export default function EntryForms({
   title?: string;
 }) {
   const editing = !!trade;
-  // Saisie minimale par défaut (date + montant). Détails et tags/notes se déplient.
-  const [showDetail, setShowDetail] = useState(editing && !!trade?.symbol);
+  // Deux natures d'entrée annoncées par les onglets ; tags & notes se déplient.
+  const [mode, setMode] = useState<'daily' | 'detailed'>(
+    trade && trade.symbol ? 'detailed' : 'daily',
+  );
   const [showTags, setShowTags] = useState(
     editing && (((trade?.tags?.length ?? 0) > 0) || !!trade?.notes),
   );
   const [dateValue, setDateValue] = useState<string>(trade?.trade_date ?? today);
-  const mode = showDetail ? 'detailed' : 'daily';
+  const detailed = mode === 'detailed';
 
   return (
     <div className="jentry card ds-form">
       {title ? <h2 className="acct-rules-title">{title}</h2> : null}
+
+      <div className="mb-4">
+        <Tabs
+          tabs={[
+            { id: 'daily', label: 'Saisie rapide' },
+            { id: 'detailed', label: 'Trade détaillé' },
+          ]}
+          active={mode}
+          onChange={(id) => setMode(id as 'daily' | 'detailed')}
+          ariaLabel="Type de saisie"
+        />
+        <p className="jentry-hint">
+          {detailed
+            ? 'Une ligne par trade : symbole, sens, prix, P&L net.'
+            : 'L’essentiel : une date et le P&L du jour. Passe en « Trade détaillé » pour journaliser trade par trade.'}
+        </p>
+      </div>
 
       <form action={editing ? updateTrade : addTrade} className="jentry-form">
         <input type="hidden" name="account_id" value={accountId} />
         <input type="hidden" name="mode" value={mode} />
         {editing ? <input type="hidden" name="id" value={trade!.id} /> : null}
 
-        {/* Essentiel : une date, un montant */}
         <div className="jentry-grid">
           <DatePicker
             id="trade_date"
@@ -69,10 +88,30 @@ export default function EntryForms({
             value={dateValue}
             onChange={setDateValue}
           />
+
+          {detailed ? (
+            <>
+              <Input id="symbol" name="symbol" label="Symbole" defaultValue={v(trade?.symbol)} placeholder="ES, NQ, MES…" />
+              <Select
+                name="direction"
+                label="Sens"
+                defaultValue={v(trade?.direction) ?? ''}
+                options={[
+                  { value: '', label: '—' },
+                  { value: 'long', label: 'Long' },
+                  { value: 'short', label: 'Short' },
+                ]}
+              />
+              <Input id="quantity" name="quantity" label="Quantité" type="number" step="1" defaultValue={v(trade?.quantity)} mono />
+              <Input id="entry_price" name="entry_price" label="Entrée" type="number" step="0.000001" defaultValue={v(trade?.entry_price)} mono />
+              <Input id="exit_price" name="exit_price" label="Sortie" type="number" step="0.000001" defaultValue={v(trade?.exit_price)} mono />
+            </>
+          ) : null}
+
           <Input
             id="pnl"
             name="pnl"
-            label={`P&L ${showDetail ? 'net' : 'du jour'} (${currency})`}
+            label={`P&L ${detailed ? 'net' : 'du jour'} (${currency})`}
             type="number"
             step="0.01"
             required
@@ -80,19 +119,14 @@ export default function EntryForms({
             placeholder="ex : 420 ou -180"
             mono
           />
+
+          {detailed ? (
+            <Input id="fees" name="fees" label={`Frais (${currency})`} type="number" step="0.01" defaultValue={v(trade?.fees)} mono />
+          ) : null}
         </div>
 
-        {/* Déclencheurs de dépliage — la saisie quotidienne reste courte */}
+        {/* Tags & notes — repliés par défaut, la saisie quotidienne reste courte */}
         <div className="jentry-disclosures">
-          <button
-            type="button"
-            className="jentry-toggle"
-            aria-expanded={showDetail}
-            onClick={() => setShowDetail((x) => !x)}
-          >
-            <ChevronDown aria-hidden="true" />
-            {showDetail ? 'Masquer le détail du trade' : 'Détailler le trade'}
-          </button>
           <button
             type="button"
             className="jentry-toggle"
@@ -104,28 +138,6 @@ export default function EntryForms({
           </button>
         </div>
 
-        {/* Détails du trade — repliés par défaut */}
-        {showDetail ? (
-          <div className="jentry-grid">
-            <Input id="symbol" name="symbol" label="Symbole" defaultValue={v(trade?.symbol)} placeholder="ES, NQ, MES…" />
-            <Select
-              name="direction"
-              label="Sens"
-              defaultValue={v(trade?.direction) ?? ''}
-              options={[
-                { value: '', label: '—' },
-                { value: 'long', label: 'Long' },
-                { value: 'short', label: 'Short' },
-              ]}
-            />
-            <Input id="quantity" name="quantity" label="Quantité" type="number" step="1" defaultValue={v(trade?.quantity)} mono />
-            <Input id="entry_price" name="entry_price" label="Entrée" type="number" step="0.000001" defaultValue={v(trade?.entry_price)} mono />
-            <Input id="exit_price" name="exit_price" label="Sortie" type="number" step="0.000001" defaultValue={v(trade?.exit_price)} mono />
-            <Input id="fees" name="fees" label={`Frais (${currency})`} type="number" step="0.01" defaultValue={v(trade?.fees)} mono />
-          </div>
-        ) : null}
-
-        {/* Tags & notes — repliés par défaut */}
         {showTags ? (
           <>
             <div className="jtags">
