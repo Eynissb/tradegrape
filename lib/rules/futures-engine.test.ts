@@ -288,6 +288,30 @@ describe('payout — jours de profit', () => {
   });
 });
 
+describe('payout — sans buffer', () => {
+  const NO_BUFFER: PayoutRules = {
+    buffer: null,
+    minAmount: null,
+    minProfitDays: null,
+    dailyThreshold: null,
+    consistencyPct: null,
+    minCycleProfit: null,
+    maxAmount: null,
+    maxPct: null,
+  };
+
+  it('retirable = profit du cycle, jamais le solde entier', () => {
+    // Bug réel : sur 50 000 avec 531,02 de profit, retirable ≈ 531, pas 50 531.
+    const r = evaluatePayout(NO_BUFFER, 50_000, 50_531.02, [t('2026-02-02', 531.02)]);
+    expect(r.withdrawable).toBe(531.02);
+  });
+
+  it('rien à retirer si le compte est sous le capital initial', () => {
+    const r = evaluatePayout(NO_BUFFER, 50_000, 49_800, [t('2026-02-02', -200)]);
+    expect(r.withdrawable).toBe(0);
+  });
+});
+
 describe('payout — buffer', () => {
   it('bloque sous le buffer et chiffre l’écart', () => {
     const r = evaluatePayout(LUCID_PRO_50K, 50_000, 51_800, [t('2026-02-02', 1_800)]);

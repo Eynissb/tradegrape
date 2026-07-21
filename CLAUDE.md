@@ -451,6 +451,15 @@ payante, hors de notre axe. À reconsidérer plus tard.
 - **Drawdown max constaté** — le plus grand repli pic-à-creux réellement subi par le compte
   (max equity drawdown), calculable par le moteur à partir de la courbe. Métrique attendue par
   tout trader, aujourd'hui non suivie. À ajouter aux analytics (per-compte et agrégat).
+- **Compte à rebours « prochain reset du daily loss »** — le daily loss se réinitialise à
+  heure fixe (souvent 17 h ET / 18 h ET). Afficher le temps restant avant reset, façon
+  « Next Daily Loss Reset in 12:36:36 » de la référence E8. Le moteur connaît la limite ;
+  reste à modéliser l'heure de reset par firm/offre.
+- **Tableau de bord agrégé** — entrée de navigation « Tableau de bord » **à venir** (pas
+  maintenant : un lien qui pointe sur « Mes comptes » serait un doublon trompeur). Quand le
+  produit sera plus avancé, il agrégera l'état de tous les comptes, le bilan résumé, les
+  alertes de changement de règles et la revue hebdomadaire ; **« Mes comptes » deviendra alors
+  une sous-section**.
 
 ### Ce qu'on ne fait PAS (journal)
 
@@ -481,6 +490,17 @@ Transposition : tokens + classes dans `app/design-system.css` (importé par `glo
 composants React dans `components/ui/`. **Cette référence reste susceptible d'évoluer** — les
 finitions seront affinées une fois appliquée sur de vrais écrans ; concevoir les composants
 pour que ces ajustements soient faciles (variables centralisées, aucune valeur en dur).
+
+### Refonte visuelle « dashboard » (en cours) — règle du dégradé
+
+Direction retenue (réf. type E8 Markets, transposée à l'indigo→fuchsia) : **sidebar
+permanente ~240px** + header, cartes en **deux traitements** — sombres (fond quasi noir,
+bordure à peine visible) et **dégradé vertical marqué** (vif en haut → profond en bas, lignes
+internes en barres). **Un seul bloc en dégradé par page** : celui qui porte l'information la
+plus décisive **et qui n'a pas déjà un code couleur sémantique** (les états restent
+lime/amber/red — on ne mélange jamais le dégradé de marque avec la sémantique d'alerte).
+Page compte : le dégradé va au **bloc payout** (« ce qu'il te manque pour retirer », notre
+signature). Espacements généreux. La lisibilité chirurgicale des chiffres prime toujours.
 
 ### Proportions & largeurs (règle : la largeur suit le CONTENU, pas le parent)
 

@@ -368,9 +368,9 @@ export default async function AccountPage({
               ) : null}
 
               <div className="acct-days">
-                <span className="progress-label">Jours de trading validés</span>
+                <span className="progress-label">Jours de trading</span>
                 <span className="num" style={{ color: ev.tradingDays.met ? 'var(--ok)' : 'var(--text-1)' }}>
-                  {ev.tradingDays.count} / {ev.tradingDays.required}
+                  {ev.tradingDays.count} validé{ev.tradingDays.count > 1 ? 's' : ''} · minimum {ev.tradingDays.required}
                 </span>
               </div>
             </div>

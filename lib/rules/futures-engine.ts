@@ -256,9 +256,12 @@ export function evaluatePayout(
   const daysMet = profitDayCount >= requiredDays;
   if (!daysMet) blockers.push('profit_days_not_met');
 
-  // Buffer : on ne retire que ce qui dépasse
+  // Buffer : on ne retire que ce qui dépasse le plancher de retrait. Sans buffer
+  // configuré, le plancher est le CAPITAL INITIAL — on ne retire jamais le capital
+  // de la firm, seulement le profit du cycle (sinon on afficherait le solde entier).
   const buffer = payout.buffer ?? 0;
-  const aboveBuffer = round2(Math.max(0, currentBalance - buffer));
+  const withdrawFloor = buffer > 0 ? buffer : startingBalance;
+  const aboveBuffer = round2(Math.max(0, currentBalance - withdrawFloor));
   const bufferGap = round2(Math.max(0, buffer - currentBalance));
   if (buffer > 0 && currentBalance <= buffer) blockers.push('below_buffer');
 
