@@ -71,6 +71,10 @@
   --surface-solid: #131121;
   --surface-solid-2: #0f0d1a;
   --nav-h: 64px;
+  /* Largeur de conteneur unique : pages ET contenu interne du header.
+     Changer ici répercute partout (le header suit le conteneur des pages). */
+  --container: 1200px;
+  --container-pad: 24px;
 }
 
 @property --bd-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
