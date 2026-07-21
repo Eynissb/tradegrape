@@ -63,9 +63,9 @@ export async function createAccount(formData: FormData) {
 
   const { data: offer } = await supabase
     .from('offers')
-    .select(OFFER_COLS)
+    .select(`${OFFER_COLS}, price`)
     .eq('id', offerId)
-    .single<OfferRuleRow & { plan_id: string }>();
+    .single<OfferRuleRow & { plan_id: string; price: number | null }>();
   if (!offer) backWithError('/app/accounts/new', 'Offre introuvable ou non publiée.');
 
   const { data: plan } = await supabase
@@ -101,6 +101,19 @@ export async function createAccount(formData: FormData) {
     .single<{ id: string }>();
 
   if (error) backWithError('/app/accounts/new', error.message);
+
+  // Enregistre l'achat du challenge, pré-rempli au prix de l'offre (modifiable ensuite).
+  // Best-effort : n'empêche pas la création du compte si l'insert échoue.
+  if (offer.price != null) {
+    await supabase.from('account_purchases').insert({
+      journal_account_id: account!.id,
+      user_id: user.id,
+      kind: 'challenge',
+      amount: Number(offer.price),
+      currency: offer.currency ?? 'USD',
+      purchased_at: new Date().toISOString().slice(0, 10),
+    });
+  }
 
   revalidatePath('/app');
   redirect(`/app/accounts/${account!.id}`);
@@ -352,6 +365,101 @@ export async function saveAccountCommission(formData: FormData) {
 
   revalidatePath(`/app/accounts/${id}`);
   redirect(`${base}?saved=1`);
+}
+
+/* ---------- Bilan financier : achats (challenges/resets/activations) & payouts ---------- */
+
+const PURCHASE_KINDS = ['challenge', 'reset', 'activation'] as const;
+
+export async function addPurchase(formData: FormData) {
+  const accountId = str(formData, 'account_id');
+  if (!accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}/settings`;
+  const kind = str(formData, 'kind');
+  const amount = num(formData, 'amount');
+  if (!kind || !PURCHASE_KINDS.includes(kind as (typeof PURCHASE_KINDS)[number])) {
+    backWithError(base, 'Type d’achat invalide.');
+  }
+  if (amount === null || amount < 0) backWithError(base, 'Montant invalide.');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app');
+
+  const { data: acc } = await supabase
+    .from('journal_accounts')
+    .select('rules_snapshot')
+    .eq('id', accountId)
+    .single<{ rules_snapshot: RulesSnapshot }>();
+  const currency = acc?.rules_snapshot.display?.currency ?? 'USD';
+
+  const { error } = await supabase.from('account_purchases').insert({
+    journal_account_id: accountId,
+    user_id: user.id,
+    kind,
+    amount,
+    currency,
+    purchased_at: str(formData, 'purchased_at') ?? new Date().toISOString().slice(0, 10),
+  });
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(`${base}?saved=1#couts`);
+}
+
+export async function deletePurchase(formData: FormData) {
+  const id = str(formData, 'id');
+  const accountId = str(formData, 'account_id');
+  if (!id || !accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}/settings`;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('account_purchases').delete().eq('id', id);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(`${base}?saved=1#couts`);
+}
+
+export async function addPayout(formData: FormData) {
+  const accountId = str(formData, 'account_id');
+  if (!accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}/settings`;
+  const amount = num(formData, 'amount');
+  if (amount === null || amount <= 0) backWithError(base, 'Montant invalide.');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app');
+
+  const { error } = await supabase.from('journal_payouts').insert({
+    account_id: accountId,
+    user_id: user.id,
+    amount,
+    received_at: str(formData, 'received_at'),
+  });
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(`${base}?saved=1#couts`);
+}
+
+export async function deletePayout(formData: FormData) {
+  const id = str(formData, 'id');
+  const accountId = str(formData, 'account_id');
+  if (!id || !accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}/settings`;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('journal_payouts').delete().eq('id', id);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(`${base}?saved=1#couts`);
 }
 
 /** Suppression groupée d'entrées sélectionnées. RLS + scope compte : jamais hors de ses trades. */
