@@ -1,13 +1,16 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { FileUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
+import Input from '@/components/ui/Input';
 import { cn } from '@/lib/cn';
-import { pnlColor, signed } from '@/app/app/_components/journal-ui';
+import { money, pnlColor, signed } from '@/app/app/_components/journal-ui';
 import { ADAPTERS } from '@/lib/journal/trade-csv';
 import { applyTradesImport, previewTradesImport, type PreviewState } from './import-actions';
+
+const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 
 const INITIAL: PreviewState = { ok: false };
 
@@ -26,6 +29,22 @@ export default function ImportTradesClient({
   const [state, formAction, pending] = useActionState(previewTradesImport, INITIAL);
   const [fileName, setFileName] = useState('');
   const [platform, setPlatform] = useState<keyof typeof ADAPTERS>('tradovate');
+  const [commTotal, setCommTotal] = useState('');
+
+  // Préremplit le total depuis le taux enregistré du compte, quand un aperçu arrive.
+  useEffect(() => {
+    if (state.ok && state.accountRate && state.contracts) {
+      setCommTotal(String(round2(state.contracts * state.accountRate)));
+    } else if (state.ok) {
+      setCommTotal('');
+    }
+  }, [state]);
+
+  const gross = state.grossPnl ?? 0;
+  const commValue = commTotal.trim() === '' ? 0 : Number(commTotal.replace(',', '.')) || 0;
+  const net = round2(gross - commValue);
+  // Le fichier ne portait pas de frais → on propose la saisie des commissions.
+  const askCommissions = state.ok && (state.fileFees ?? 0) === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -116,10 +135,58 @@ export default function ImportTradesClient({
             <p className="jsub mt-2">Aperçu des {state.lines?.length} premières lignes · {state.createCount} au total.</p>
           ) : null}
 
+          {/* Étape commissions — le fichier ne porte pas les frais */}
+          {askCommissions ? (
+            <div className="jimport-comm mt-5">
+              <h3 className="acct-rules-title">Commissions</h3>
+              <p className="jsub" style={{ marginBottom: '1rem' }}>
+                Cet export {ADAPTERS[platform].label} ne contient pas les frais et le P&L est brut.
+                Saisis le <strong>total des commissions</strong> affiché par ta plateforme pour cette
+                période ({state.contracts} contrat(s) importé(s)) — on le répartit sur les trades et on
+                retient le taux par contrat pour tes prochains imports.
+              </p>
+
+              <Input
+                id="comm_total"
+                label={`Total des commissions (${currency})`}
+                type="number"
+                step="0.01"
+                min="0"
+                width="sm"
+                mono
+                value={commTotal}
+                onChange={(e) => setCommTotal(e.target.value)}
+                placeholder="ex : 14.56"
+              />
+              {state.accountRate ? (
+                <p className="jsub mt-1">
+                  Taux enregistré : <span className="num">{state.accountRate}</span> {currency}/contrat aller-retour (prérempli).
+                </p>
+              ) : null}
+
+              <div className="jimport-summary mt-3">
+                <span>Brut <b className="num" style={{ color: pnlColor(gross) }}>{signed(gross, currency)}</b></span>
+                <span>Commissions <b className="num" style={{ color: commValue ? 'var(--danger)' : 'var(--ink3)' }}>−{money(commValue, currency)}</b></span>
+                <span>Net <b className="num" style={{ color: pnlColor(net) }}>{signed(net, currency)}</b></span>
+              </div>
+              <p className="jsub mt-1">Vérifie que le net correspond au chiffre de ta plateforme.</p>
+
+              {commTotal.trim() === '' ? (
+                <div className="notice notice-warn mt-3">
+                  Sans commissions, le P&L et la progression vers l’objectif seront <strong>surestimés</strong>.
+                  Tu pourras les renseigner plus tard dans les paramètres du compte.
+                </div>
+              ) : null}
+            </div>
+          ) : (state.fileFees ?? 0) > 0 ? (
+            <p className="jsub mt-4">Frais lus dans le fichier : <span className="num">{money(state.fileFees ?? 0, currency)}</span>.</p>
+          ) : null}
+
           {state.createCount && state.createCount > 0 ? (
             <form action={applyTradesImport} className="mt-5">
               <input type="hidden" name="account_id" value={state.accountId} />
               <input type="hidden" name="rows" value={state.rowsJson} />
+              {askCommissions ? <input type="hidden" name="total_commissions" value={commTotal} /> : null}
               <Button type="submit">Importer {state.createCount} trade(s)</Button>
             </form>
           ) : (

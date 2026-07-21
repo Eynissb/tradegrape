@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { num, str } from '@/lib/admin/form';
+import { feesForTrade } from '@/lib/journal/commissions';
 import {
   buildManualSnapshot,
   buildRulesSnapshot,
@@ -244,6 +245,45 @@ export async function deleteTrade(formData: FormData) {
 
   revalidatePath(base);
   redirect(base);
+}
+
+/** Paramètres du compte : commission par contrat aller-retour (+ back-fill optionnel). */
+export async function saveAccountCommission(formData: FormData) {
+  const id = str(formData, 'id');
+  if (!id) redirect('/app');
+  const base = `/app/accounts/${id}/settings`;
+
+  const rateRaw = str(formData, 'commission_per_contract');
+  let rate: number | null = null;
+  if (rateRaw !== null) {
+    const n = Number(rateRaw.replace(',', '.'));
+    if (!Number.isFinite(n) || n < 0) backWithError(base, 'Commission invalide (nombre ≥ 0).');
+    rate = n;
+  }
+  const applyExisting = formData.get('apply_existing') === 'on';
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('journal_accounts')
+    .update({ commission_per_contract: rate })
+    .eq('id', id);
+  if (error) backWithError(base, error.message);
+
+  // Recalcule les frais des trades importés (source csv) selon le nouveau taux.
+  if (applyExisting && rate !== null) {
+    const { data: csvTrades } = await supabase
+      .from('trades')
+      .select('id, quantity')
+      .eq('account_id', id)
+      .eq('source', 'csv')
+      .returns<{ id: string; quantity: number | null }[]>();
+    for (const t of csvTrades ?? []) {
+      await supabase.from('trades').update({ fees: feesForTrade(t.quantity, rate) }).eq('id', t.id);
+    }
+  }
+
+  revalidatePath(`/app/accounts/${id}`);
+  redirect(`${base}?saved=1`);
 }
 
 export async function deleteAccount(formData: FormData) {

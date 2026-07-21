@@ -64,6 +64,7 @@ interface AccountRow {
   starting_balance: number;
   status: string;
   rules_snapshot: RulesSnapshot;
+  commission_per_contract: number | null;
 }
 
 interface TradeListRow extends DbTradeRow {
@@ -71,6 +72,7 @@ interface TradeListRow extends DbTradeRow {
   direction: string | null;
   tags: string[];
   notes: string | null;
+  source: string;
 }
 
 export default async function AccountPage({
@@ -108,7 +110,7 @@ export default async function AccountPage({
 
   const { data: account } = await supabase
     .from('journal_accounts')
-    .select('id, label, account_size, starting_balance, status, rules_snapshot')
+    .select('id, label, account_size, starting_balance, status, rules_snapshot, commission_per_contract')
     .eq('id', id)
     .single<AccountRow>();
 
@@ -116,7 +118,7 @@ export default async function AccountPage({
 
   const { data: tradeRows } = await supabase
     .from('trades')
-    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, tags, notes')
+    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, tags, notes, source')
     .eq('account_id', id)
     .order('trade_date', { ascending: false })
     .order('closed_at', { ascending: false })
@@ -225,6 +227,10 @@ export default async function AccountPage({
   const decidedCount = winCount + lossCount;
   const winRate = decidedCount ? Math.round((winCount / decidedCount) * 100) : null;
 
+  // Commissions non renseignées alors qu'il y a des trades importés → P&L surestimé.
+  const importedCount = trades.filter((t) => t.source === 'csv').length;
+  const commissionsMissing = account.commission_per_contract == null && importedCount > 0;
+
   // Analytics (onglet dédié) — recalculées selon la période sélectionnée.
   const preset: PeriodPreset = PERIODS.includes(periodParam as PeriodPreset)
     ? (periodParam as PeriodPreset)
@@ -250,7 +256,10 @@ export default async function AccountPage({
       </nav>
 
       <div className="acct2-top">
-        <h1 className="jh1">{account.label ?? 'Compte'}</h1>
+        <div className="acct2-top-row">
+          <h1 className="jh1">{account.label ?? 'Compte'}</h1>
+          <Link href={`/app/accounts/${account.id}/settings`} className="link-accent">Paramètres</Link>
+        </div>
         <p className="jsub">
           {snap.display?.firmName} · {snap.display?.planName} ·{' '}
           {money(Number(account.account_size), currency)}
@@ -262,6 +271,14 @@ export default async function AccountPage({
       {ev.reasons.length > 0 ? (
         <div className="notice notice-error mt-4">
           {ev.reasons.map((r) => REASON_LABELS[r] ?? r).join(' · ')}
+        </div>
+      ) : null}
+
+      {commissionsMissing ? (
+        <div className="notice notice-warn mt-4">
+          Les commissions ne sont pas prises en compte sur ce compte ({importedCount} trade(s) importé(s)) :
+          le P&L et la progression vers l’objectif sont <strong>surestimés</strong>.{' '}
+          <Link href={`/app/accounts/${account.id}/settings`} className="link-accent">Renseigner les commissions</Link>
         </div>
       ) : null}
 

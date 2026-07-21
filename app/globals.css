@@ -344,6 +344,7 @@ h1, h2, h3 {
  * travail à onglets à droite (Calendrier | Historique, extensible tranche 2/3).
  * -------------------------------------------------------------------------- */
 .acct2-top { margin-bottom: 4px; }
+.acct2-top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
 .acct2 { display: grid; gap: 1.6rem; }
 .acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
@@ -391,6 +392,11 @@ h1, h2, h3 {
  * (voir .acct2-stretch) et la table remplit — surface solide, pas de vide noir. */
 .acct2-hist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
 .acct2-hist-tools { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+
+/* Étape commissions à l'import */
+.jimport-comm { border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.jimport-summary { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: var(--ink2); }
+.jimport-summary b { font-family: var(--font-mono); font-weight: 700; margin-left: 6px; }
 .acct2-hist-table { flex: 1; }
 .acct2-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 24px; text-align: center; color: var(--ink3); }
 
