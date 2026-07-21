@@ -286,6 +286,58 @@ export async function saveAccountCommission(formData: FormData) {
   redirect(`${base}?saved=1`);
 }
 
+/** Suppression groupée d'entrées sélectionnées. RLS + scope compte : jamais hors de ses trades. */
+export async function deleteTradesBulk(formData: FormData) {
+  const accountId = str(formData, 'account_id');
+  const ids = formData.getAll('ids').map((v) => String(v)).filter(Boolean);
+  if (!accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}?view=historique`;
+  if (ids.length === 0) redirect(base);
+
+  const supabase = await createClient();
+  // Vérifie l'appartenance du compte ; la policy RLS « trades owner » borne déjà
+  // la suppression aux trades de l'utilisateur, on scope en plus par compte.
+  const { data: account } = await supabase
+    .from('journal_accounts')
+    .select('id')
+    .eq('id', accountId)
+    .single<{ id: string }>();
+  if (!account) redirect('/app');
+
+  const { error } = await supabase.from('trades').delete().eq('account_id', accountId).in('id', ids);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(base);
+}
+
+/** Supprime un lot d'import entier (annuler un import faux ou en double). */
+export async function deleteImportBatch(formData: FormData) {
+  const accountId = str(formData, 'account_id');
+  const batch = str(formData, 'import_batch');
+  if (!accountId) redirect('/app');
+  const base = `/app/accounts/${accountId}?view=historique`;
+  if (!batch) redirect(base);
+
+  const supabase = await createClient();
+  const { data: account } = await supabase
+    .from('journal_accounts')
+    .select('id')
+    .eq('id', accountId)
+    .single<{ id: string }>();
+  if (!account) redirect('/app');
+
+  const { error } = await supabase
+    .from('trades')
+    .delete()
+    .eq('account_id', accountId)
+    .eq('import_batch', batch);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${accountId}`);
+  redirect(base);
+}
+
 export async function deleteAccount(formData: FormData) {
   const id = str(formData, 'id');
   if (!id) redirect('/app');

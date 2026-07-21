@@ -186,6 +186,7 @@ export default function ImportTradesClient({
             <form action={applyTradesImport} className="mt-5">
               <input type="hidden" name="account_id" value={state.accountId} />
               <input type="hidden" name="rows" value={state.rowsJson} />
+              <input type="hidden" name="platform" value={state.platform} />
               {askCommissions ? <input type="hidden" name="total_commissions" value={commTotal} /> : null}
               <Button type="submit">Importer {state.createCount} trade(s)</Button>
             </form>

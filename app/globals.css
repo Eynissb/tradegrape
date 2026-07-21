@@ -393,6 +393,19 @@ h1, h2, h3 {
 .acct2-hist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
 .acct2-hist-tools { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
 
+/* Historique : lots d'import, filtres, sélection multiple */
+.jhist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
+.jhist-batches { display: flex; flex-direction: column; gap: .2rem; }
+.jhist-batch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem .1rem; border-top: 1px solid var(--border); }
+.jhist-batch:first-child { border-top: 0; }
+.jhist-batch-plat { font-weight: 600; color: var(--ink); }
+.jhist-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
+.jhist-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: rgba(150, 110, 240, .08); }
+.jhist-selcount { font-weight: 600; color: var(--ink); }
+.jhist-cbcol { width: 42px; text-align: center; }
+.jhist-cb { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
+.jhist .table tbody tr.is-selected { background: rgba(150, 110, 240, .1); }
+
 /* Étape commissions à l'import */
 .jimport-comm { border-top: 1px solid var(--border); padding-top: 1.2rem; }
 .jimport-summary { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: var(--ink2); }

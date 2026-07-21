@@ -106,6 +106,8 @@ export async function previewTradesImport(
 export async function applyTradesImport(formData: FormData) {
   const accountId = String(formData.get('account_id') ?? '');
   const rowsJson = String(formData.get('rows') ?? '[]');
+  const platformRaw = String(formData.get('platform') ?? '');
+  const platform = isPlatform(platformRaw) ? platformRaw : null;
   const base = `/app/accounts/${accountId}/import`;
 
   let rows: Record<string, unknown>[];
@@ -150,7 +152,16 @@ export async function applyTradesImport(formData: FormData) {
     importRows.forEach((r) => { r.fees = feesForTrade(r.quantity, rate); });
   }
 
-  const payload = importRows.map((r) => ({ ...r, account_id: accountId, user_id: user.id, source: 'csv' }));
+  // Lot d'import : un identifiant partagé + la plateforme, pour lister/supprimer le lot.
+  const importBatch = crypto.randomUUID();
+  const payload = importRows.map((r) => ({
+    ...r,
+    account_id: accountId,
+    user_id: user.id,
+    source: 'csv',
+    import_batch: importBatch,
+    import_platform: platform,
+  }));
   const { error } = await supabase.from('trades').insert(payload);
   if (error) redirect(`${base}?error=${encodeURIComponent(error.message)}`);
 

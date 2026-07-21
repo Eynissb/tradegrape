@@ -36,6 +36,7 @@ import EntryForms from './EntryForms';
 import MonthCalendar from './MonthCalendar';
 import AccountViewTabs from './AccountViewTabs';
 import AnalyticsPanel from './AnalyticsPanel';
+import HistoryPanel, { type HistoryRow } from './HistoryPanel';
 
 type AccountView = 'calendrier' | 'analytics' | 'historique';
 
@@ -73,6 +74,8 @@ interface TradeListRow extends DbTradeRow {
   tags: string[];
   notes: string | null;
   source: string;
+  import_batch: string | null;
+  import_platform: string | null;
 }
 
 export default async function AccountPage({
@@ -118,7 +121,7 @@ export default async function AccountPage({
 
   const { data: tradeRows } = await supabase
     .from('trades')
-    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, tags, notes, source')
+    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, tags, notes, source, import_batch, import_platform')
     .eq('account_id', id)
     .order('trade_date', { ascending: false })
     .order('closed_at', { ascending: false })
@@ -215,6 +218,20 @@ export default async function AccountPage({
 
   // Dernières entrées, montrées sous le calendrier (vérifier sans changer d'onglet).
   const recentTrades = trades.slice(0, 8);
+
+  // Lignes sérialisables pour le panneau d'historique (client : sélection + filtres).
+  const historyRows: HistoryRow[] = trades.map((t) => ({
+    id: t.id,
+    trade_date: t.trade_date,
+    symbol: t.symbol,
+    direction: t.direction,
+    pnl: Number(t.pnl),
+    fees: t.fees === null ? 0 : Number(t.fees),
+    tags: t.tags,
+    source: t.source,
+    import_batch: t.import_batch,
+    import_platform: t.import_platform,
+  }));
 
   // Totaux tous comptes confondus — en-tête de l'onglet Historique.
   let winCount = 0;
@@ -443,68 +460,8 @@ export default async function AccountPage({
                 </div>
               </div>
 
-              {/* Table — grandit pour occuper la colonne, surface solide (pas d'aplat noir) */}
-              <div className="card acct2-hist-table">
-                {trades.length === 0 ? (
-                  <div className="acct2-empty">Aucune entrée. Commence par un P&L rapide dans la console.</div>
-                ) : (
-                  <div className="table-wrap">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Type</th>
-                          <th className="num">P&L</th>
-                          <th>Tags</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {trades.map((t) => {
-                          const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                          const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
-                          return (
-                            <tr key={t.id}>
-                              <td data-label="Date" className="num">
-                                <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
-                              </td>
-                              <td data-label="Type">
-                                <Link href={editHref} className="jrow-link">
-                                  {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                                </Link>
-                              </td>
-                              <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                                <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
-                                  {signed(pnlNet, currency)}
-                                </Link>
-                              </td>
-                              <td data-label="Tags">
-                                <div className="jchips">
-                                  {t.tags.map((tag) => (
-                                    <span key={tag} className="jchip">{tagLabel(tag)}</span>
-                                  ))}
-                                </div>
-                              </td>
-                              <td className="admin-row-actions">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
-                                    Éditer
-                                  </Link>
-                                  <form action={deleteTrade}>
-                                    <input type="hidden" name="id" value={t.id} />
-                                    <input type="hidden" name="account_id" value={account.id} />
-                                    <Button type="submit" variant="ghost" size="sm" iconOnly icon={Trash2} className="btn-danger-ghost" aria-label="Supprimer l’entrée" />
-                                  </form>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              {/* Historique filtrable + sélection multiple + suppression par lot */}
+              <HistoryPanel trades={historyRows} accountId={account.id} currency={currency} />
             </div>
           ) : view === 'analytics' && analytics ? (
             <AnalyticsPanel
