@@ -1,24 +1,38 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
+import { FileUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import { cn } from '@/lib/cn';
 import { applyImport, previewImport, type PreviewState } from './import-actions';
 
 const INITIAL: PreviewState = { ok: false };
 
 export default function ImportClient({ planId }: { planId: string }) {
   const [state, formAction, pending] = useActionState(previewImport, INITIAL);
+  const [fileName, setFileName] = useState('');
 
   return (
     <div className="flex flex-col gap-6">
       {/* Étape 1 — choix du fichier */}
       <form action={formAction} className="card">
         <input type="hidden" name="plan_id" value={planId} />
-        <div className="field">
-          <label className="label" htmlFor="file">Fichier CSV</label>
-          <input className="input" id="file" name="file" type="file" accept=".csv,text/csv" required />
-        </div>
+        <span className="label" style={{ display: 'block', marginBottom: '.45rem' }}>Fichier CSV</span>
+        <label className={cn('dropzone', fileName && 'has-file')}>
+          <input
+            className="dropzone-input"
+            name="file"
+            type="file"
+            accept=".csv,text/csv"
+            required
+            onChange={(e) => setFileName(e.target.files?.[0]?.name ?? '')}
+          />
+          <span className="icon-tile" aria-hidden="true"><FileUp /></span>
+          <span className="dropzone-label">
+            {fileName || 'Choisir un fichier CSV ou glisser-déposer'}
+          </span>
+        </label>
         <Button type="submit" loading={pending} className="mt-4">
           {pending ? 'Analyse…' : 'Analyser le fichier'}
         </Button>

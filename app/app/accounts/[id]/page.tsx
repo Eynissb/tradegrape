@@ -361,12 +361,16 @@ export default async function AccountPage({
                           </div>
                         </td>
                         <td className="admin-row-actions">
-                          <Link href={editHref} className="link-accent">Éditer</Link>
-                          <form action={deleteTrade} className="mt-1">
-                            <input type="hidden" name="id" value={t.id} />
-                            <input type="hidden" name="account_id" value={account.id} />
-                            <button type="submit" className="jlink-danger">Supprimer</button>
-                          </form>
+                          <div className="flex items-center justify-end gap-2">
+                            <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
+                              Éditer
+                            </Link>
+                            <form action={deleteTrade}>
+                              <input type="hidden" name="id" value={t.id} />
+                              <input type="hidden" name="account_id" value={account.id} />
+                              <Button type="submit" variant="danger" size="sm">Supprimer</Button>
+                            </form>
+                          </div>
                         </td>
                       </tr>
                     );

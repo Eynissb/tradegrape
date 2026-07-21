@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { RulesSnapshot } from '@/lib/journal/snapshot';
 import EntryForms, { type TradeValues } from '../../EntryForms';
 import { deleteTrade } from '@/app/app/actions';
+import Button, { buttonClasses } from '@/components/ui/Button';
 
 export const metadata = { title: 'Modifier une entrée — Tradegrape' };
 
@@ -60,15 +61,13 @@ export default async function EditTrade({
       </div>
 
       <div className="mt-6 flex items-center justify-between">
-        <Link href={`/app/accounts/${id}`} className="btn-ghost">
+        <Link href={`/app/accounts/${id}`} className={buttonClasses({ variant: 'ghost' })}>
           Annuler
         </Link>
         <form action={deleteTrade}>
           <input type="hidden" name="id" value={trade.id} />
           <input type="hidden" name="account_id" value={id} />
-          <button type="submit" className="jlink-danger">
-            Supprimer cette entrée
-          </button>
+          <Button type="submit" variant="danger" size="sm">Supprimer cette entrée</Button>
         </form>
       </div>
     </main>

@@ -740,3 +740,22 @@ th[aria-sort="ascending"] .th-sort .lucide, th[aria-sort="descending"] .th-sort 
 .gauge-ok .gauge-label .lucide { color: var(--ok); }
 .gauge-warn .gauge-label .lucide { color: var(--warn); }
 .gauge-danger .gauge-label .lucide { color: var(--danger); }
+
+/* =====================================================================
+   DROPZONE (upload de fichier — remplace l'input file natif)
+   ===================================================================== */
+.dropzone {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: .6rem;
+  text-align: center; cursor: pointer;
+  border: 1px dashed var(--border-strong); border-radius: var(--r-lg);
+  background: rgba(11, 8, 24, .4); padding: 1.6rem 1.2rem;
+  color: var(--text-2); font-size: .9rem;
+  transition: border-color var(--transition), background var(--transition);
+}
+.dropzone:hover, .dropzone:focus-within { border-color: var(--fuchsia); background: rgba(150, 110, 240, .06); }
+.dropzone.has-file { border-style: solid; border-color: var(--ok-border); }
+.dropzone-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.dropzone-input:focus-visible + .icon-tile { box-shadow: var(--focus-ring); }
+.dropzone-label { color: var(--text-1); font-weight: 500; word-break: break-all; }
+.dropzone .icon-tile { width: 44px; height: 44px; margin-bottom: 0; }
+.dropzone .icon-tile .lucide { width: 20px; height: 20px; }

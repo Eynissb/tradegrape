@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonClasses } from "@/components/ui/Button";
 
 export default function Home() {
   return (
@@ -8,10 +9,13 @@ export default function Home() {
       <div className="glow glow-b" style={{ bottom: "-12%", right: "-8%" }} />
       <div className="glow glow-c" style={{ top: "30%", left: "40%" }} />
 
-      <section className="glass relative z-10 w-full max-w-xl px-10 py-12 text-center">
+      <section
+        className="lg-glass relative z-10 w-full max-w-xl px-10 py-12 text-center"
+        style={{ borderRadius: "var(--r-xl)" }}
+      >
         <span
           className="text-xs font-semibold uppercase tracking-[0.2em]"
-          style={{ color: "var(--ink3)" }}
+          style={{ color: "var(--text-3)" }}
         >
           Comparateur · Journal · Futures
         </span>
@@ -20,15 +24,15 @@ export default function Home() {
           <span className="grad-text">Tradegrape</span>
         </h1>
 
-        <p className="mt-5 text-lg" style={{ color: "var(--ink2)" }}>
+        <p className="mt-5 text-lg" style={{ color: "var(--text-2)" }}>
           « Ne choisis pas ta prop firm. Teste-la d'abord. »
         </p>
 
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/signup" className="btn-grad">
+          <Link href="/signup" className={buttonClasses({ size: "lg" })}>
             Ouvrir mon journal gratuit
           </Link>
-          <Link href="/login" className="btn-ghost">
+          <Link href="/login" className={buttonClasses({ variant: "secondary", size: "lg" })}>
             Se connecter
           </Link>
         </div>

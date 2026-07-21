@@ -43,27 +43,27 @@ export default async function RequestedFirmsPage() {
           <span className="num">0003_requested_firms.sql</span>.
         </div>
       ) : rows.length === 0 ? (
-        <div className="glass admin-empty mt-4">
+        <div className="card mt-4" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
           Aucune demande pour l’instant.
         </div>
       ) : (
-        <div className="admin-table-wrap mt-4">
-          <table className="admin-table">
+        <div className="table-wrap mt-4">
+          <table className="table">
             <thead>
               <tr>
                 <th>Firm</th>
-                <th>Demandes</th>
-                <th>Première</th>
-                <th>Dernière</th>
+                <th className="num">Demandes</th>
+                <th className="num">Première</th>
+                <th className="num">Dernière</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
-                  <td className="admin-strong">{r.name}</td>
-                  <td className="num">{r.request_count}</td>
-                  <td className="num">{fmtDate(r.first_requested_at)}</td>
-                  <td className="num">{fmtDate(r.last_requested_at)}</td>
+                  <td data-label="Firm"><span className="cell-firm">{r.name}</span></td>
+                  <td data-label="Demandes" className="num">{r.request_count}</td>
+                  <td data-label="Première" className="num">{fmtDate(r.first_requested_at)}</td>
+                  <td data-label="Dernière" className="num">{fmtDate(r.last_requested_at)}</td>
                 </tr>
               ))}
             </tbody>
