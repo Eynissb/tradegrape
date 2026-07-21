@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Checkbox from '@/components/ui/Checkbox';
+import UISelect from '@/components/ui/Select';
 import { saveOffer } from './actions';
 
 export interface OfferValues {
@@ -97,17 +98,15 @@ function Select({
   allowEmpty?: boolean;
 }) {
   return (
-    <div className="field">
-      <label className="label" htmlFor={name}>{label}</label>
-      <select className="input" id={name} name={name} defaultValue={value ?? (allowEmpty ? '' : options[0])}>
-        {allowEmpty ? <option value="">—</option> : null}
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </div>
+    <UISelect
+      name={name}
+      label={label}
+      defaultValue={value ?? (allowEmpty ? '' : options[0])}
+      options={[
+        ...(allowEmpty ? [{ value: '', label: '—' }] : []),
+        ...options.map((o) => ({ value: o, label: o })),
+      ]}
+    />
   );
 }
 

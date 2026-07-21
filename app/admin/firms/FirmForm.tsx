@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Checkbox from '@/components/ui/Checkbox';
+import Select from '@/components/ui/Select';
 import { saveFirm } from './actions';
 
 /** Sous-ensemble des colonnes firms éditées dans ce formulaire. */
@@ -110,19 +111,16 @@ export default function FirmForm({ firm }: { firm?: FirmValues }) {
       <Section title="Identité">
         <Text name="name" label="Nom" value={firm?.name} required placeholder="TopStep" />
         <Text name="slug" label="Slug" value={firm?.slug} required placeholder="topstep" />
-        <div className="field">
-          <label className="label" htmlFor="market_type">Marché</label>
-          <select
-            className="input"
-            id="market_type"
-            name="market_type"
-            defaultValue={firm?.market_type ?? 'futures'}
-          >
-            <option value="futures">futures</option>
-            <option value="forex">forex</option>
-            <option value="crypto">crypto</option>
-          </select>
-        </div>
+        <Select
+          name="market_type"
+          label="Marché"
+          defaultValue={firm?.market_type ?? 'futures'}
+          options={[
+            { value: 'futures', label: 'Futures' },
+            { value: 'forex', label: 'Forex' },
+            { value: 'crypto', label: 'Crypto' },
+          ]}
+        />
         <Text name="founded_year" label="Année de création" value={firm?.founded_year} type="number" />
         <Text name="country" label="Pays" value={firm?.country} placeholder="US" />
         <Text name="hq_city" label="Ville (siège)" value={firm?.hq_city} placeholder="Chicago" />

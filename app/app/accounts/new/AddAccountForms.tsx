@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createAccount, createManualAccount } from '@/app/app/actions';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import Tabs from '@/components/ui/Tabs';
 
 export interface OfferOption {
@@ -25,17 +26,16 @@ function suggestLabel(o: OfferOption): string {
 export default function AddAccountForms({ offers }: { offers: OfferOption[] }) {
   const [path, setPath] = useState<'catalog' | 'manual'>('catalog');
   const [labelValue, setLabelValue] = useState('');
+  const [offerId, setOfferId] = useState('');
   const catalog = path === 'catalog';
 
-  const byFirm = new Map<string, OfferOption[]>();
-  for (const o of offers) {
-    const firm = o.plan?.firm?.name ?? 'Autres';
-    const list = byFirm.get(firm) ?? [];
-    list.push(o);
-    byFirm.set(firm, list);
-  }
+  const offerOptions = offers.map((o) => ({
+    value: o.id,
+    label: `${o.plan?.firm?.name ?? 'Autres'} · ${o.plan?.name} · ${Number(o.account_size).toLocaleString('fr-FR')} ${o.currency ?? 'USD'} · ${o.drawdown_type}`,
+  }));
 
   function onOfferChange(id: string) {
+    setOfferId(id);
     const o = offers.find((x) => x.id === id);
     if (o) setLabelValue(suggestLabel(o));
   }
@@ -64,29 +64,15 @@ export default function AddAccountForms({ offers }: { offers: OfferOption[] }) {
               Recommandé : les règles (drawdown, objectif, cohérence, payout) sont
               pré-remplies depuis l’offre.
             </p>
-            <div className="field">
-              <label className="label" htmlFor="offer_id">Offre</label>
-              <select
-                className="input"
-                id="offer_id"
-                name="offer_id"
-                required
-                defaultValue=""
-                onChange={(e) => onOfferChange(e.target.value)}
-              >
-                <option value="" disabled>Choisis une offre…</option>
-                {[...byFirm.entries()].map(([firm, list]) => (
-                  <optgroup key={firm} label={firm}>
-                    {list.map((o) => (
-                      <option key={o.id} value={o.id}>
-                        {o.plan?.name} · {Number(o.account_size).toLocaleString('fr-FR')}{' '}
-                        {o.currency ?? 'USD'} · {o.drawdown_type}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
+            <Select
+              name="offer_id"
+              label="Offre"
+              required
+              placeholder="Choisis une offre…"
+              value={offerId}
+              onChange={onOfferChange}
+              options={offerOptions}
+            />
             <Input
               id="label"
               name="label"
@@ -115,14 +101,16 @@ export default function AddAccountForms({ offers }: { offers: OfferOption[] }) {
             <Input id="label" name="label" label="Nom du compte" required placeholder="Ex : Alpha 50K — Éval" />
             <Input id="account_size" name="account_size" label="Taille du compte" type="number" step="0.01" required placeholder="50000" mono />
             <Input id="currency" name="currency" label="Devise" defaultValue="USD" />
-            <div className="field">
-              <label className="label" htmlFor="drawdown_type">Type de drawdown *</label>
-              <select className="input" id="drawdown_type" name="drawdown_type" defaultValue="EOD">
-                <option value="EOD">EOD</option>
-                <option value="TRAIL">TRAIL</option>
-                <option value="STATIC">STATIC</option>
-              </select>
-            </div>
+            <Select
+              name="drawdown_type"
+              label="Type de drawdown *"
+              defaultValue="EOD"
+              options={[
+                { value: 'EOD', label: 'EOD' },
+                { value: 'TRAIL', label: 'TRAIL' },
+                { value: 'STATIC', label: 'STATIC' },
+              ]}
+            />
             <Input id="drawdown_amount" name="drawdown_amount" label="Montant drawdown *" type="number" step="0.01" required placeholder="2000" mono />
             <Input id="profit_target" name="profit_target" label="Objectif de profit" type="number" step="0.01" placeholder="3000" mono />
             <Input id="daily_loss_limit" name="daily_loss_limit" label="Perte journalière max" type="number" step="0.01" placeholder="1000" mono />

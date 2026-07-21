@@ -5,6 +5,10 @@ import { addTrade, updateTrade } from '@/app/app/actions';
 import { TAG_FAMILIES } from '@/lib/journal/tags';
 import Button from '@/components/ui/Button';
 import DatePicker from '@/components/ui/DatePicker';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Select from '@/components/ui/Select';
+import Tabs from '@/components/ui/Tabs';
 
 export interface TradeValues {
   id: string;
@@ -44,21 +48,16 @@ export default function EntryForms({
 
   return (
     <div className="jentry card">
-      <div className="jentry-tabs">
-        <button
-          type="button"
-          className={mode === 'daily' ? 'is-active' : ''}
-          onClick={() => setMode('daily')}
-        >
-          P&L journalier
-        </button>
-        <button
-          type="button"
-          className={detailed ? 'is-active' : ''}
-          onClick={() => setMode('detailed')}
-        >
-          Trade détaillé
-        </button>
+      <div className="mb-4">
+        <Tabs
+          tabs={[
+            { id: 'daily', label: 'P&L journalier' },
+            { id: 'detailed', label: 'Trade détaillé' },
+          ]}
+          active={mode}
+          onChange={(id) => setMode(id as 'daily' | 'detailed')}
+          ariaLabel="Type de saisie"
+        />
       </div>
 
       <form action={editing ? updateTrade : addTrade} className="jentry-form">
@@ -78,52 +77,37 @@ export default function EntryForms({
 
           {detailed ? (
             <>
-              <div className="field">
-                <label htmlFor="symbol">Symbole</label>
-                <input className="input" id="symbol" name="symbol" defaultValue={v(trade?.symbol)} placeholder="ES, NQ, MES…" />
-              </div>
-              <div className="field">
-                <label htmlFor="direction">Sens</label>
-                <select className="input" id="direction" name="direction" defaultValue={v(trade?.direction) ?? ''}>
-                  <option value="">—</option>
-                  <option value="long">Long</option>
-                  <option value="short">Short</option>
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="quantity">Quantité</label>
-                <input className="input" id="quantity" name="quantity" type="number" step="1" defaultValue={v(trade?.quantity)} />
-              </div>
-              <div className="field">
-                <label htmlFor="entry_price">Entrée</label>
-                <input className="input" id="entry_price" name="entry_price" type="number" step="0.000001" defaultValue={v(trade?.entry_price)} />
-              </div>
-              <div className="field">
-                <label htmlFor="exit_price">Sortie</label>
-                <input className="input" id="exit_price" name="exit_price" type="number" step="0.000001" defaultValue={v(trade?.exit_price)} />
-              </div>
+              <Input id="symbol" name="symbol" label="Symbole" defaultValue={v(trade?.symbol)} placeholder="ES, NQ, MES…" />
+              <Select
+                name="direction"
+                label="Sens"
+                defaultValue={v(trade?.direction) ?? ''}
+                options={[
+                  { value: '', label: '—' },
+                  { value: 'long', label: 'Long' },
+                  { value: 'short', label: 'Short' },
+                ]}
+              />
+              <Input id="quantity" name="quantity" label="Quantité" type="number" step="1" defaultValue={v(trade?.quantity)} mono />
+              <Input id="entry_price" name="entry_price" label="Entrée" type="number" step="0.000001" defaultValue={v(trade?.entry_price)} mono />
+              <Input id="exit_price" name="exit_price" label="Sortie" type="number" step="0.000001" defaultValue={v(trade?.exit_price)} mono />
             </>
           ) : null}
 
-          <div className="field">
-            <label htmlFor="pnl">P&L {detailed ? 'net' : 'du jour'} ({currency})</label>
-            <input
-              className="input"
-              id="pnl"
-              name="pnl"
-              type="number"
-              step="0.01"
-              required
-              defaultValue={v(trade?.pnl)}
-              placeholder="ex : 420 ou -180"
-            />
-          </div>
+          <Input
+            id="pnl"
+            name="pnl"
+            label={`P&L ${detailed ? 'net' : 'du jour'} (${currency})`}
+            type="number"
+            step="0.01"
+            required
+            defaultValue={v(trade?.pnl)}
+            placeholder="ex : 420 ou -180"
+            mono
+          />
 
           {detailed ? (
-            <div className="field">
-              <label htmlFor="fees">Frais ({currency})</label>
-              <input className="input" id="fees" name="fees" type="number" step="0.01" defaultValue={v(trade?.fees)} />
-            </div>
+            <Input id="fees" name="fees" label={`Frais (${currency})`} type="number" step="0.01" defaultValue={v(trade?.fees)} mono />
           ) : null}
         </div>
 
@@ -153,10 +137,7 @@ export default function EntryForms({
           ))}
         </div>
 
-        <div className="field">
-          <label htmlFor="notes">Notes</label>
-          <textarea className="input" id="notes" name="notes" rows={2} defaultValue={v(trade?.notes)} placeholder="Comment s’est passée la session ?" />
-        </div>
+        <Textarea id="notes" name="notes" label="Notes" rows={2} defaultValue={v(trade?.notes)} placeholder="Comment s’est passée la session ?" />
 
         <Button type="submit">
           {editing ? 'Enregistrer les modifications' : 'Enregistrer l’entrée'}

@@ -14,8 +14,11 @@ export interface SelectOption {
 export interface SelectProps {
   label?: string;
   options: SelectOption[];
-  value: string | null;
-  onChange: (value: string) => void;
+  /** Contrôlé : fournir value + onChange. */
+  value?: string | null;
+  onChange?: (value: string) => void;
+  /** Non contrôlé (formulaires server action) : valeur initiale. */
+  defaultValue?: string;
   placeholder?: string;
   disabled?: boolean;
   error?: string;
@@ -31,6 +34,7 @@ export default function Select({
   options,
   value,
   onChange,
+  defaultValue,
   placeholder = 'Choisir…',
   disabled,
   error,
@@ -38,11 +42,20 @@ export default function Select({
   required,
   name,
 }: SelectProps) {
+  const controlled = value !== undefined;
+  const [internal, setInternal] = useState<string | null>(defaultValue ?? null);
+  const current = controlled ? value ?? null : internal;
+
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
-  const selected = options.find((o) => o.value === value) ?? null;
+  const selected = options.find((o) => o.value === current) ?? null;
+
+  function setValue(v: string) {
+    if (controlled) onChange?.(v);
+    else setInternal(v);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -56,7 +69,7 @@ export default function Select({
   function commit(i: number) {
     const opt = options[i];
     if (opt) {
-      onChange(opt.value);
+      setValue(opt.value);
       setOpen(false);
     }
   }
@@ -87,7 +100,7 @@ export default function Select({
           {required ? <span className="req"> *</span> : null}
         </span>
       ) : null}
-      {name ? <input type="hidden" name={name} value={value ?? ''} /> : null}
+      {name ? <input type="hidden" name={name} value={current ?? ''} /> : null}
       <div className={cn('select', open && 'is-open')} ref={rootRef} onKeyDown={onKeyDown}>
         <button
           type="button"
@@ -111,7 +124,7 @@ export default function Select({
               <li
                 key={o.value}
                 role="option"
-                aria-selected={o.value === value}
+                aria-selected={o.value === current}
                 className={cn('select-option', i === active && 'is-active')}
                 onMouseEnter={() => setActive(i)}
                 onClick={() => commit(i)}

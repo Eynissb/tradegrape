@@ -7,6 +7,7 @@ import { duplicateOffers, toggleOfferPublish } from '@/app/admin/offers/actions'
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 
 export const metadata = { title: 'Éditer un plan — Admin Tradegrape' };
 
@@ -182,16 +183,15 @@ export default async function EditPlan({
           </p>
           <form action={duplicateOffers} className="admin-dup-form">
             <input type="hidden" name="plan_id" value={plan.id} />
-            <div className="field">
-              <label className="label" htmlFor="template_id">Offre modèle</label>
-              <select className="input" id="template_id" name="template_id" defaultValue={offers[0].id}>
-                {offers.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.account_size.toLocaleString('fr-FR')} · {o.drawdown_type}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              name="template_id"
+              label="Offre modèle"
+              defaultValue={offers[0].id}
+              options={offers.map((o) => ({
+                value: o.id,
+                label: `${o.account_size.toLocaleString('fr-FR')} · ${o.drawdown_type}`,
+              }))}
+            />
             <Input id="sizes" name="sizes" label="Tailles cibles (séparées par virgule)" placeholder="25000, 50000, 100000, 150000" />
             <Button type="submit">Générer</Button>
           </form>

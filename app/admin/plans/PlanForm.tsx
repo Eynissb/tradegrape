@@ -3,6 +3,7 @@ import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Checkbox from '@/components/ui/Checkbox';
+import Select from '@/components/ui/Select';
 import { savePlan } from './actions';
 
 export interface PlanValues {
@@ -46,13 +47,15 @@ export default function PlanForm({
         <div className="admin-grid">
           <Input id="name" name="name" label="Nom" required defaultValue={v(plan?.name)} placeholder="Pro" />
           <Input id="slug" name="slug" label="Slug" required defaultValue={v(plan?.slug)} placeholder="pro" />
-          <div className="field">
-            <label className="label" htmlFor="account_kind">Type de compte</label>
-            <select className="input" id="account_kind" name="account_kind" defaultValue={plan?.account_kind ?? 'evaluation'}>
-              <option value="evaluation">evaluation</option>
-              <option value="direct">direct</option>
-            </select>
-          </div>
+          <Select
+            name="account_kind"
+            label="Type de compte"
+            defaultValue={plan?.account_kind ?? 'evaluation'}
+            options={[
+              { value: 'evaluation', label: 'Évaluation' },
+              { value: 'direct', label: 'Direct' },
+            ]}
+          />
           <Input id="rating" name="rating" label="Note (0–10)" type="number" step="0.1" defaultValue={v(plan?.rating)} placeholder="9.0" />
           <Input id="sort_order" name="sort_order" label="Ordre de tri" type="number" defaultValue={v(plan?.sort_order)} />
         </div>
