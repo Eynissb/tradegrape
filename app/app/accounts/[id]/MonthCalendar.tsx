@@ -89,7 +89,7 @@ export default function MonthCalendar({
           {WEEKDAYS.map((w) => (
             <div key={w} className="jcal-wd">{w}</div>
           ))}
-          <div className="jcal-wd jcal-wtot">Semaine</div>
+          <div className="jcal-wd jcal-wtot">Sem.</div>
         </div>
 
         {view.weeks.map((week, wi) => (

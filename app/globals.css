@@ -329,6 +329,20 @@ h1, h2, h3 {
 
 .jwrap { max-width: 1080px; margin: 0 auto; padding: 32px 24px 72px; position: relative; z-index: 1; }
 .jwrap-narrow { max-width: 620px; }
+.jwrap-wide { max-width: 1320px; }
+
+/* Page compte : jauges + payout en colonne latérale au-delà de 1280px */
+.acct-grid { display: grid; gap: 1.6rem; }
+.acct-side { display: flex; flex-direction: column; gap: 1.4rem; }
+@media (min-width: 1280px) {
+  .acct-grid { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  .acct-main { grid-column: 1; grid-row: 1; min-width: 0; }
+  .acct-side { grid-column: 2; grid-row: 1; position: sticky; top: 84px; }
+}
+.acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
+.acct-gauges { display: flex; flex-direction: column; gap: 1.15rem; }
+.acct-days { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); }
+.acct-days .num { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; }
 .jhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 6px; }
 .jhead-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .jh1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: -0.6px; }
@@ -408,7 +422,7 @@ h1, h2, h3 {
 .jcal-nav:hover { color: var(--ink); border-color: rgba(192, 75, 255, 0.4); }
 
 .jcal-grid { display: flex; flex-direction: column; gap: 6px; }
-.jcal-row { display: grid; grid-template-columns: repeat(7, 1fr) 0.72fr; gap: 6px; }
+.jcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 64px; gap: 6px; }
 .jcal-wd { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink3); text-align: center; padding-bottom: 2px; }
 .jcal-wtot { text-align: right; }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { addTrade, updateTrade } from '@/app/app/actions';
 import { TAG_FAMILIES } from '@/lib/journal/tags';
+import Button from '@/components/ui/Button';
 
 export interface TradeValues {
   id: string;
@@ -40,7 +41,7 @@ export default function EntryForms({
   const detailed = mode === 'detailed';
 
   return (
-    <div className="jentry glass">
+    <div className="jentry card">
       <div className="jentry-tabs">
         <button
           type="button"
@@ -158,9 +159,9 @@ export default function EntryForms({
           <textarea className="input" id="notes" name="notes" rows={2} defaultValue={v(trade?.notes)} placeholder="Comment s’est passée la session ?" />
         </div>
 
-        <button type="submit" className="btn-grad">
+        <Button type="submit">
           {editing ? 'Enregistrer les modifications' : 'Enregistrer l’entrée'}
-        </button>
+        </Button>
       </form>
     </div>
   );
