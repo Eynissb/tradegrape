@@ -265,7 +265,7 @@ export default async function AccountPage({
       : null;
 
   return (
-    <main className="jwrap jwrap-acct">
+    <main className="jwrap jwrap-acct dash">
       <nav className="jcrumb">
         <Link href="/app" className="link-accent">
           Mes comptes
@@ -374,9 +374,10 @@ export default async function AccountPage({
                 </span>
               </div>
             </div>
+          </div>
 
-            {/* Payout — même carte, séparé par un filet */}
-            <div className="acct2-payout">
+          {/* Payout — bloc en dégradé, notre signature produit */}
+          <div className="card card-grad acct2-payout">
               <div className="jpayout-head">
                 <h2 className="acct-rules-title" style={{ marginBottom: 0 }}>Retrait — compte financé</h2>
                 <Badge variant={payout.eligible ? 'ok' : 'warn'} icon={payout.eligible ? CircleCheck : TriangleAlert}>
@@ -420,9 +421,8 @@ export default async function AccountPage({
                 </div>
               ) : null}
             </div>
-          </div>
 
-          {/* Saisie — toujours à l'écran, sous le cockpit (repliée par défaut) */}
+          {/* Saisie — toujours à l'écran (repliée par défaut) */}
           <EntryForms accountId={account.id} currency={currency} today={today} title="Ajouter une entrée" />
         </aside>
 
