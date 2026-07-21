@@ -6,6 +6,8 @@ export { default as Textarea } from './Textarea';
 export type { TextareaProps } from './Textarea';
 export { default as Select } from './Select';
 export type { SelectProps, SelectOption } from './Select';
+export { default as DatePicker } from './DatePicker';
+export type { DatePickerProps } from './DatePicker';
 export { default as Checkbox } from './Checkbox';
 export type { CheckboxProps } from './Checkbox';
 export { Radio, RadioGroup } from './Radio';

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { addTrade, updateTrade } from '@/app/app/actions';
 import { TAG_FAMILIES } from '@/lib/journal/tags';
 import Button from '@/components/ui/Button';
+import DatePicker from '@/components/ui/DatePicker';
 
 export interface TradeValues {
   id: string;
@@ -38,6 +39,7 @@ export default function EntryForms({
   const [mode, setMode] = useState<'daily' | 'detailed'>(
     trade && trade.symbol ? 'detailed' : 'daily',
   );
+  const [dateValue, setDateValue] = useState<string>(trade?.trade_date ?? today);
   const detailed = mode === 'detailed';
 
   return (
@@ -65,17 +67,14 @@ export default function EntryForms({
         {editing ? <input type="hidden" name="id" value={trade!.id} /> : null}
 
         <div className="jentry-grid">
-          <div className="field">
-            <label htmlFor="trade_date">Date</label>
-            <input
-              className="input"
-              id="trade_date"
-              name="trade_date"
-              type="date"
-              defaultValue={v(trade?.trade_date) ?? today}
-              required
-            />
-          </div>
+          <DatePicker
+            id="trade_date"
+            name="trade_date"
+            label="Date"
+            required
+            value={dateValue}
+            onChange={setDateValue}
+          />
 
           {detailed ? (
             <>
