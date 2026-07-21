@@ -12,6 +12,7 @@ import {
 import {
   CircleCheck,
   CircleX,
+  Settings,
   Shield,
   Target,
   Trash2,
@@ -30,7 +31,7 @@ import {
 import Badge from '@/components/ui/Badge';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Progress, { type Tone } from '@/components/ui/Progress';
-import { deleteAccount, deleteTrade } from '@/app/app/actions';
+import { deleteTrade } from '@/app/app/actions';
 import { buildAnalytics, resolveRange, type AnalyticsTrade, type PeriodPreset } from '@/lib/journal/analytics';
 import EntryForms from './EntryForms';
 import MonthCalendar from './MonthCalendar';
@@ -275,7 +276,9 @@ export default async function AccountPage({
       <div className="acct2-top">
         <div className="acct2-top-row">
           <h1 className="jh1">{account.label ?? 'Compte'}</h1>
-          <Link href={`/app/accounts/${account.id}/settings`} className="link-accent">Paramètres</Link>
+          <Link href={`/app/accounts/${account.id}/settings`} className="jsettings-link">
+            <Settings aria-hidden="true" /> Réglages du compte
+          </Link>
         </div>
         <p className="jsub">
           {snap.display?.firmName} · {snap.display?.planName} ·{' '}
@@ -295,7 +298,7 @@ export default async function AccountPage({
         <div className="notice notice-warn mt-4">
           Les commissions ne sont pas prises en compte sur ce compte ({importedCount} trade(s) importé(s)) :
           le P&L et la progression vers l’objectif sont <strong>surestimés</strong>.{' '}
-          <Link href={`/app/accounts/${account.id}/settings`} className="link-accent">Renseigner les commissions</Link>
+          <Link href={`/app/accounts/${account.id}/settings#commissions`} className="link-accent">Renseigner les commissions</Link>
         </div>
       ) : null}
 
@@ -653,12 +656,6 @@ export default async function AccountPage({
           )}
         </section>
       </div>
-
-      <form action={deleteAccount} className="admin-danger mt-10">
-        <input type="hidden" name="id" value={account.id} />
-        <span>Supprimer ce compte et tout son historique.</span>
-        <Button type="submit" variant="danger" size="sm">Supprimer le compte</Button>
-      </form>
     </main>
   );
 }

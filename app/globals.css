@@ -345,6 +345,10 @@ h1, h2, h3 {
  * -------------------------------------------------------------------------- */
 .acct2-top { margin-bottom: 4px; }
 .acct2-top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.jsettings-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--ink2); text-decoration: none; white-space: nowrap; transition: color .15s; }
+.jsettings-link:hover { color: var(--ink); }
+.jsettings-link .lucide { width: 16px; height: 16px; }
+.jdanger { border-color: rgba(255, 77, 94, .3); }
 .acct2 { display: grid; gap: 1.6rem; }
 .acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }

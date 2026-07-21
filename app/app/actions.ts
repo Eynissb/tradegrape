@@ -9,10 +9,12 @@ import {
   buildManualSnapshot,
   buildRulesSnapshot,
   type OfferRuleRow,
+  type RulesSnapshot,
 } from '@/lib/journal/snapshot';
 import type { DrawdownType, OfferRules } from '@/lib/rules/types';
 
 const DRAWDOWN_TYPES: DrawdownType[] = ['EOD', 'TRAIL', 'STATIC'];
+const JOURNAL_STATUSES = ['evaluation', 'funded', 'passed', 'failed', 'archived'] as const;
 
 const OFFER_COLS =
   'account_size, currency, drawdown_type, drawdown_amount, profit_target, daily_loss_limit, consistency_pct, min_trading_days, funded_consistency_pct, payout_buffer, payout_min_amount, payout_min_days, payout_daily_threshold, profit_split, payout_model, plan_id';
@@ -247,7 +249,73 @@ export async function deleteTrade(formData: FormData) {
   redirect(base);
 }
 
-/** Paramètres du compte : commission par contrat aller-retour (+ back-fill optionnel). */
+/** Paramètres — général : nom et statut du compte. */
+export async function saveAccountGeneral(formData: FormData) {
+  const id = str(formData, 'id');
+  if (!id) redirect('/app');
+  const base = `/app/accounts/${id}/settings`;
+
+  const label = str(formData, 'label');
+  const status = str(formData, 'status');
+  if (!label) backWithError(base, 'Le nom du compte est obligatoire.');
+  if (!status || !JOURNAL_STATUSES.includes(status as (typeof JOURNAL_STATUSES)[number])) {
+    backWithError(base, 'Statut invalide.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('journal_accounts').update({ label, status }).eq('id', id);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${id}`);
+  redirect(`${base}?saved=1`);
+}
+
+/** Paramètres — règles (compte personnalisé uniquement). Met à jour le snapshot. */
+export async function saveAccountRules(formData: FormData) {
+  const id = str(formData, 'id');
+  if (!id) redirect('/app');
+  const base = `/app/accounts/${id}/settings`;
+
+  const supabase = await createClient();
+  const { data: acc } = await supabase
+    .from('journal_accounts')
+    .select('offer_id, rules_snapshot')
+    .eq('id', id)
+    .single<{ offer_id: string | null; rules_snapshot: RulesSnapshot }>();
+  if (!acc) redirect('/app');
+  if (acc.offer_id) {
+    backWithError(base, 'Les règles d’une offre du catalogue ne se modifient pas ici.');
+  }
+
+  const ddType = str(formData, 'drawdown_type');
+  const ddAmount = num(formData, 'drawdown_amount');
+  if (!ddType || !DRAWDOWN_TYPES.includes(ddType as DrawdownType)) {
+    backWithError(base, 'Type de drawdown invalide.');
+  }
+  if (ddAmount === null || ddAmount <= 0) backWithError(base, 'Le montant de drawdown est obligatoire.');
+
+  const rules: OfferRules = {
+    ...acc.rules_snapshot.rules,
+    drawdownType: ddType as DrawdownType,
+    drawdownAmount: ddAmount,
+    profitTarget: num(formData, 'profit_target'),
+    dailyLossLimit: num(formData, 'daily_loss_limit'),
+    consistencyPct: num(formData, 'consistency_pct'),
+    minTradingDays: num(formData, 'min_trading_days') ?? 1,
+  };
+  const snapshot: RulesSnapshot = { ...acc.rules_snapshot, rules };
+
+  const { error } = await supabase
+    .from('journal_accounts')
+    .update({ rules_snapshot: snapshot })
+    .eq('id', id);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(`/app/accounts/${id}`);
+  redirect(`${base}?saved=1`);
+}
+
+/** Paramètres — commission par contrat aller-retour (+ back-fill optionnel). */
 export async function saveAccountCommission(formData: FormData) {
   const id = str(formData, 'id');
   if (!id) redirect('/app');
