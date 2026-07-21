@@ -322,3 +322,79 @@ export function buildAnalytics(params: {
     equity: fullEquity.filter((p) => p.date >= range.from && p.date <= range.to),
   };
 }
+
+/* ------------------------------------------------- agrégat multi-comptes */
+
+export interface AggregateTrade extends AnalyticsTrade {
+  accountId: string;
+  accountLabel: string;
+}
+
+export interface CumulativePoint {
+  date: string;
+  pnl: number; // P&L net cumulé (pas de plancher : les règles sont par compte)
+}
+
+export interface AggregateAnalytics {
+  range: ResolvedRange;
+  rangeEntries: number;
+  accounts: number;
+  metrics: Metrics;
+  bySymbol: Bucket[];
+  byWeekday: Bucket[];
+  byHour: Bucket[];
+  bySetup: Bucket[];
+  byEmotion: Bucket[];
+  byAccount: Bucket[];
+  distribution: DistributionBin[];
+  cumulative: CumulativePoint[];
+}
+
+/** P&L net cumulé jour par jour, tous comptes confondus (sans plancher). */
+export function buildCumulative(trades: AnalyticsTrade[]): CumulativePoint[] {
+  if (trades.length === 0) return [];
+  const byDay = new Map<string, number>();
+  for (const t of trades) byDay.set(t.tradeDate, round2((byDay.get(t.tradeDate) ?? 0) + net(t)));
+  let cum = 0;
+  return [...byDay.keys()].sort().map((d) => {
+    cum = round2(cum + (byDay.get(d) ?? 0));
+    return { date: d, pnl: cum };
+  });
+}
+
+/**
+ * Analytics consolidées sur plusieurs comptes. Seules les analytics s'agrègent —
+ * les jauges de règles restent par compte (chaque offre a ses propres règles),
+ * donc pas de plancher de drawdown ici : la courbe est le P&L net cumulé.
+ */
+export function buildAggregateAnalytics(params: {
+  allTrades: AggregateTrade[];
+  range: ResolvedRange;
+}): AggregateAnalytics {
+  const { allTrades, range } = params;
+  const windowed = allTrades.filter((t) => t.tradeDate >= range.from && t.tradeDate <= range.to);
+
+  const labels = new Map<string, string>();
+  for (const t of windowed) if (!labels.has(t.accountId)) labels.set(t.accountId, t.accountLabel);
+
+  return {
+    range,
+    rangeEntries: windowed.length,
+    accounts: labels.size,
+    metrics: computeMetrics(windowed),
+    bySymbol: bucketize(windowed, (t) => (t.symbol ? [t.symbol] : null), (k) => k).sort(byEntriesDesc),
+    byWeekday: bucketize(windowed, (t) => [String(weekdayIndex(t.tradeDate))], (k) => WEEKDAYS_FR[Number(k)]).sort(
+      (a, b) => Number(a.key) - Number(b.key),
+    ),
+    byHour: bucketize(windowed, (t) => (t.symbol ? [pad2(hourOf(t.closedAt))] : null), (k) => `${k}h`).sort(
+      (a, b) => Number(a.key) - Number(b.key),
+    ),
+    bySetup: bucketize(windowed, (t) => famKeys(t, 'setup'), tagLabel).sort(byEntriesDesc),
+    byEmotion: bucketize(windowed, (t) => famKeys(t, 'emotion'), tagLabel).sort(byEntriesDesc),
+    byAccount: bucketize(windowed, (t) => [(t as AggregateTrade).accountId], (id) => labels.get(id) ?? id).sort(
+      byEntriesDesc,
+    ),
+    distribution: buildDistribution(windowed),
+    cumulative: buildCumulative(windowed),
+  };
+}

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildAggregateAnalytics,
   buildAnalytics,
+  buildCumulative,
   buildDistribution,
   buildEquityCurve,
   computeMetrics,
   resolveRange,
+  type AggregateTrade,
   type AnalyticsTrade,
 } from './analytics';
 import type { OfferRules } from '../rules/types';
@@ -188,6 +191,63 @@ describe('buildEquityCurve', () => {
     const pts = buildEquityCurve(STATIC_25K, 25_000, [t('2026-01-01', 100), t('2026-01-01', 50)]);
     expect(pts).toHaveLength(1);
     expect(pts[0].equity).toBe(25_150);
+  });
+});
+
+describe('buildAggregateAnalytics', () => {
+  const ag = (accountId: string, accountLabel: string, date: string, pnl: number, opts: Partial<AnalyticsTrade> = {}): AggregateTrade => ({
+    ...t(date, pnl, opts),
+    accountId,
+    accountLabel,
+  });
+
+  const trades: AggregateTrade[] = [
+    ag('a', 'Apex 50K', '2026-01-01', 400, { symbol: 'ES' }),
+    ag('a', 'Apex 50K', '2026-01-02', -100, { symbol: 'NQ' }),
+    ag('b', 'Topstep 50K', '2026-01-02', 250, { symbol: 'ES' }),
+    ag('b', 'Topstep 50K', '2026-01-03', -50, { symbol: 'ES' }),
+  ];
+  const range = { preset: 'all' as const, from: '2026-01-01', to: '2026-01-31' };
+
+  it('agrège les métriques sur tous les comptes', () => {
+    const a = buildAggregateAnalytics({ allTrades: trades, range });
+    expect(a.accounts).toBe(2);
+    expect(a.rangeEntries).toBe(4);
+    expect(a.metrics.netPnl).toBe(500); // 400 - 100 + 250 - 50
+    expect(a.metrics.wins).toBe(2);
+    expect(a.metrics.losses).toBe(2);
+  });
+
+  it('ventile par compte avec les libellés', () => {
+    const a = buildAggregateAnalytics({ allTrades: trades, range });
+    const apex = a.byAccount.find((b) => b.label === 'Apex 50K');
+    const topstep = a.byAccount.find((b) => b.label === 'Topstep 50K');
+    expect(apex?.entries).toBe(2);
+    expect(apex?.netPnl).toBe(300);
+    expect(topstep?.netPnl).toBe(200);
+  });
+
+  it('courbe = P&L net cumulé (sans plancher)', () => {
+    const a = buildAggregateAnalytics({ allTrades: trades, range });
+    // 2026-01-01: +400 ; 01-02: +400-100+250=550 ; 01-03: 550-50=500
+    expect(a.cumulative).toEqual([
+      { date: '2026-01-01', pnl: 400 },
+      { date: '2026-01-02', pnl: 550 },
+      { date: '2026-01-03', pnl: 500 },
+    ]);
+  });
+
+  it('respecte la période', () => {
+    const a = buildAggregateAnalytics({ allTrades: trades, range: { preset: 'custom', from: '2026-01-02', to: '2026-01-02' } });
+    expect(a.rangeEntries).toBe(2);
+    expect(a.metrics.netPnl).toBe(150); // -100 + 250
+  });
+});
+
+describe('buildCumulative', () => {
+  it('agrège les trades du même jour', () => {
+    const pts = buildCumulative([t('2026-01-01', 100), t('2026-01-01', 50), t('2026-01-02', -30)]);
+    expect(pts).toEqual([{ date: '2026-01-01', pnl: 150 }, { date: '2026-01-02', pnl: 120 }]);
   });
 });
 

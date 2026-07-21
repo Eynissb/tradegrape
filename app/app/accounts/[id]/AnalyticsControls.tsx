@@ -16,11 +16,14 @@ export default function AnalyticsControls({
   preset,
   from,
   to,
+  buildHref,
 }: {
-  accountId: string;
+  accountId?: string;
   preset: PeriodPreset;
   from: string;
   to: string;
+  /** Override du lien (vue agrégée). Par défaut : l'onglet Analytics du compte. */
+  buildHref?: (period: PeriodPreset, extra: string) => string;
 }) {
   const router = useRouter();
   const [custom, setCustom] = useState(preset === 'custom');
@@ -28,7 +31,10 @@ export default function AnalyticsControls({
   const [cTo, setCTo] = useState(to);
 
   function go(period: PeriodPreset, extra = '') {
-    router.push(`/app/accounts/${accountId}?view=analytics&period=${period}${extra}`);
+    const href = buildHref
+      ? buildHref(period, extra)
+      : `/app/accounts/${accountId}?view=analytics&period=${period}${extra}`;
+    router.push(href);
   }
 
   return (

@@ -423,6 +423,11 @@ h1, h2, h3 {
 
 /* ===== Onglet Analytics (tranche 2) — surface solide, lisibilité chirurgicale ===== */
 .acct2-analytics { display: flex; flex-direction: column; gap: 1.2rem; }
+.agg-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.4rem; }
+.cum-line-pos { stroke: var(--ok); stroke-width: 2.5; }
+.cum-line-neg { stroke: var(--danger); stroke-width: 2.5; }
+.cum-area-pos { fill: rgba(56, 255, 176, .1); stroke: none; }
+.cum-area-neg { fill: rgba(255, 77, 94, .1); stroke: none; }
 .acct2-period { display: flex; flex-direction: column; gap: .9rem; }
 .acct2-period-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 

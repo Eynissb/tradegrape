@@ -357,8 +357,8 @@ distribution gains-pertes, séries.
    (`evaluatePayout`) ; saisie rapide journalière + trade détaillé ; tags prédéfinis ;
    édition des entrées ; calendrier mensuel. **(livré)**
 2. **Analytics** — courbe d'équité + plancher, métriques, ventilations, distributions.
-   **(livré, sauf la vue multi-comptes agrégée)** — onglet Analytics dans l'espace de
-   travail ; moteur pur `lib/journal/analytics.ts` (le plancher réutilise `futures-engine`).
+   **(livré)** — onglet Analytics dans l'espace de travail ; moteur pur
+   `lib/journal/analytics.ts` (le plancher réutilise `futures-engine`).
    Plus, indispensables :
    - **Plage de dates + filtres** — sélecteur de période (ce mois, ce trimestre, depuis le
      début, personnalisé) qui **recalcule toutes les statistiques**. Sans ça l'outil devient
@@ -368,7 +368,9 @@ distribution gains-pertes, séries.
    - **Vue multi-comptes agrégée** — sélecteur « Tous les comptes » consolidant la
      performance globale (un trader cumule souvent plusieurs comptes). ⚠️ **Les jauges de
      règles restent par compte** (chaque offre a ses propres règles) ; **seules les analytics
-     s'agrègent**. **(à faire)**
+     s'agrègent**. **(livré : `/app/analytics`, `buildAggregateAnalytics` — métriques,
+     ventilations dont par-compte, distribution, P&L net cumulé sans plancher ; devises
+     mixtes signalées sans conversion)**
    - **Export des données** — export CSV de ses trades par l'utilisateur (confiance + RGPD).
      **(livré : `GET /app/accounts/<id>/export`)**
 3. **Modules exclusifs** — calculateur de risque avant trade, « aurais-tu passé ailleurs ? »,
