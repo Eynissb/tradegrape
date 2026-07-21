@@ -75,11 +75,11 @@ export default function MonthCalendar({
   return (
     <div className="jcal glass">
       <div className="jcal-head">
-        <Link href={`/app/accounts/${accountId}?month=${view.prev}`} className="jcal-nav" aria-label="Mois précédent">
+        <Link href={`/app/accounts/${accountId}?view=calendrier&month=${view.prev}`} className="jcal-nav" aria-label="Mois précédent">
           ‹
         </Link>
         <h2 className="jcal-title">{view.label}</h2>
-        <Link href={`/app/accounts/${accountId}?month=${view.next}`} className="jcal-nav" aria-label="Mois suivant">
+        <Link href={`/app/accounts/${accountId}?view=calendrier&month=${view.next}`} className="jcal-nav" aria-label="Mois suivant">
           ›
         </Link>
       </div>
@@ -100,7 +100,7 @@ export default function MonthCalendar({
               return c.inMonth ? (
                 <Link
                   key={c.date}
-                  href={`/app/accounts/${accountId}?month=${mk}&day=${c.date}#historique`}
+                  href={`/app/accounts/${accountId}?view=calendrier&month=${mk}&day=${c.date}`}
                   className={`jcal-link${isActive ? ' is-active' : ''}`}
                 >
                   {inner}

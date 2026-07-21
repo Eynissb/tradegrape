@@ -336,20 +336,52 @@ h1, h2, h3 {
 .jwrap-narrow { max-width: var(--container-narrow); }
 .jwrap-wide { max-width: var(--container); }
 
-/* Page compte : jauges + payout en colonne latérale au-delà de 1280px */
-.acct-grid { display: grid; gap: 1.6rem; }
-.acct-side { display: flex; flex-direction: column; gap: 1.4rem; }
+/* ===== Page compte — Architecture B ===================================== *
+ * Console gauche (état/règles + saisie, toujours visibles) + espace de
+ * travail à onglets à droite (Calendrier | Historique, extensible tranche 2/3).
+ * -------------------------------------------------------------------------- */
+.acct2-top { margin-bottom: 4px; }
+.acct2 { display: grid; gap: 1.6rem; }
+.acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
+.acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
 @media (min-width: 1280px) {
-  .acct-grid { grid-template-columns: minmax(0, 1fr) 420px; align-items: start; gap: 2rem; }
-  .acct-main { grid-column: 1; grid-row: 1; min-width: 0; }
-  .acct-side { grid-column: 2; grid-row: 1; position: sticky; top: 84px; }
+  .acct2 { grid-template-columns: 560px minmax(0, 1fr); align-items: start; gap: 2rem; }
+  .acct2-console { position: sticky; top: 84px; }
 }
+@media (min-width: 1800px) {
+  .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
+}
+
+/* Cockpit : statut + solde, jauges, payout — une seule carte solide */
+.acct2-cockpit { display: flex; flex-direction: column; gap: 1.3rem; }
+.acct2-cockpit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.acct2-cockpit-bal { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.acct2-payout { border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.acct2-saisie { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Espace de travail : onglets + contenu */
+.acct2-work-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+/* Vue calendrier : calendrier borné (~1000px) + panneau compagnon */
+.acct2-cal { display: grid; gap: 1.2rem; }
+.acct2-cal-main { min-width: 0; max-width: 1000px; }
+.acct2-cal-side { align-self: start; }
+@media (min-width: 1750px) {
+  .acct2-cal { grid-template-columns: minmax(0, 1fr) minmax(300px, 340px); align-items: start; }
+}
+.acct2-side-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.acct2-daylist { list-style: none; margin: 1rem 0 0; padding: 0; }
+.acct2-dayrow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-top: 1px solid var(--border); }
+.acct2-dayrow:first-child { border-top: 0; }
+.acct2-dayrow .num { font-family: var(--font-mono); font-weight: 700; }
+.acct2-recap { display: flex; flex-direction: column; gap: .7rem; margin-top: 1rem; }
+.acct2-recap-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.acct2-recap-row .num { font-family: var(--font-mono); font-weight: 700; font-size: 1.05rem; }
+
 .acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
 .acct-gauges { display: flex; flex-direction: column; gap: 1.15rem; }
 .acct-days { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); }
 .acct-days .num { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; }
-.jhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 6px; }
-.jhead-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .jh1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: -0.6px; }
 .jh2 { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.4px; }
 .jsub { color: var(--ink2); font-size: 14px; }

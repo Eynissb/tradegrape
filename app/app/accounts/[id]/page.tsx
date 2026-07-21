@@ -17,7 +17,7 @@ import {
   TrendingUp,
   TriangleAlert,
 } from 'lucide-react';
-import { buildMonthView, parseMonth } from '@/lib/journal/calendar';
+import { buildMonthView, monthKey, parseMonth } from '@/lib/journal/calendar';
 import { tagLabel } from '@/lib/journal/tags';
 import type { RuleState } from '@/lib/rules/types';
 import {
@@ -32,6 +32,9 @@ import Progress, { type Tone } from '@/components/ui/Progress';
 import { deleteAccount, deleteTrade } from '@/app/app/actions';
 import EntryForms from './EntryForms';
 import MonthCalendar from './MonthCalendar';
+import AccountViewTabs from './AccountViewTabs';
+
+type AccountView = 'calendrier' | 'historique';
 
 export const metadata = { title: 'Compte — Tradegrape' };
 
@@ -70,10 +73,11 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; month?: string; day?: string }>;
+  searchParams: Promise<{ error?: string; month?: string; day?: string; view?: string }>;
 }) {
   const { id } = await params;
-  const { error, month: monthParam, day: dayParam } = await searchParams;
+  const { error, month: monthParam, day: dayParam, view: viewParam } = await searchParams;
+  const view: AccountView = viewParam === 'historique' ? 'historique' : 'calendrier';
   const today = new Date().toISOString().slice(0, 10);
 
   const supabase = await createClient();
@@ -144,8 +148,14 @@ export default async function AccountPage({
     breakerDay,
   });
 
-  // Historique filtré sur un jour si demandé.
-  const visibleTrades = dayParam ? trades.filter((t) => t.trade_date === dayParam) : trades;
+  // Détail d'un jour cliqué dans le calendrier (panneau compagnon).
+  const dayTrades = dayParam ? trades.filter((t) => t.trade_date === dayParam) : [];
+
+  // Récap léger du mois affiché (compagnon quand aucun jour n'est sélectionné).
+  const monthCells = monthView.weeks.flatMap((w) => w.days).filter((d) => d.inMonth);
+  const monthTotal = monthCells.reduce((s, d) => s + (d.pnl ?? 0), 0);
+  const monthActiveDays = monthCells.filter((d) => d.pnl !== null).length;
+  const monthTradingDays = monthCells.filter((d) => d.isTradingDay).length;
 
   return (
     <main className="jwrap jwrap-wide">
@@ -156,21 +166,12 @@ export default async function AccountPage({
         / {account.label ?? 'Compte'}
       </nav>
 
-      <div className="jhead">
-        <div>
-          <h1 className="jh1">{account.label ?? 'Compte'}</h1>
-          <p className="jsub">
-            {snap.display?.firmName} · {snap.display?.planName} ·{' '}
-            {money(Number(account.account_size), currency)}
-          </p>
-        </div>
-        <div className="jhead-right">
-          <StatusBadge state={ev.status} />
-          <div className="jbalance num">{money(ev.balance, currency)}</div>
-          <div className="jbalance-sub num" style={{ color: pnlColor(ev.netProfit) }}>
-            {signed(ev.netProfit, currency)}
-          </div>
-        </div>
+      <div className="acct2-top">
+        <h1 className="jh1">{account.label ?? 'Compte'}</h1>
+        <p className="jsub">
+          {snap.display?.firmName} · {snap.display?.planName} ·{' '}
+          {money(Number(account.account_size), currency)}
+        </p>
       </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
@@ -181,12 +182,21 @@ export default async function AccountPage({
         </div>
       ) : null}
 
-      <div className="acct-grid mt-6">
-        {/* Colonne latérale : l'information la plus critique, avant le calendrier */}
-        <aside className="acct-side">
-          {/* Jauges de règles — surface solide, lisibilité maximale */}
-          <div className="card acct-rules">
-            <h2 className="acct-rules-title">Règles en temps réel</h2>
+      <div className="acct2 mt-6">
+        {/* Console gauche : état/règles + payout + saisie — toujours visibles */}
+        <aside className="acct2-console">
+          {/* Cockpit : statut, solde, jauges, payout — surface solide, lisibilité max */}
+          <div className="card acct2-cockpit">
+            <div className="acct2-cockpit-head">
+              <StatusBadge state={ev.status} />
+              <div className="acct2-cockpit-bal">
+                <div className="jbalance num">{money(ev.balance, currency)}</div>
+                <div className="jbalance-sub num" style={{ color: pnlColor(ev.netProfit) }}>
+                  {signed(ev.netProfit, currency)}
+                </div>
+              </div>
+            </div>
+
             <div className="acct-gauges">
               {ev.dailyLoss ? (
                 <Progress
@@ -244,142 +254,197 @@ export default async function AccountPage({
                 </span>
               </div>
             </div>
+
+            {/* Payout — même carte, séparé par un filet */}
+            <div className="acct2-payout">
+              <div className="jpayout-head">
+                <h2 className="acct-rules-title" style={{ marginBottom: 0 }}>Retrait — compte financé</h2>
+                <Badge variant={payout.eligible ? 'ok' : 'warn'} icon={payout.eligible ? CircleCheck : TriangleAlert}>
+                  {payout.eligible ? 'Éligible' : 'Pas encore'}
+                </Badge>
+              </div>
+
+              <div className="jpayout-figs">
+                <div>
+                  <div
+                    className="jcard-k num"
+                    style={{ color: payout.eligible ? 'var(--ok)' : 'var(--text-3)' }}
+                  >
+                    {money(payout.eligible ? payout.withdrawable : 0, currency)}
+                  </div>
+                  <div className="jcard-l">
+                    {payout.eligible
+                      ? 'Retirable maintenant'
+                      : `Retirable maintenant (potentiel : ${money(payout.withdrawable, currency)})`}
+                  </div>
+                </div>
+                <div>
+                  <div className="jcard-k num">{payout.profitDays.count} / {payout.profitDays.required}</div>
+                  <div className="jcard-l">Jours de profit</div>
+                </div>
+              </div>
+
+              {!payout.eligible ? (
+                <div className="jmissing">
+                  <span className="jmissing-t">Ce qu’il manque :</span>
+                  <ul>
+                    {payout.missing.profitDays > 0 ? <li>{payout.missing.profitDays} jour(s) de profit</li> : null}
+                    {payout.missing.cycleProfit > 0 ? <li>{money(payout.missing.cycleProfit, currency)} de profit sur le cycle</li> : null}
+                    {payout.missing.buffer > 0 ? <li>{money(payout.missing.buffer, currency)} pour repasser le buffer</li> : null}
+                    {payout.blockers
+                      .filter((b) => b !== 'profit_days_not_met' && b !== 'below_buffer' && b !== 'cycle_profit_not_met')
+                      .map((b) => (
+                        <li key={b}>{BLOCKER_LABELS[b] ?? b}</li>
+                      ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           </div>
 
-          {/* Bloc payout — surface solide */}
-          <div className="jpayout card">
-            <div className="jpayout-head">
-              <h2 className="jh2" style={{ fontSize: '1.05rem' }}>Retrait — compte financé</h2>
-              <Badge variant={payout.eligible ? 'ok' : 'warn'} icon={payout.eligible ? CircleCheck : TriangleAlert}>
-                {payout.eligible ? 'Éligible' : 'Pas encore'}
-              </Badge>
-            </div>
-
-            <div className="jpayout-figs">
-              <div>
-                <div
-                  className="jcard-k num"
-                  style={{ color: payout.eligible ? 'var(--ok)' : 'var(--text-3)' }}
-                >
-                  {money(payout.eligible ? payout.withdrawable : 0, currency)}
-                </div>
-                <div className="jcard-l">
-                  {payout.eligible
-                    ? 'Retirable maintenant'
-                    : `Retirable maintenant (potentiel : ${money(payout.withdrawable, currency)})`}
-                </div>
-              </div>
-              <div>
-                <div className="jcard-k num">{payout.profitDays.count} / {payout.profitDays.required}</div>
-                <div className="jcard-l">Jours de profit</div>
-              </div>
-            </div>
-
-            {!payout.eligible ? (
-              <div className="jmissing">
-                <span className="jmissing-t">Ce qu’il manque :</span>
-                <ul>
-                  {payout.missing.profitDays > 0 ? <li>{payout.missing.profitDays} jour(s) de profit</li> : null}
-                  {payout.missing.cycleProfit > 0 ? <li>{money(payout.missing.cycleProfit, currency)} de profit sur le cycle</li> : null}
-                  {payout.missing.buffer > 0 ? <li>{money(payout.missing.buffer, currency)} pour repasser le buffer</li> : null}
-                  {payout.blockers
-                    .filter((b) => b !== 'profit_days_not_met' && b !== 'below_buffer' && b !== 'cycle_profit_not_met')
-                    .map((b) => (
-                      <li key={b}>{BLOCKER_LABELS[b] ?? b}</li>
-                    ))}
-                </ul>
-              </div>
-            ) : null}
+          {/* Saisie — toujours à l'écran, sous le cockpit */}
+          <div className="card acct2-saisie">
+            <h2 className="acct-rules-title">Ajouter une entrée</h2>
+            <EntryForms accountId={account.id} currency={currency} today={today} />
           </div>
         </aside>
 
-        {/* Colonne principale : calendrier, saisie, historique */}
-        <div className="acct-main">
-          <MonthCalendar
-            view={monthView}
-            accountId={account.id}
-            activeDay={dayParam}
-            consistency={consistencyInfo}
-          />
-
-          <h2 className="jh2 mt-8">Ajouter une entrée</h2>
-          <div className="mt-4">
-            <EntryForms accountId={account.id} currency={currency} today={today} />
+        {/* Espace de travail : onglets (Calendrier | Historique), extensible tranche 2/3 */}
+        <section className="acct2-work">
+          <div className="acct2-work-head">
+            <AccountViewTabs accountId={account.id} view={view} />
           </div>
 
-          <h2 className="jh2 mt-8" id="historique">
-        Historique
-      </h2>
-      {dayParam ? (
-        <div className="notice notice-info mt-4">
-          Filtré sur le <strong>{dayParam}</strong> ({visibleTrades.length} entrée(s)).{' '}
-          <Link href={`/app/accounts/${account.id}#historique`} className="link-accent">
-            Voir tout
-          </Link>
-        </div>
-      ) : null}
-          {visibleTrades.length === 0 ? (
-            <div className="card mt-4" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
-              {dayParam ? 'Aucune entrée ce jour-là.' : 'Aucune entrée. Commence par un P&L journalier.'}
-            </div>
-          ) : (
-            <div className="table-wrap mt-4">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th className="num">P&L</th>
-                    <th>Tags</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleTrades.map((t) => {
-                    const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                    const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
-                    return (
-                      <tr key={t.id}>
-                        <td data-label="Date" className="num">
-                          <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
-                        </td>
-                        <td data-label="Type">
-                          <Link href={editHref} className="jrow-link">
-                            {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                          </Link>
-                        </td>
-                        <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                          <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
-                            {signed(pnlNet, currency)}
-                          </Link>
-                        </td>
-                        <td data-label="Tags">
-                          <div className="jchips">
-                            {t.tags.map((tag) => (
-                              <span key={tag} className="jchip">{tagLabel(tag)}</span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="admin-row-actions">
-                          <div className="flex items-center justify-end gap-2">
-                            <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
-                              Éditer
+          {view === 'historique' ? (
+            trades.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
+                Aucune entrée. Commence par un P&L journalier dans la console.
+              </div>
+            ) : (
+              <div className="table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th className="num">P&L</th>
+                      <th>Tags</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trades.map((t) => {
+                      const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                      const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                      return (
+                        <tr key={t.id}>
+                          <td data-label="Date" className="num">
+                            <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
+                          </td>
+                          <td data-label="Type">
+                            <Link href={editHref} className="jrow-link">
+                              {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
                             </Link>
-                            <form action={deleteTrade}>
-                              <input type="hidden" name="id" value={t.id} />
-                              <input type="hidden" name="account_id" value={account.id} />
-                              <Button type="submit" variant="danger" size="sm">Supprimer</Button>
-                            </form>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
+                            <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
+                              {signed(pnlNet, currency)}
+                            </Link>
+                          </td>
+                          <td data-label="Tags">
+                            <div className="jchips">
+                              {t.tags.map((tag) => (
+                                <span key={tag} className="jchip">{tagLabel(tag)}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="admin-row-actions">
+                            <div className="flex items-center justify-end gap-2">
+                              <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
+                                Éditer
+                              </Link>
+                              <form action={deleteTrade}>
+                                <input type="hidden" name="id" value={t.id} />
+                                <input type="hidden" name="account_id" value={account.id} />
+                                <Button type="submit" variant="danger" size="sm">Supprimer</Button>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
+          ) : (
+            <div className="acct2-cal">
+              <div className="acct2-cal-main">
+                <MonthCalendar
+                  view={monthView}
+                  accountId={account.id}
+                  activeDay={dayParam}
+                  consistency={consistencyInfo}
+                />
+              </div>
+
+              {/* Panneau compagnon : détail d'un jour, sinon récap du mois */}
+              <aside className="acct2-cal-side card">
+                {dayParam ? (
+                  <>
+                    <div className="acct2-side-head">
+                      <h3 className="acct-rules-title" style={{ marginBottom: 0 }}>{dayParam}</h3>
+                      <Link
+                        href={`/app/accounts/${account.id}?view=calendrier&month=${monthKey(monthView.year, monthView.month)}`}
+                        className="link-accent"
+                      >
+                        Fermer
+                      </Link>
+                    </div>
+                    {dayTrades.length === 0 ? (
+                      <p className="jsub mt-3">Aucune entrée ce jour-là.</p>
+                    ) : (
+                      <ul className="acct2-daylist">
+                        {dayTrades.map((t) => {
+                          const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                          return (
+                            <li key={t.id} className="acct2-dayrow">
+                              <Link href={`/app/accounts/${account.id}/trades/${t.id}`} className="jrow-link">
+                                {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
+                              </Link>
+                              <span className="num" style={{ color: pnlColor(pnlNet) }}>
+                                {signed(pnlNet, currency)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <h3 className="acct-rules-title">Aperçu du mois</h3>
+                    <div className="acct2-recap">
+                      <div className="acct2-recap-row">
+                        <span className="jcard-l">Total du mois</span>
+                        <span className="num" style={{ color: pnlColor(monthTotal) }}>{signed(monthTotal, currency)}</span>
+                      </div>
+                      <div className="acct2-recap-row">
+                        <span className="jcard-l">Jours actifs</span>
+                        <span className="num">{monthActiveDays}</span>
+                      </div>
+                      <div className="acct2-recap-row">
+                        <span className="jcard-l">Jours validés</span>
+                        <span className="num">{monthTradingDays}</span>
+                      </div>
+                    </div>
+                    <p className="jsub mt-3">Clique un jour du calendrier pour voir le détail de ses entrées.</p>
+                  </>
+                )}
+              </aside>
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       <form action={deleteAccount} className="admin-danger mt-10">
