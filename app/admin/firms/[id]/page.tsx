@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 import { togglePlanPublish } from '@/app/admin/plans/actions';
+import Button, { buttonClasses } from '@/components/ui/Button';
 import FirmForm, { type FirmValues } from '../FirmForm';
 import { deleteFirm, toggleFirmPublish } from '../actions';
 
@@ -83,13 +84,13 @@ export default async function EditFirm({
           <h2 className="admin-h2">Plans</h2>
           <p className="admin-sub">{plans.length} plan(s) — la notation vit ici.</p>
         </div>
-        <Link href={`/admin/plans/new?firm=${id}`} className="btn-grad">
+        <Link href={`/admin/plans/new?firm=${id}`} className={buttonClasses()}>
           + Nouveau plan
         </Link>
       </div>
 
       {plans.length === 0 ? (
-        <div className="glass admin-empty">
+        <div className="card" style={{ textAlign: 'center', color: 'var(--text-3)' }}>
           Aucun plan.{' '}
           <Link href={`/admin/plans/new?firm=${id}`} className="link-accent">
             Ajouter le premier
@@ -97,14 +98,14 @@ export default async function EditFirm({
           .
         </div>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="table-wrap">
+          <table className="table">
             <thead>
               <tr>
                 <th>Nom</th>
                 <th>Slug</th>
                 <th>Type</th>
-                <th>Note</th>
+                <th className="num">Note</th>
                 <th>Statut</th>
                 <th></th>
               </tr>
@@ -112,11 +113,11 @@ export default async function EditFirm({
             <tbody>
               {plans.map((p) => (
                 <tr key={p.id}>
-                  <td className="admin-strong">{p.name}</td>
-                  <td className="num">{p.slug}</td>
-                  <td>{p.account_kind}</td>
-                  <td className="num">{p.rating ?? '—'}</td>
-                  <td>
+                  <td data-label="Nom"><span className="cell-firm">{p.name}</span></td>
+                  <td data-label="Slug" className="mono" style={{ color: 'var(--text-3)' }}>{p.slug}</td>
+                  <td data-label="Type">{p.account_kind}</td>
+                  <td data-label="Note" className="num">{p.rating ?? '—'}</td>
+                  <td data-label="Statut">
                     <PublishToggle
                       action={togglePlanPublish}
                       id={p.id}
@@ -141,9 +142,7 @@ export default async function EditFirm({
       <form action={deleteFirm} className="admin-danger">
         <input type="hidden" name="id" value={id} />
         <span>Supprimer définitivement cette firm et tout ce qui en dépend.</span>
-        <button type="submit" className="admin-btn-danger">
-          Supprimer
-        </button>
+        <Button type="submit" variant="danger" size="sm">Supprimer</Button>
       </form>
     </div>
   );

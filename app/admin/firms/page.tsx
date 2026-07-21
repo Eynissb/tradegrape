@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { Building2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
+import { buttonClasses } from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import { toggleFirmPublish } from './actions';
 
 export const metadata = { title: 'Firms — Admin Tradegrape' };
@@ -33,7 +36,7 @@ export default async function FirmsList() {
           <h1 className="admin-h1">Firms</h1>
           <p className="admin-sub">{firms.length} firm(s) au catalogue.</p>
         </div>
-        <Link href="/admin/firms/new" className="btn-grad">
+        <Link href="/admin/firms/new" className={buttonClasses()}>
           + Nouvelle firm
         </Link>
       </div>
@@ -41,22 +44,25 @@ export default async function FirmsList() {
       {error ? <div className="notice notice-error">{error.message}</div> : null}
 
       {firms.length === 0 ? (
-        <div className="glass admin-empty">
-          Aucune firm pour l’instant.{' '}
-          <Link href="/admin/firms/new" className="link-accent">
-            Créer la première
-          </Link>
-          .
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="Aucune firm au catalogue"
+          description="Crée ta première firm pour démarrer le comparateur."
+          action={
+            <Link href="/admin/firms/new" className={buttonClasses()}>
+              Créer la première
+            </Link>
+          }
+        />
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
+        <div className="table-wrap">
+          <table className="table">
             <thead>
               <tr>
                 <th>Nom</th>
                 <th>Slug</th>
                 <th>Marché</th>
-                <th>Health</th>
+                <th className="num">Health</th>
                 <th>Statut</th>
                 <th></th>
               </tr>
@@ -64,11 +70,15 @@ export default async function FirmsList() {
             <tbody>
               {firms.map((f) => (
                 <tr key={f.id}>
-                  <td className="admin-strong">{f.name}</td>
-                  <td className="num">{f.slug}</td>
-                  <td>{f.market_type}</td>
-                  <td className="num">{f.health_score ?? '—'}</td>
-                  <td>
+                  <td data-label="Nom">
+                    <span className="cell-firm">{f.name}</span>
+                  </td>
+                  <td data-label="Slug" className="mono" style={{ color: 'var(--text-3)' }}>
+                    {f.slug}
+                  </td>
+                  <td data-label="Marché">{f.market_type}</td>
+                  <td data-label="Health" className="num">{f.health_score ?? '—'}</td>
+                  <td data-label="Statut">
                     <PublishToggle
                       action={toggleFirmPublish}
                       id={f.id}

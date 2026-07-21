@@ -65,9 +65,11 @@
   --ease-out-soft: cubic-bezier(.22, 1, .36, 1);
   --ease-gel: cubic-bezier(.3, 1.4, .5, 1);
 
-  /* Surfaces SOLIDES — couche contenu (tableaux, jauges, chiffres) */
-  --surface-solid: #14102a;
-  --surface-solid-2: #100c20;
+  /* Surfaces SOLIDES — couche contenu (tableaux, jauges, chiffres).
+     Volontairement DÉSATURÉES : sur les écrans denses (calendrier, tables,
+     jauges) la donnée prime, le violet ne doit pas tirer l'œil. */
+  --surface-solid: #131121;
+  --surface-solid-2: #0f0d1a;
   --nav-h: 64px;
 }
 

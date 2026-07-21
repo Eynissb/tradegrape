@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import Button, { buttonClasses } from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Checkbox from '@/components/ui/Checkbox';
 import { saveFirm } from './actions';
 
 /** Sous-ensemble des colonnes firms éditées dans ce formulaire. */
@@ -57,22 +60,16 @@ function Text({
   step?: string;
 }) {
   return (
-    <div className="field">
-      <label htmlFor={name}>
-        {label}
-        {required ? <span style={{ color: 'var(--hot)' }}> *</span> : null}
-      </label>
-      <input
-        className="input"
-        id={name}
-        name={name}
-        type={type}
-        step={step}
-        required={required}
-        placeholder={placeholder}
-        defaultValue={v(value)}
-      />
-    </div>
+    <Input
+      id={name}
+      name={name}
+      label={label}
+      type={type}
+      step={step}
+      required={required}
+      placeholder={placeholder}
+      defaultValue={v(value)}
+    />
   );
 }
 
@@ -85,12 +82,7 @@ function Check({
   label: string;
   checked?: boolean | null;
 }) {
-  return (
-    <label className="admin-check">
-      <input type="checkbox" name={name} defaultChecked={!!checked} />
-      <span>{label}</span>
-    </label>
-  );
+  return <Checkbox name={name} label={label} defaultChecked={!!checked} />;
 }
 
 function Section({
@@ -119,7 +111,7 @@ export default function FirmForm({ firm }: { firm?: FirmValues }) {
         <Text name="name" label="Nom" value={firm?.name} required placeholder="TopStep" />
         <Text name="slug" label="Slug" value={firm?.slug} required placeholder="topstep" />
         <div className="field">
-          <label htmlFor="market_type">Marché</label>
+          <label className="label" htmlFor="market_type">Marché</label>
           <select
             className="input"
             id="market_type"
@@ -180,10 +172,8 @@ export default function FirmForm({ firm }: { firm?: FirmValues }) {
       </Section>
 
       <div className="flex items-center gap-3">
-        <button type="submit" className="btn-grad">
-          {isEdit ? 'Enregistrer' : 'Créer la firm'}
-        </button>
-        <Link href="/admin/firms" className="btn-ghost">
+        <Button type="submit">{isEdit ? 'Enregistrer' : 'Créer la firm'}</Button>
+        <Link href="/admin/firms" className={buttonClasses({ variant: 'ghost' })}>
           Annuler
         </Link>
       </div>
