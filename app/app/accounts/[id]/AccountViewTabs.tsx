@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { CalendarDays, ListOrdered } from 'lucide-react';
+import { CalendarDays, ListOrdered, LineChart } from 'lucide-react';
 import Tabs from '@/components/ui/Tabs';
 
 /**
@@ -21,6 +21,7 @@ export default function AccountViewTabs({
     <Tabs
       tabs={[
         { id: 'calendrier', label: 'Calendrier', icon: CalendarDays },
+        { id: 'analytics', label: 'Analytics', icon: LineChart },
         { id: 'historique', label: 'Historique', icon: ListOrdered },
       ]}
       active={view}

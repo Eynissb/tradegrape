@@ -397,6 +397,37 @@ h1, h2, h3 {
 .btn.btn-danger-ghost { color: var(--ink3); }
 .btn.btn-danger-ghost:hover { color: var(--danger); background: rgba(255, 77, 94, 0.1); border-color: rgba(255, 77, 94, 0.3); }
 
+/* ===== Onglet Analytics (tranche 2) — surface solide, lisibilité chirurgicale ===== */
+.acct2-analytics { display: flex; flex-direction: column; gap: 1.2rem; }
+.acct2-period { display: flex; flex-direction: column; gap: .9rem; }
+.acct2-period-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
+
+.acct2-breakdowns { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+/* Courbe d'équité (SVG pur) */
+.eq-chart { width: 100%; }
+.eq-grid { stroke: var(--border); stroke-width: 1; }
+.eq-axis { fill: var(--ink3); font-size: 11px; font-family: var(--font-mono); }
+.eq-axis-start { font-size: 10px; }
+.eq-start { stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
+.eq-margin { fill: rgba(56, 255, 176, .1); stroke: none; }
+.eq-floor { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 5 4; }
+.eq-equity { stroke: var(--c2); stroke-width: 2.5; }
+.eq-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--ink2); }
+.eq-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.eq-key { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.eq-key-equity { background: var(--c2); }
+.eq-key-floor { background: var(--danger); height: 3px; }
+.eq-key-margin { background: rgba(56, 255, 176, .55); height: 10px; border-radius: 2px; }
+
+/* Distribution du P&L */
+.acct2-dist { display: flex; flex-direction: column; gap: 6px; }
+.acct2-dist-row { display: grid; grid-template-columns: 130px 1fr 42px; align-items: center; gap: 10px; }
+.acct2-dist-label { font-size: 11px; color: var(--ink3); text-align: right; }
+.acct2-dist-track { height: 14px; background: rgba(255, 255, 255, .04); border-radius: 4px; overflow: hidden; }
+.acct2-dist-bar { display: block; height: 100%; border-radius: 4px; min-width: 2px; }
+.acct2-dist-count { font-size: 12px; color: var(--ink2); text-align: right; }
+
 .acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
 .acct-gauges { display: flex; flex-direction: column; gap: 1.15rem; }
 .acct-days { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); }

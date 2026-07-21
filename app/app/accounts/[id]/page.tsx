@@ -31,11 +31,15 @@ import Badge from '@/components/ui/Badge';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Progress, { type Tone } from '@/components/ui/Progress';
 import { deleteAccount, deleteTrade } from '@/app/app/actions';
+import { buildAnalytics, resolveRange, type AnalyticsTrade, type PeriodPreset } from '@/lib/journal/analytics';
 import EntryForms from './EntryForms';
 import MonthCalendar from './MonthCalendar';
 import AccountViewTabs from './AccountViewTabs';
+import AnalyticsPanel from './AnalyticsPanel';
 
-type AccountView = 'calendrier' | 'historique';
+type AccountView = 'calendrier' | 'analytics' | 'historique';
+
+const PERIODS: PeriodPreset[] = ['month', 'quarter', 'all', 'custom'];
 
 export const metadata = { title: 'Compte — Tradegrape' };
 
@@ -74,11 +78,30 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; month?: string; day?: string; view?: string; highlight?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    month?: string;
+    day?: string;
+    view?: string;
+    highlight?: string;
+    period?: string;
+    from?: string;
+    to?: string;
+  }>;
 }) {
   const { id } = await params;
-  const { error, month: monthParam, day: dayParam, view: viewParam, highlight: highlightParam } = await searchParams;
-  const view: AccountView = viewParam === 'historique' ? 'historique' : 'calendrier';
+  const {
+    error,
+    month: monthParam,
+    day: dayParam,
+    view: viewParam,
+    highlight: highlightParam,
+    period: periodParam,
+    from: fromParam,
+    to: toParam,
+  } = await searchParams;
+  const view: AccountView =
+    viewParam === 'historique' ? 'historique' : viewParam === 'analytics' ? 'analytics' : 'calendrier';
   const today = new Date().toISOString().slice(0, 10);
 
   const supabase = await createClient();
@@ -201,6 +224,21 @@ export default async function AccountPage({
   }
   const decidedCount = winCount + lossCount;
   const winRate = decidedCount ? Math.round((winCount / decidedCount) * 100) : null;
+
+  // Analytics (onglet dédié) — recalculées selon la période sélectionnée.
+  const preset: PeriodPreset = PERIODS.includes(periodParam as PeriodPreset)
+    ? (periodParam as PeriodPreset)
+    : 'all';
+  const analyticsTrades: AnalyticsTrade[] = trades.map((t) => ({
+    ...toEngineTrade(t),
+    symbol: t.symbol ?? '',
+    tags: t.tags,
+  }));
+  const range = resolveRange(preset, today, analyticsTrades, fromParam, toParam);
+  const analytics =
+    view === 'analytics'
+      ? buildAnalytics({ rules: snap.rules, startingBalance: start, allTrades: analyticsTrades, range })
+      : null;
 
   return (
     <main className="jwrap jwrap-acct">
@@ -442,6 +480,13 @@ export default async function AccountPage({
                 )}
               </div>
             </div>
+          ) : view === 'analytics' && analytics ? (
+            <AnalyticsPanel
+              analytics={analytics}
+              currency={currency}
+              accountId={account.id}
+              startingBalance={start}
+            />
           ) : (
             <div className="acct2-cal">
               <MonthCalendar

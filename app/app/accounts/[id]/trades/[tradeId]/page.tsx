@@ -30,7 +30,7 @@ export default async function EditTrade({
     supabase
       .from('trades')
       .select(
-        'id, trade_date, pnl, fees, symbol, direction, quantity, entry_price, exit_price, notes, tags',
+        'id, trade_date, closed_at, pnl, fees, symbol, direction, quantity, entry_price, exit_price, notes, tags',
       )
       .eq('id', tradeId)
       .eq('account_id', id)

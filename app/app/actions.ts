@@ -28,6 +28,10 @@ function tradeFields(formData: FormData, date: string, pnl: number) {
     .getAll('tags')
     .map((t) => String(t))
     .filter(Boolean);
+  // Heure de clôture (trade détaillé) → alimente la ventilation analytics par heure.
+  // À défaut, midi : les entrées journalières sont de toute façon exclues du par-heure.
+  const time = detailed ? str(formData, 'trade_time') : null;
+  const closedAt = time && /^\d{2}:\d{2}$/.test(time) ? `${date}T${time}:00.000Z` : `${date}T12:00:00.000Z`;
   return {
     symbol: detailed ? str(formData, 'symbol') ?? '' : '',
     direction: detailed ? str(formData, 'direction') : null,
@@ -36,7 +40,7 @@ function tradeFields(formData: FormData, date: string, pnl: number) {
     exit_price: detailed ? num(formData, 'exit_price') : null,
     pnl,
     fees: num(formData, 'fees') ?? 0,
-    closed_at: `${date}T12:00:00.000Z`,
+    closed_at: closedAt,
     trade_date: date,
     notes: str(formData, 'notes'),
     tags,

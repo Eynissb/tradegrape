@@ -14,6 +14,7 @@ import Tabs from '@/components/ui/Tabs';
 export interface TradeValues {
   id: string;
   trade_date: string;
+  closed_at?: string | null;
   pnl: number | string;
   fees: number | string | null;
   symbol: string | null;
@@ -105,6 +106,15 @@ export default function EntryForms({
               <Input id="quantity" name="quantity" label="Quantité" type="number" step="1" defaultValue={v(trade?.quantity)} mono />
               <Input id="entry_price" name="entry_price" label="Entrée" type="number" step="0.000001" defaultValue={v(trade?.entry_price)} mono />
               <Input id="exit_price" name="exit_price" label="Sortie" type="number" step="0.000001" defaultValue={v(trade?.exit_price)} mono />
+              <Input
+                id="trade_time"
+                name="trade_time"
+                label="Heure de clôture"
+                type="time"
+                width="sm"
+                defaultValue={trade?.closed_at ? String(trade.closed_at).slice(11, 16) : undefined}
+                hint="Pour la ventilation par heure"
+              />
             </>
           ) : null}
 
