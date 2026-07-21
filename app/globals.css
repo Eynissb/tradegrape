@@ -639,11 +639,17 @@ h1, h2, h3 {
 .app-shell { display: flex; min-height: 100vh; position: relative; }
 /* Glows ambiants : diffusent une lueur colorée que les cartes en verre laissent
    transparaître (backdrop-filter). Fixes, très flous, faible opacité. */
-.app-glow { position: fixed; border-radius: 50%; filter: blur(160px); pointer-events: none; z-index: 0; }
-.app-glow-1 { width: 760px; height: 760px; background: #4a1fd8; opacity: .30; top: -260px; left: 40px; }
-.app-glow-2 { width: 600px; height: 600px; background: #b32fd0; opacity: .16; top: 90px; right: -200px; }
+.app-glow { position: fixed; border-radius: 50%; filter: blur(170px); pointer-events: none; z-index: 0; }
+/* Lueur principale : coin haut-gauche, baigne la zone en diagonale */
+.app-glow-1 { width: 1050px; height: 1050px; background: #4a1fd8; opacity: .36; top: -400px; left: -240px; }
+/* Seconde plus discrète, bas-droite */
+.app-glow-2 { width: 640px; height: 640px; background: #b32fd0; opacity: .12; bottom: -280px; right: -200px; }
 .app-side {
-  width: 240px; flex-shrink: 0; background: #05040d;
+  width: 240px; flex-shrink: 0;
+  background: rgba(7, 5, 18, .55);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  backdrop-filter: blur(30px) saturate(150%);
+  border-right: 1px solid rgba(255, 255, 255, .04);
   display: flex; flex-direction: column; padding: 22px 14px 18px;
   position: sticky; top: 0; height: 100vh; z-index: 2;
 }
@@ -712,15 +718,16 @@ h1, h2, h3 {
 
 /* ---- Page compte (.dash) : cartes en VERRE (le halo transparaît) ---- */
 .dash .card {
-  /* double fond : intérieur en padding-box, bordure en dégradé (arête claire en haut) */
+  /* Fond FRANCHEMENT transparent → le flou et le halo ambiant traversent (vrai verre).
+     Bordure en dégradé (arête haute plus claire = épaisseur du verre) + reflet interne. */
   background:
-    linear-gradient(180deg, rgba(22, 16, 42, .66), rgba(12, 9, 24, .74)) padding-box,
-    linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(150, 110, 240, .06) 34%, rgba(150, 110, 240, .04)) border-box;
+    linear-gradient(180deg, rgba(30, 22, 58, .34), rgba(12, 9, 26, .42)) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, .3), rgba(150, 110, 240, .05) 30%, rgba(150, 110, 240, .03)) border-box;
   border: 1px solid transparent;
-  border-radius: 20px;
-  -webkit-backdrop-filter: blur(22px) saturate(150%);
-  backdrop-filter: blur(22px) saturate(150%);
-  box-shadow: 0 26px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .1);
+  border-radius: 24px;
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .1);
   padding: 26px 28px;
 }
 .dash .acct2 { gap: 2.2rem; }
@@ -756,30 +763,34 @@ h1, h2, h3 {
 .dash .card-grad .jpayout-figs > div { background: rgba(255, 255, 255, .12); border-radius: 14px; padding: 14px 18px; flex: 1; }
 
 /* Titre de bloc avec icône en carré arrondi (signature de la référence) */
-.ctitle { display: flex; align-items: center; gap: 13px; margin-bottom: 1.5rem; }
+.ctitle { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
 .ctitle-ic {
-  width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center;
-  background: rgba(150, 110, 240, .16); color: var(--c2); flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .05); color: rgba(226, 216, 255, .82); flex-shrink: 0;
 }
-.ctitle-ic .lucide { width: 19px; height: 19px; }
+.ctitle-ic .lucide { width: 16px; height: 16px; stroke-width: 1.7; }
 .ctitle-h { font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; color: var(--ink); margin: 0; }
 .ctitle-right { margin-left: auto; }
 
-/* Cartes de métriques : icône + libellé gris en HAUT, valeur très grosse en dessous */
-.dash .acct2-monthstats { gap: 14px; }
-.dash .acct2-stat { padding: 18px 20px; border-radius: 16px; }
+/* Cartes de métriques : icône + libellé gris en HAUT, valeur très grosse dessous.
+   Aucun trait — juste un fond un peu plus clair. Larges → valeur sur UNE ligne. */
+.dash .acct2-monthstats { gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.dash .acct2-stat { padding: 18px 20px; border-radius: 16px; border: 0; background: rgba(255, 255, 255, .035); }
 .acct2-stat-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); margin-bottom: 10px; }
 .acct2-stat-head .lucide { width: 15px; height: 15px; }
-.dash .acct2-stat-k { font-size: 1.55rem; }
+.dash .acct2-stat-k { font-size: 1.75rem; white-space: nowrap; }
 
-/* Blocs de règles façon « Goal Overview » : titre+icône, badge, colonnes requis/actuel */
+/* Blocs de règles façon « Goal Overview ». Séparation = variation d'opacité
+   (hairline), pas de bordure qui découpe. */
 .acct2-balance { display: flex; flex-direction: column; gap: 4px; }
 .dash .acct2-balance .jbalance { font-size: 2.1rem; letter-spacing: -1px; }
-.rule-blocks { display: flex; flex-direction: column; gap: 14px; }
-.rule-block { border: 1px solid rgba(150, 110, 240, .12); border-radius: 16px; padding: 16px 18px; background: rgba(255, 255, 255, .015); }
+.rule-blocks { display: flex; flex-direction: column; }
+.rule-block { border: 0; border-radius: 0; padding: 16px 2px; background: transparent; border-top: 1px solid rgba(255, 255, 255, .05); }
+.rule-block:first-child { border-top: 0; padding-top: 2px; }
+.rule-block:last-child { padding-bottom: 2px; }
 .rule-block-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.rule-ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(150, 110, 240, .14); color: var(--c2); flex-shrink: 0; }
-.rule-ic .lucide { width: 16px; height: 16px; }
+.rule-ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: rgba(255, 255, 255, .04); color: rgba(226, 216, 255, .72); flex-shrink: 0; }
+.rule-ic .lucide { width: 15px; height: 15px; }
 .rule-title { font-weight: 600; font-size: 14px; color: var(--ink); }
 .rule-block-head .rbadge { margin-left: auto; }
 .rule-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

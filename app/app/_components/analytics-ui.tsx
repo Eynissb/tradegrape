@@ -92,11 +92,11 @@ export function MetricsGrid({ metrics, currency }: { metrics: import('@/lib/jour
     <div className="acct2-monthstats">
       <Stat icon={Target} label="Taux de réussite" value={m.winRate === null ? '—' : `${m.winRate}%`} sub={`${m.wins} G · ${m.losses} P`} />
       <Stat icon={Coins} label="P&L net" value={signed(m.netPnl, currency)} color={pnlColor(m.netPnl)} />
-      <Stat icon={Sigma} label="Expectancy / entrée" value={signed(m.expectancy, currency)} color={pnlColor(m.expectancy)} />
+      <Stat icon={Sigma} label="Expectancy / entrée" value={signed(m.expectancy, currency)} />
       <Stat icon={Ratio} label="R moyen" value={m.avgR === null ? '—' : `${m.avgR}R`} sub="1R = perte moyenne" />
       <Stat icon={Scale} label="Profit factor" value={profitFactor} />
-      <Stat icon={TrendingUp} label="Gain moyen" value={money(m.avgWin, currency)} color="var(--ok)" />
-      <Stat icon={TrendingDown} label="Perte moyenne" value={m.avgLoss ? `−${money(m.avgLoss, currency)}` : money(0, currency)} color="var(--danger)" />
+      <Stat icon={TrendingUp} label="Gain moyen" value={money(m.avgWin, currency)} />
+      <Stat icon={TrendingDown} label="Perte moyenne" value={m.avgLoss ? `−${money(m.avgLoss, currency)}` : money(0, currency)} />
       <Stat icon={Flame} label="Série gains / pertes" value={`${m.maxWinStreak} / ${m.maxLossStreak}`} sub="plus longues séries" />
     </div>
   );

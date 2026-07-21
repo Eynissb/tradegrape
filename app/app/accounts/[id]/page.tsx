@@ -554,9 +554,9 @@ export default async function AccountPage({
                         <Stat icon={TrendingUp} label="Total du mois" value={signed(monthTotal, currency)} color={pnlColor(monthTotal)} />
                         <Stat icon={CalendarDays} label="Jours actifs" value={String(monthActiveDays)} />
                         <Stat icon={CalendarCheck} label="Jours validés" value={String(monthTradingDays)} />
-                        <Stat icon={TrendingUp} label="Meilleur jour" value={bestDay ? signed(bestDay.pnl, currency) : '—'} color={bestDay ? pnlColor(bestDay.pnl) : undefined} sub={bestDay?.date} />
-                        <Stat icon={TrendingDown} label="Pire jour" value={worstDay ? signed(worstDay.pnl, currency) : '—'} color={worstDay ? pnlColor(worstDay.pnl) : undefined} sub={worstDay?.date} />
-                        <Stat icon={Flame} label="Série en cours" value={streak === 0 ? '—' : String(streak)} color={streak === 0 ? undefined : streakSign > 0 ? 'var(--ok)' : 'var(--danger)'} sub={streak > 0 ? streakLabel : undefined} />
+                        <Stat icon={TrendingUp} label="Meilleur jour" value={bestDay ? signed(bestDay.pnl, currency) : '—'} sub={bestDay?.date} />
+                        <Stat icon={TrendingDown} label="Pire jour" value={worstDay ? signed(worstDay.pnl, currency) : '—'} sub={worstDay?.date} />
+                        <Stat icon={Flame} label="Série en cours" value={streak === 0 ? '—' : String(streak)} sub={streak > 0 ? streakLabel : undefined} />
                       </div>
                     </div>
 
