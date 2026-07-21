@@ -571,7 +571,7 @@ h1, h2, h3 {
 .jcal-nav:hover { color: var(--ink); border-color: rgba(192, 75, 255, 0.4); }
 
 .jcal-grid { display: flex; flex-direction: column; gap: 8px; }
-.jcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 72px; gap: 8px; }
+.jcal-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) 64px; gap: 6px; }
 .jcal-wd { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink3); text-align: center; padding-bottom: 2px; }
 .jcal-wtot { text-align: right; }
 
@@ -588,9 +588,9 @@ h1, h2, h3 {
 @media (prefers-reduced-motion: reduce) { .jcal-link.is-added .jcal-cell { animation: none; } }
 
 .jcal-cell {
-  position: relative; min-height: 88px; border-radius: 12px;
-  border: 1px solid rgba(120, 150, 220, 0.12);
-  padding: 9px 11px; display: flex; flex-direction: column; gap: 3px;
+  position: relative; min-height: 56px; border-radius: 10px;
+  border: 1px solid rgba(120, 150, 220, 0.1);
+  padding: 6px 8px; display: flex; flex-direction: column; gap: 2px;
   transition: border-color 0.15s, transform 0.15s;
 }
 .jcal-link:hover .jcal-cell { border-color: rgba(192, 75, 255, 0.45); transform: translateY(-1px); }
@@ -636,14 +636,15 @@ h1, h2, h3 {
    ===================================================================== */
 
 /* ---- Shell : sidebar + zone principale ---- */
-.app-shell { display: flex; min-height: 100vh; position: relative; }
-/* Glows ambiants : diffusent une lueur colorée que les cartes en verre laissent
-   transparaître (backdrop-filter). Fixes, très flous, faible opacité. */
-.app-glow { position: fixed; border-radius: 50%; filter: blur(170px); pointer-events: none; z-index: 0; }
-/* Lueur principale : coin haut-gauche, baigne la zone en diagonale */
-.app-glow-1 { width: 1050px; height: 1050px; background: #4a1fd8; opacity: .36; top: -400px; left: -240px; }
-/* Seconde plus discrète, bas-droite */
-.app-glow-2 { width: 640px; height: 640px; background: #b32fd0; opacity: .12; bottom: -280px; right: -200px; }
+/* Fond global avec matière : dégradé net (haut-gauche plus clair) — pas noir plat. */
+.app-shell {
+  display: flex; min-height: 100vh; position: relative;
+  background: radial-gradient(125% 105% at 12% -8%, #170b38 0%, #0b0620 42%, #060310 100%);
+}
+/* Glows ambiants forts, placés SOUS les cartes (le verre les laisse transparaître). */
+.app-glow { position: fixed; border-radius: 50%; filter: blur(180px); pointer-events: none; z-index: 0; }
+.app-glow-1 { width: 1300px; height: 1300px; background: #5a2ff0; opacity: .55; top: -360px; left: -220px; }
+.app-glow-2 { width: 900px; height: 900px; background: #c23fe0; opacity: .4; top: 24%; right: -280px; }
 .app-side {
   width: 240px; flex-shrink: 0;
   background: rgba(7, 5, 18, .55);
@@ -721,18 +722,26 @@ h1, h2, h3 {
   /* Fond FRANCHEMENT transparent → le flou et le halo ambiant traversent (vrai verre).
      Bordure en dégradé (arête haute plus claire = épaisseur du verre) + reflet interne. */
   background:
-    linear-gradient(180deg, rgba(30, 22, 58, .34), rgba(12, 9, 26, .42)) padding-box,
-    linear-gradient(180deg, rgba(255, 255, 255, .3), rgba(150, 110, 240, .05) 30%, rgba(150, 110, 240, .03)) border-box;
+    linear-gradient(180deg, rgba(34, 24, 66, .16), rgba(15, 10, 30, .22)) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, .32), rgba(150, 110, 240, .05) 30%, rgba(150, 110, 240, .03)) border-box;
   border: 1px solid transparent;
   border-radius: 24px;
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .1);
-  padding: 26px 28px;
+  -webkit-backdrop-filter: blur(26px) saturate(185%);
+  backdrop-filter: blur(26px) saturate(185%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, .34), inset 0 1px 0 rgba(255, 255, 255, .1);
+  padding: 20px 22px;
 }
-.dash .acct2 { gap: 2.2rem; }
-.dash .acct2-console { gap: 2rem; }
-.dash .acct2-analytics, .dash .acct2-hist, .dash .acct2-work { gap: 2rem; }
+.dash .acct2 { gap: 1.4rem; }
+.dash .acct2-console { gap: 1.4rem; }
+.dash .acct2-analytics, .dash .acct2-hist, .dash .acct2-work { gap: 1.4rem; }
+/* Valeurs : police proportionnelle serrée + tabular-nums (le mono restait daté).
+   Le mono ne sert plus qu'aux petits chiffres techniques (dates dans les tables). */
+.dash .jbalance,
+.dash .acct2-stat-k,
+.dash .card-grad .jcard-k,
+.dash .rule-col-v {
+  font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.4px;
+}
 
 /* Bloc dégradé = payout (signature). Progression VERTICALE franche : vif → profond. */
 .dash .card-grad {
@@ -762,40 +771,40 @@ h1, h2, h3 {
 .dash .card-grad .jpayout-figs { gap: 14px; }
 .dash .card-grad .jpayout-figs > div { background: rgba(255, 255, 255, .12); border-radius: 14px; padding: 14px 18px; flex: 1; }
 
-/* Titre de bloc avec icône en carré arrondi (signature de la référence) */
-.ctitle { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+/* Titre de bloc avec icône en carré arrondi. Hiérarchie nette titre > libellé > valeur. */
+.ctitle { display: flex; align-items: center; gap: 11px; margin-bottom: 1.1rem; }
 .ctitle-ic {
-  width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
-  background: rgba(255, 255, 255, .05); color: rgba(226, 216, 255, .82); flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .05); color: rgba(226, 216, 255, .78); flex-shrink: 0;
 }
 .ctitle-ic .lucide { width: 16px; height: 16px; stroke-width: 1.7; }
-.ctitle-h { font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; color: var(--ink); margin: 0; }
+.ctitle-h { font-family: var(--font-display); font-weight: 650; font-size: 1.16rem; color: var(--ink); margin: 0; letter-spacing: -.3px; }
 .ctitle-right { margin-left: auto; }
 
-/* Cartes de métriques : icône + libellé gris en HAUT, valeur très grosse dessous.
-   Aucun trait — juste un fond un peu plus clair. Larges → valeur sur UNE ligne. */
-.dash .acct2-monthstats { gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-.dash .acct2-stat { padding: 18px 20px; border-radius: 16px; border: 0; background: rgba(255, 255, 255, .035); }
-.acct2-stat-head { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); margin-bottom: 10px; }
-.acct2-stat-head .lucide { width: 15px; height: 15px; }
-.dash .acct2-stat-k { font-size: 1.75rem; white-space: nowrap; }
+/* Cartes de métriques compactes : valeur qui remplit, pas de hauteur morte. */
+.dash .acct2-monthstats { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); align-items: start; }
+.dash .acct2-stat { padding: 13px 15px; border-radius: 14px; border: 0; background: rgba(255, 255, 255, .035); }
+.acct2-stat-head { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 500; color: #6a5f88; margin-bottom: 5px; }
+.acct2-stat-head .lucide { width: 14px; height: 14px; }
+.dash .acct2-stat-k { font-size: 1.7rem; line-height: 1.1; white-space: nowrap; }
+.acct2-stat-sub { color: #625783; }
 
-/* Blocs de règles façon « Goal Overview ». Séparation = variation d'opacité
-   (hairline), pas de bordure qui découpe. */
-.acct2-balance { display: flex; flex-direction: column; gap: 4px; }
-.dash .acct2-balance .jbalance { font-size: 2.1rem; letter-spacing: -1px; }
-.rule-blocks { display: flex; flex-direction: column; }
-.rule-block { border: 0; border-radius: 0; padding: 16px 2px; background: transparent; border-top: 1px solid rgba(255, 255, 255, .05); }
-.rule-block:first-child { border-top: 0; padding-top: 2px; }
-.rule-block:last-child { padding-bottom: 2px; }
-.rule-block-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.rule-ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: rgba(255, 255, 255, .04); color: rgba(226, 216, 255, .72); flex-shrink: 0; }
-.rule-ic .lucide { width: 15px; height: 15px; }
-.rule-title { font-weight: 600; font-size: 14px; color: var(--ink); }
+/* Solde */
+.acct2-balance { display: flex; flex-direction: column; gap: 2px; }
+.dash .acct2-balance .jbalance { font-size: 2.15rem; letter-spacing: -1px; }
+
+/* Blocs de règles compacts : grille 2 colonnes, fond légèrement plus clair (séparation
+   par opacité, pas de trait). Le bloc fait la taille de son contenu. */
+.rule-blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 8px; }
+.rule-block { border: 0; border-radius: 12px; padding: 12px 14px; background: rgba(255, 255, 255, .025); }
+.rule-block-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.rule-ic { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(255, 255, 255, .05); color: rgba(226, 216, 255, .7); flex-shrink: 0; }
+.rule-ic .lucide { width: 14px; height: 14px; }
+.rule-title { font-weight: 600; font-size: 13px; color: var(--ink2); }
 .rule-block-head .rbadge { margin-left: auto; }
-.rule-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.rule-col-l { display: block; font-size: 11.5px; color: var(--ink3); margin-bottom: 4px; }
-.rule-col-v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.05rem; }
+.rule-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rule-col-l { display: block; font-size: 10.5px; font-weight: 500; color: #625783; margin-bottom: 2px; }
+.rule-col-v { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.12rem; letter-spacing: -.3px; }
 
 /* Badge d'état façon référence : pastille + point coloré + fond teinté */
 .rbadge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
@@ -810,7 +819,10 @@ h1, h2, h3 {
 .dash .tab { border-radius: 9px; }
 .dash .tab[aria-selected="true"] { background: rgba(150, 110, 240, .2); color: #fff; }
 
-.dash .table-wrap { background: rgba(10, 8, 20, .5); border-color: rgba(150, 110, 240, .1); }
+.dash .table-wrap { background: rgba(10, 8, 20, .4); border-color: rgba(150, 110, 240, .1); }
+/* Tables denses : lignes resserrées, en-têtes discrets */
+.dash .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
+.dash .table td { padding: 8px 12px; }
 
 @media (max-width: 860px) {
   .app-side { display: none; }

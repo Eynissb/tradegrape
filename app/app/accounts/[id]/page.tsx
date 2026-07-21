@@ -574,13 +574,12 @@ export default async function AccountPage({
                         <p className="jsub mt-3">Aucune entrée. Commence par un P&L rapide dans la console.</p>
                       ) : (
                         <div className="table-wrap mt-3">
-                          <table className="table">
+                          <table className="table jrecent">
                             <thead>
                               <tr>
                                 <th>Date</th>
                                 <th>Type</th>
                                 <th className="num">P&L</th>
-                                <th>Tags</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -601,13 +600,6 @@ export default async function AccountPage({
                                       <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
                                         {signed(pnlNet, currency)}
                                       </Link>
-                                    </td>
-                                    <td data-label="Tags">
-                                      <div className="jchips">
-                                        {t.tags.map((tag) => (
-                                          <span key={tag} className="jchip">{tagLabel(tag)}</span>
-                                        ))}
-                                      </div>
                                     </td>
                                   </tr>
                                 );
