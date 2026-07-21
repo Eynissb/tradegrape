@@ -433,6 +433,25 @@ annonce approche et que la firm de l'utilisateur **restreint le news trading**.
 Pas de flux de news temps réel (type Financial Juice) pour l'instant : dépendance à une API
 payante, hors de notre axe. À reconsidérer plus tard.
 
+### Insights & revue (tranche 3)
+
+Éléments discutés, à ne pas perdre. Le journal ne doit pas seulement *enregistrer* : il doit
+*réagir* et *faire revenir*.
+
+- **Insights post-saisie** — après une entrée, un message contextuel tiré du moteur : « ce jour
+  a approché ton daily loss », « ce jour casse ta cohérence », « 3e jour gagnant d'affilée »,
+  « il te reste X $ de marge avant le plancher ». Va plus loin que le simple surlignage du jour
+  ajouté (déjà livré). Réutilise `evaluateAccount` — aucun calcul de règle réimplémenté.
+- **Revue hebdomadaire** — écran de revue *guidée de la semaine* (distinct de la revue de
+  session) : P&L de la semaine, proximité des règles, discipline, meilleur/pire jour, questions
+  de synthèse. C'est ce qui fait rouvrir l'outil le week-end. Nourrit le `digest-emails` (§10).
+- **Compteur de série explicite** — la série en cours (jours gagnants/perdants) déjà calculée
+  dans le récap du mois et l'agrégat, remontée en **indicateur de premier plan** sur la page
+  compte (pas noyée dans une carte de stats).
+- **Drawdown max constaté** — le plus grand repli pic-à-creux réellement subi par le compte
+  (max equity drawdown), calculable par le moteur à partir de la courbe. Métrique attendue par
+  tout trader, aujourd'hui non suivie. À ajouter aux analytics (per-compte et agrégat).
+
 ### Ce qu'on ne fait PAS (journal)
 
 - **Pas de backtesting ni de trade replay** : nécessite des données de marché historiques,
