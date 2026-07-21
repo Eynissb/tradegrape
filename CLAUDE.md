@@ -357,18 +357,23 @@ distribution gains-pertes, séries.
    (`evaluatePayout`) ; saisie rapide journalière + trade détaillé ; tags prédéfinis ;
    édition des entrées ; calendrier mensuel. **(livré)**
 2. **Analytics** — courbe d'équité + plancher, métriques, ventilations, distributions.
+   **(livré, sauf la vue multi-comptes agrégée)** — onglet Analytics dans l'espace de
+   travail ; moteur pur `lib/journal/analytics.ts` (le plancher réutilise `futures-engine`).
    Plus, indispensables :
    - **Plage de dates + filtres** — sélecteur de période (ce mois, ce trimestre, depuis le
      début, personnalisé) qui **recalcule toutes les statistiques**. Sans ça l'outil devient
      inutilisable dès quelques mois d'historique. Filtres complémentaires : par symbole, par
-     setup, par résultat.
+     setup, par résultat. **(livré : sélecteur de période + ventilations par symbole/jour/
+     heure/setup/émotion ; les entrées journalières sont exclues du par-symbole et par-heure)**
    - **Vue multi-comptes agrégée** — sélecteur « Tous les comptes » consolidant la
      performance globale (un trader cumule souvent plusieurs comptes). ⚠️ **Les jauges de
      règles restent par compte** (chaque offre a ses propres règles) ; **seules les analytics
-     s'agrègent**.
+     s'agrègent**. **(à faire)**
    - **Export des données** — export CSV de ses trades par l'utilisateur (confiance + RGPD).
+     **(livré : `GET /app/accounts/<id>/export`)**
 3. **Modules exclusifs** — calculateur de risque avant trade, « aurais-tu passé ailleurs ? »,
-   score de discipline, leaderboard, import CSV des trades. Plus :
+   score de discipline, leaderboard, import CSV des trades **(import CSV livré en avance avec
+   la tranche 2 : adaptateurs Tradovate/NinjaTrader/Rithmic, `lib/journal/trade-csv.ts`)**. Plus :
    - **Notebook** — notes libres non rattachées à un trade (plan de trading, observations de
      marché, règles perso). C'est ce qui fait ouvrir l'outil **les jours sans trade**.
    - **Playbook** — définition structurée des setups (nom, critères d'entrée, gestion,
