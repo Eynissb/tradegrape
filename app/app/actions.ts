@@ -200,7 +200,8 @@ export async function addTrade(formData: FormData) {
   if (error) backWithError(base, error.message);
 
   revalidatePath(base);
-  redirect(base);
+  // Retour sur le mois de l'entrée, jour surligné → confirmation visuelle de la saisie.
+  redirect(`${base}?view=calendrier&month=${date.slice(0, 7)}&highlight=${date}`);
 }
 
 export async function updateTrade(formData: FormData) {
@@ -224,7 +225,7 @@ export async function updateTrade(formData: FormData) {
   if (error) backWithError(`/app/accounts/${accountId}/trades/${id}`, error.message);
 
   revalidatePath(base);
-  redirect(base);
+  redirect(`${base}?view=calendrier&month=${date.slice(0, 7)}&highlight=${date}`);
 }
 
 export async function deleteTrade(formData: FormData) {

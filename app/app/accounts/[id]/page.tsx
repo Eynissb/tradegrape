@@ -73,10 +73,10 @@ export default async function AccountPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; month?: string; day?: string; view?: string }>;
+  searchParams: Promise<{ error?: string; month?: string; day?: string; view?: string; highlight?: string }>;
 }) {
   const { id } = await params;
-  const { error, month: monthParam, day: dayParam, view: viewParam } = await searchParams;
+  const { error, month: monthParam, day: dayParam, view: viewParam, highlight: highlightParam } = await searchParams;
   const view: AccountView = viewParam === 'historique' ? 'historique' : 'calendrier';
   const today = new Date().toISOString().slice(0, 10);
 
@@ -191,7 +191,7 @@ export default async function AccountPage({
   const recentTrades = trades.slice(0, 8);
 
   return (
-    <main className="jwrap jwrap-wide">
+    <main className="jwrap jwrap-acct">
       <nav className="jcrumb">
         <Link href="/app" className="link-accent">
           Mes comptes
@@ -413,6 +413,7 @@ export default async function AccountPage({
                 view={monthView}
                 accountId={account.id}
                 activeDay={dayParam}
+                addedDay={highlightParam}
                 consistency={consistencyInfo}
               />
 

@@ -63,11 +63,13 @@ export default function MonthCalendar({
   view,
   accountId,
   activeDay,
+  addedDay,
   consistency,
 }: {
   view: MonthView;
   accountId: string;
   activeDay?: string;
+  addedDay?: string;
   consistency?: { date: string; sharePct: number; limitPct: number } | null;
 }) {
   const mk = monthKey(view.year, view.month);
@@ -96,12 +98,13 @@ export default function MonthCalendar({
           <div key={wi} className="jcal-row jcal-week">
             {week.days.map((c) => {
               const isActive = activeDay === c.date;
+              const isAdded = addedDay === c.date && c.inMonth;
               const inner = <DayContent c={c} maxAbs={view.maxAbs} />;
               return c.inMonth ? (
                 <Link
                   key={c.date}
                   href={`/app/accounts/${accountId}?view=calendrier&month=${mk}&day=${c.date}`}
-                  className={`jcal-link${isActive ? ' is-active' : ''}`}
+                  className={`jcal-link${isActive ? ' is-active' : ''}${isAdded ? ' is-added' : ''}`}
                 >
                   {inner}
                 </Link>

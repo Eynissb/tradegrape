@@ -335,6 +335,9 @@ h1, h2, h3 {
 .jwrap { max-width: var(--container); margin: 0 auto; padding: 32px var(--container-pad) 72px; position: relative; z-index: 1; }
 .jwrap-narrow { max-width: var(--container-narrow); }
 .jwrap-wide { max-width: var(--container); }
+/* Page compte : largeur calée sur son contenu (console 600 + espace 1040) pour
+   que les deux colonnes se touchent — pas de marge de centrage entre elles. */
+.jwrap-acct { max-width: min(1720px, 94vw); }
 
 /* ===== Page compte — Architecture B ===================================== *
  * Console gauche (état/règles + saisie, toujours visibles) + espace de
@@ -367,7 +370,7 @@ h1, h2, h3 {
 /* Vue calendrier : calendrier borné (~1040px) puis un bandeau plein largeur
  * dessous (récap du mois + dernières entrées, ou détail du jour cliqué).
  * Pile centrée dans l'espace de travail → pas d'aplat latéral aux grandes largeurs. */
-.acct2-cal { display: flex; flex-direction: column; gap: 1.4rem; max-width: 1040px; margin: 0 auto; }
+.acct2-cal { display: flex; flex-direction: column; gap: 1.4rem; max-width: 1040px; }
 .acct2-below { display: flex; flex-direction: column; gap: 1.2rem; }
 .acct2-below-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 
@@ -496,6 +499,14 @@ h1, h2, h3 {
 .jcal-link { display: block; text-decoration: none; border-radius: 10px; }
 .jcal-link.is-disabled { pointer-events: none; }
 .jcal-link.is-active .jcal-cell { outline: 2px solid var(--c2); outline-offset: -2px; }
+/* Confirmation visuelle de la dernière saisie : le jour ajouté/modifié pulse. */
+.jcal-link.is-added .jcal-cell { outline: 2px solid var(--c2); outline-offset: -2px; animation: jcal-added 1.1s ease-out 2; }
+@keyframes jcal-added {
+  0% { box-shadow: 0 0 0 0 rgba(192, 75, 255, 0.55); }
+  70% { box-shadow: 0 0 0 10px rgba(192, 75, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(192, 75, 255, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .jcal-link.is-added .jcal-cell { animation: none; } }
 
 .jcal-cell {
   position: relative; min-height: 88px; border-radius: 12px;
