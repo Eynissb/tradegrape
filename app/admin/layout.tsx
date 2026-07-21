@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getProfile, isStaff } from '@/lib/auth/roles';
 import { signout } from '@/app/(auth)/actions';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
 
 /**
  * Garde /admin : staff uniquement (owner, admin, editor, moderator, analyst).
@@ -40,11 +42,9 @@ export default async function AdminLayout({
           </nav>
 
           <div className="admin-user">
-            <span className="admin-role num">{profile.role}</span>
+            <Badge variant="brand" mono>{profile.role}</Badge>
             <form action={signout}>
-              <button type="submit" className="admin-signout">
-                Déconnexion
-              </button>
+              <Button type="submit" variant="ghost" size="sm">Déconnexion</Button>
             </form>
           </div>
         </div>

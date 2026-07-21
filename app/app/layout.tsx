@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile, isStaff } from '@/lib/auth/roles';
 import { signout } from '@/app/(auth)/actions';
+import Button from '@/components/ui/Button';
 
 /** Garde /app : utilisateur connecté requis, + chrome commun du journal. */
 export default async function AppLayout({
@@ -41,9 +42,7 @@ export default async function AppLayout({
           </nav>
 
           <form action={signout}>
-            <button type="submit" className="app-signout">
-              Déconnexion
-            </button>
+            <Button type="submit" variant="ghost" size="sm">Déconnexion</Button>
           </form>
         </div>
       </header>
