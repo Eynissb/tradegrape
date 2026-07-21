@@ -490,3 +490,81 @@ Aucun élément natif du navigateur ne doit casser le thème sombre :
   scroller sur un champ montant focalisé ne doit jamais changer sa valeur en silence.
 - **Autofill Chrome neutralisé** (le fond jaune casserait le verre) ; `::selection`,
   `::placeholder`, scrollbar et `::-webkit-search-cancel-button` thémés.
+
+---
+
+## 12. Corrections de schéma à venir
+
+> **Ne rien coder maintenant — à traiter APRÈS le journal.** Mécanismes réels relevés à la
+> collecte des données de 13 firms (Apex, Topstep, Lucid, Tradeify, Take Profit Trader,
+> Phidias, TradeDay, FFN, Bulenox, My Funded Futures, Alpha Futures, FundedNext, YRM) que le
+> schéma actuel ne modélise pas. Liste tenue pour ne pas se perdre.
+
+### Priorité haute — justesse du moteur (1 à 3)
+
+**1. Le drawdown change entre évaluation et compte financé.**
+Take Profit Trader : **EOD en Test, trailing intraday en PRO**. TradeDay QuickPay : EOD ou
+intraday au choix en évaluation, mais **toujours trailing intraday une fois financé** — même
+si l'éval a été passée en EOD. Le champ `funded_drawdown_type` existe déjà :
+**vérifier que le moteur l'utilise réellement selon le statut du compte** (`phase`/`status`),
+au lieu d'appliquer partout le drawdown d'évaluation.
+
+**2. Le verrouillage du trailing varie selon la PLATEFORME, pas seulement l'offre.**
+Apex : le trailing se **verrouille au capital initial sur Rithmic et WealthCharts**, mais
+**ne se verrouille jamais sur Tradovate**. Le `drawdown_locks_at_breakeven` doit pouvoir
+varier par (offre × plateforme). Le moteur (`computeDrawdownFloor`, cap `min(rawFloor, start)`)
+devra recevoir ce paramètre au lieu de toujours verrouiller au capital.
+
+**3. Splits par palier (le `profit_split` unique ne suffit pas).**
+TradeDay QuickPay : **50/50 sous 4 000 $ de profit puis 80/20**. Bulenox et Tradeify Growth :
+**100% sur les premiers 10 000–15 000 $ cumulés puis 90/10**. Phidias Premium : **progressif
+de 75% à 100% sur les cinq premiers payouts**. Topstep : 100% sur les premiers 10 000 $ pour
+les comptes d'avant janvier 2026. → **table de paliers de split** (seuil cumulé ou n° de
+payout → pourcentage), pas une valeur scalaire.
+
+### Priorité moyenne — comparateur (4 à 10)
+
+**4. Cohérence progressive.** Tradeify Lightning : **20% au 1er payout, 25% au 2e, 30% ensuite**.
+→ paliers de `consistency_pct` indexés sur le n° de payout.
+
+**5. Deux chemins de payout pour une même offre.** Topstep : **Standard** (5 jours gagnants à
+150 $, plafonds 2000/3000/5000) **ou Consistency** (3 jours, cohérence 40%, plafonds
+3000/4000/6000). Tradeify Select : **Flex ou Daily**, choix permanent, règles complètement
+différentes. → pouvoir **attacher plusieurs variantes de payout** à une offre (le
+`rules_snapshot` du compte fige la variante choisie).
+
+**6. Cohérence calculée différemment + effet du dépassement.** FundedNext calcule le meilleur
+jour **sur l'objectif de profit, pas sur le profit total**. Et un dépassement **augmente
+l'objectif au lieu de faire échouer** — même mécanisme chez Take Profit Trader. → champ
+**méthode de calcul de cohérence** (`total` | `objectif`) + champ **effet en cas de
+dépassement** (`fail` | `raise_target`). Impacte directement `evaluateFuturesAccount`.
+
+**7. Phase intermédiaire.** FFN a une phase d'**« exhibition »** entre l'évaluation et le
+financé, avec son propre buffer à construire. Bulenox : **trois étapes — Qualification,
+Master, Funded**. → le modèle `phase` doit accepter plus que `evaluation`/`funded`.
+
+**8. Options payantes à l'achat.** Topstep : **ajouter un DLL volontaire** donne une remise
+et **double le plafond de payout**. FundedNext Flex : **option payante 80% → 90% de split**.
+→ table d'**options d'offre** (surcoût + effets sur les règles), figées au snapshot du compte.
+
+**9. Expiration et resets.** Apex : **30 jours calendaires, aucun reset**. Topstep : **aucune
+limite de temps**. Bulenox : **reset à 78 $**. FFN : **reset à 100 $**. → ajouter
+`eval_duration_days` et `reset_fee` sur l'offre.
+
+**10. Table d'événements de firme (`firm_events`).** Tracer changements de règles, pertes de
+plateforme, suppressions de plan, retards de payout signalés. Réel : **Alpha Futures a perdu
+NinjaTrader et Tradovate le 12 juillet 2026** et **supprimé son plan Premium en transformant
+des payouts dus en remboursements**. Table à prévoir :
+
+```
+firm_events (
+  firm_id       uuid references firms(id) on delete cascade,
+  event_date    date,
+  type          text,        -- rule_change | platform_lost | plan_removed | payout_delay …
+  description   text,
+  health_impact int,         -- delta appliqué au health score
+  source_url    text
+)
+```
+
+Alimente le **health score** (§10) et l'historique de fiabilité affiché au comparateur.
