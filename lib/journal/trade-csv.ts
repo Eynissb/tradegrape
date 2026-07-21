@@ -47,6 +47,11 @@ interface Adapter {
   /** En-têtes attendus, montrés à l'utilisateur. */
   expected: string;
   map: FieldMap;
+  /**
+   * Pas de colonne de sens explicite (Tradovate) : déduire long/short de l'ordre
+   * des deux horodatages (achat avant vente = long).
+   */
+  inferDirectionFromFills?: boolean;
 }
 
 const norm = (h: string): string => h.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -55,6 +60,7 @@ export const ADAPTERS: Record<ImportPlatform, Adapter> = {
   tradovate: {
     label: 'Tradovate',
     expected: 'symbol, qty, buyPrice, sellPrice, pnl, boughtTimestamp, soldTimestamp',
+    inferDirectionFromFills: true,
     map: {
       symbol: ['symbol', 'contract'],
       pnl: ['pnl', 'realizedpnl', 'netpnl', 'pl', 'profit'],
@@ -101,16 +107,30 @@ export const ADAPTERS: Record<ImportPlatform, Adapter> = {
 
 const pad2 = (s: string): string => (s.length === 1 ? `0${s}` : s);
 
-/** Parse un nombre tolérant : symboles monétaires, parenthèses = négatif, séparateurs. */
+/**
+ * Parse un nombre tolérant. Accepte toutes les variantes des exports réels :
+ *   $30.50 · $(116.50) · ($116.50) · (116.50) · -$116.50 · -116.50 · 1,234.56
+ *   $1,234.56 · $(1,234.56)
+ * Les symboles monétaires sont retirés AVANT le test des parenthèses comptables,
+ * sinon la convention Tradovate « $(116.50) » (perte) passe à travers et la ligne
+ * est rejetée — un compte perdant paraîtrait gagnant.
+ */
 export function parseNum(raw: string): number | null {
   let s = raw.trim();
   if (s === '') return null;
+  // 1) symboles monétaires et espaces d'abord (ils peuvent entourer les parenthèses)
+  s = s.replace(/[$€£\s]/g, '');
+  // 2) signe : parenthèses comptables OU moins explicite
   let neg = false;
   if (/^\(.*\)$/.test(s)) {
     neg = true;
     s = s.slice(1, -1);
+  } else if (s.startsWith('-')) {
+    neg = true;
+    s = s.slice(1);
   }
-  s = s.replace(/[$€£\s]/g, '');
+  if (s === '') return null;
+  // 3) séparateurs de milliers / décimale
   if (s.includes('.') && s.includes(',')) {
     s = s.replace(/,/g, ''); // virgules = milliers
   } else if (s.includes(',') && !s.includes('.')) {
@@ -213,16 +233,27 @@ export function parseTradesCsv(
     const pnl = parseNum(pick(index, cells, adapter.map.pnl));
     if (pnl === null) errors.push(`Ligne ${ln} — P&L manquant ou invalide`);
 
-    const closeRaw = pick(index, cells, adapter.map.closeTime) || pick(index, cells, adapter.map.openTime);
-    const dt = parseDateTime(closeRaw);
+    // La clôture est le PLUS RÉCENT des deux horodatages : sur un short, l'achat
+    // de couverture est postérieur à la vente d'ouverture, et les colonnes ne sont
+    // pas dans l'ordre chronologique. La date du trade = clôture, pas premier fill.
+    const dtClose = parseDateTime(pick(index, cells, adapter.map.closeTime));
+    const dtOpen = parseDateTime(pick(index, cells, adapter.map.openTime));
+    let dt = dtClose ?? dtOpen;
+    if (dtClose && dtOpen) dt = dtClose.iso >= dtOpen.iso ? dtClose : dtOpen;
     if (!dt) errors.push(`Ligne ${ln} — date/heure manquante ou invalide`);
+
+    let direction = normDirection(pick(index, cells, adapter.map.direction));
+    if (!direction && adapter.inferDirectionFromFills && dtClose && dtOpen) {
+      // closeTime = vente, openTime = achat ⇒ achat avant vente = long.
+      direction = dtOpen.iso < dtClose.iso ? 'long' : 'short';
+    }
 
     trades.push({
       payload: {
         trade_date: dt?.date ?? '',
         closed_at: dt?.iso ?? '',
         symbol,
-        direction: normDirection(pick(index, cells, adapter.map.direction)),
+        direction,
         quantity: parseNum(pick(index, cells, adapter.map.qty)),
         entry_price: parseNum(pick(index, cells, adapter.map.entry)),
         exit_price: parseNum(pick(index, cells, adapter.map.exit)),

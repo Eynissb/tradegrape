@@ -12,6 +12,17 @@ describe('parseNum', () => {
   it('virgule décimale européenne', () => {
     expect(parseNum('12,5')).toBe(12.5);
   });
+
+  // Toutes les variantes des exports réels — $(116.50) est le cas Tradovate qui échouait.
+  it('$30.50 → 30.5', () => expect(parseNum('$30.50')).toBe(30.5));
+  it('$(116.50) → -116.5 (perte Tradovate, cas réel du bug)', () => expect(parseNum('$(116.50)')).toBe(-116.5));
+  it('($116.50) → -116.5', () => expect(parseNum('($116.50)')).toBe(-116.5));
+  it('(116.50) → -116.5', () => expect(parseNum('(116.50)')).toBe(-116.5));
+  it('-$116.50 → -116.5', () => expect(parseNum('-$116.50')).toBe(-116.5));
+  it('-116.50 → -116.5', () => expect(parseNum('-116.50')).toBe(-116.5));
+  it('1,234.56 → 1234.56', () => expect(parseNum('1,234.56')).toBe(1234.56));
+  it('$1,234.56 → 1234.56', () => expect(parseNum('$1,234.56')).toBe(1234.56));
+  it('$(1,234.56) → -1234.56', () => expect(parseNum('$(1,234.56)')).toBe(-1234.56));
 });
 
 describe('parseDateTime', () => {
@@ -51,6 +62,46 @@ describe('parseTradesCsv — Tradovate', () => {
     expect(trades[0].payload.closed_at).toBe('2026-07-20T09:45:00.000Z');
     expect(trades[0].payload.entry_price).toBe(5000.25);
     expect(trades[1].payload.pnl).toBe(-100); // parenthèses = négatif
+  });
+});
+
+describe('parseTradesCsv — export Tradovate RÉEL', () => {
+  // En-tête et lignes réels (CRLF), avec la convention comptable $(...) et des
+  // horodatages non chronologiques sur les shorts (achat de couverture après vente).
+  const REAL = [
+    'symbol,_priceFormat,_priceFormatType,_tickSize,buyFillId,sellFillId,qty,buyPrice,sellPrice,pnl,boughtTimestamp,soldTimestamp,duration',
+    'MNQU6,-2,0,0.25,111,222,1,29514.00,29529.25,$30.50,07/16/2026 15:32:03,07/16/2026 15:31:56,7sec',
+    'MNQU6,-2,0,0.25,333,444,1,29379.50,29321.25,$(116.50),07/16/2026 15:41:19,07/16/2026 15:51:49,10min 29sec',
+    'MNQU6,-2,0,0.25,555,666,1,29465.00,29423.50,$(83.00),07/16/2026 16:17:44,07/16/2026 16:05:57,11min 46sec',
+  ].join('\r\n');
+
+  it('importe les pertes ET les gains (aucune ligne rejetée)', () => {
+    const { trades, headerError } = parseTradesCsv(REAL, 'tradovate');
+    expect(headerError).toBeUndefined();
+    expect(trades).toHaveLength(3);
+    expect(trades.every((t) => t.errors.length === 0)).toBe(true);
+    expect(trades.map((t) => t.payload.pnl)).toEqual([30.5, -116.5, -83]);
+  });
+
+  it('la date/heure = clôture (horodatage le plus récent), même sur un short', () => {
+    const { trades } = parseTradesCsv(REAL, 'tradovate');
+    // Short : vendu 15:31:56 puis racheté 15:32:03 → clôture = 15:32:03
+    expect(trades[0].payload.closed_at).toBe('2026-07-16T15:32:03.000Z');
+    expect(trades[0].payload.direction).toBe('short');
+    // Long : acheté 15:41:19 puis vendu 15:51:49 → clôture = 15:51:49
+    expect(trades[1].payload.closed_at).toBe('2026-07-16T15:51:49.000Z');
+    expect(trades[1].payload.direction).toBe('long');
+    // Short : vendu 16:05:57 puis racheté 16:17:44 → clôture = 16:17:44
+    expect(trades[2].payload.closed_at).toBe('2026-07-16T16:17:44.000Z');
+    expect(trades[2].payload.direction).toBe('short');
+    expect(trades[2].payload.trade_date).toBe('2026-07-16');
+  });
+
+  it('CRLF : la dernière colonne (duration) ne pollue aucun champ utile', () => {
+    const { trades } = parseTradesCsv(REAL, 'tradovate');
+    // Le symbole et le P&L restent propres malgré les fins de ligne \r\n.
+    expect(trades[0].payload.symbol).toBe('MNQU6');
+    expect(trades[2].payload.pnl).toBe(-83);
   });
 });
 
