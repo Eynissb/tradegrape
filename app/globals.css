@@ -187,30 +187,40 @@ h1, h2, h3 {
 .admin-bar-in {
   max-width: var(--container); margin: 0 auto;
   padding: 13px var(--container-pad);
-  display: flex; align-items: center; gap: 22px;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+/* Sur écran étroit la barre s'empile au lieu de pousser la page en débordement. */
+@media (max-width: 640px) {
+  .admin-bar-in { gap: 10px 14px; }
+  .admin-nav { order: 3; flex-basis: 100%; gap: 14px; flex-wrap: wrap; }
+  .admin-user { margin-left: auto; }
 }
 .admin-brand {
   display: flex; align-items: center; gap: 10px;
   font-family: var(--font-display); font-weight: 700; font-size: 17px;
   color: var(--ink); text-decoration: none; letter-spacing: -0.4px;
 }
-.admin-pill {
+/* Pastille « admin » : contrôle de niveau 3, plus un contour violet. */
+.ui .admin-pill {
   font-family: var(--font-body); font-weight: 600; font-size: 11px;
   text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--c2); border: 1px solid rgba(192, 75, 255, 0.35);
-  padding: 2px 8px; border-radius: 20px;
+  color: var(--ink2); border: 0; padding: 3px 9px; border-radius: var(--r-pill);
+  background: var(--elev-3-bg); box-shadow: var(--elev-3-shadow);
 }
 .admin-nav { display: flex; align-items: center; gap: 18px; flex: 1; }
-.admin-nav a { color: var(--ink2); text-decoration: none; font-size: 14px; font-weight: 500; }
-.admin-nav a:hover { color: var(--ink); }
-.admin-soon { color: var(--ink3); font-size: 12.5px; }
+.ui .admin-nav a { color: var(--ink2); text-decoration: none; font-size: 14px; font-weight: 500; }
+.ui .admin-nav a:hover { color: var(--ink); }
+.ui .admin-soon { color: var(--ink3); font-size: 12.5px; }
 .admin-user { display: flex; align-items: center; gap: 14px; }
-.admin-role { font-size: 12px; color: var(--c2); }
-.admin-signout {
-  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(120, 150, 220, 0.25);
-  color: var(--ink2); font-size: 13px; padding: 7px 13px; border-radius: 9px; cursor: pointer;
+/* Le rôle est une DONNÉE : il ne porte pas l'accent de marque. */
+.ui .admin-role { font-size: 12px; color: var(--ink3); }
+.ui .admin-signout {
+  height: var(--h-control-sm); padding: 0 14px; border-radius: var(--r-pill);
+  border: 0; color: var(--ink2); font-size: 13px; cursor: pointer;
+  background: var(--ctl-bg); box-shadow: var(--ctl-shadow);
+  transition: background .15s, color .15s;
 }
-.admin-signout:hover { color: var(--ink); }
+.ui .admin-signout:hover { color: var(--ink); background: var(--ctl-bg-hover); }
 
 .admin-main { flex: 1; }
 .admin-page { max-width: var(--container); margin: 0 auto; padding: 32px var(--container-pad) 64px; }
@@ -220,20 +230,21 @@ h1, h2, h3 {
 .admin-sub { color: var(--ink2); font-size: 14px; margin-top: 4px; }
 .admin-crumb { font-size: 13px; color: var(--ink3); margin-bottom: 8px; }
 
-.admin-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
-.admin-card {
+.admin-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 24px; align-items: start; }
+.ui .admin-card {
   display: flex; flex-direction: column; gap: 4px;
-  background: var(--card); border: 1px solid var(--card-brd); border-radius: var(--r-lg);
-  padding: 20px 22px; text-decoration: none; color: var(--ink);
-  transition: transform 0.2s, border-color 0.2s;
+  border: 0; border-radius: 20px; padding: 20px 22px; text-decoration: none; color: var(--ink);
+  background: var(--elev-1-bg); box-shadow: var(--elev-1-shadow);
+  transition: transform .2s, box-shadow .2s;
 }
-.admin-card:not(.is-disabled):hover { transform: translateY(-2px); border-color: rgba(192, 75, 255, 0.35); }
+/* Survol : la carte monte. Plus de contour violet. */
+.ui .admin-card:not(.is-disabled):hover { transform: translateY(-2px); box-shadow: var(--elev-1-shadow), 0 14px 32px rgba(0, 0, 0, .4); }
 .admin-card.is-disabled { opacity: 0.5; }
-.admin-card-k { font-family: var(--font-display); font-weight: 700; font-size: 30px; }
-.admin-card-l { font-weight: 600; }
-.admin-card-d { font-size: 13px; color: var(--ink3); }
+.ui .admin-card-k { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 30px; letter-spacing: -.5px; color: var(--ink); }
+.ui .admin-card-l { font-weight: 600; color: var(--ink); }
+.ui .admin-card-d { font-size: 13px; color: var(--ink3); }
 
-.admin-empty { padding: 26px; text-align: center; color: var(--ink2); }
+.ui .admin-empty { padding: 26px; text-align: center; color: var(--ink2); }
 
 .admin-table-wrap { overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--card-brd); }
 .admin-table { width: 100%; border-collapse: collapse; background: var(--card); font-size: 14px; }
@@ -245,29 +256,41 @@ h1, h2, h3 {
 .admin-table td { padding: 13px 16px; border-bottom: 1px solid rgba(150, 110, 240, 0.08); color: var(--ink2); }
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table tr:hover td { background: rgba(150, 110, 240, 0.05); }
-.admin-strong { color: var(--ink); font-weight: 600; }
+.ui .admin-strong { color: var(--ink); font-weight: 600; }
 .admin-row-actions { text-align: right; }
-.admin-badge {
-  font-size: 12px; padding: 3px 10px; border-radius: 20px;
-  background: rgba(120, 150, 220, 0.14); color: var(--ink3);
+/* Badge d'état : surface neutre en relief ; seul l'état « publié » se teinte. */
+.ui .admin-badge {
+  font-size: 12px; padding: 3px 10px; border-radius: var(--r-pill); border: 0;
+  background: var(--elev-3-bg); box-shadow: var(--elev-3-shadow); color: var(--ink3);
 }
-.admin-badge.is-on { background: rgba(56, 255, 176, 0.12); color: var(--lime); }
+.ui .admin-badge.is-on {
+  background: linear-gradient(180deg, rgba(56, 255, 176, .16), rgba(56, 255, 176, .06));
+  box-shadow: inset 0 1px 0 rgba(56, 255, 176, .30), inset 0 -1px 0 rgba(0, 0, 0, .22), 0 1px 2px rgba(0, 0, 0, .35);
+  color: var(--win);
+}
 
 /* Titre + action rapide (toggle de publication) */
 .admin-title-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 
 /* Toggle Publié/Brouillon — le bouton EST le toggle */
-.admin-toggle {
+.ui .admin-toggle {
   display: inline-flex; align-items: center; gap: 7px;
-  background: rgba(120, 150, 220, 0.1); border: 1px solid rgba(120, 150, 220, 0.22);
-  color: var(--ink3); font-family: var(--font-body); font-size: 12px; font-weight: 600;
-  padding: 5px 12px 5px 10px; border-radius: 20px; cursor: pointer; transition: all 0.18s;
+  height: var(--h-control-sm); padding: 0 12px; border: 0; border-radius: var(--r-pill);
+  color: var(--ink2); font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--ctl-bg); box-shadow: var(--ctl-shadow);
+  transition: background .15s, box-shadow .15s, color .15s, transform .1s;
 }
-.admin-toggle:hover { border-color: rgba(192, 75, 255, 0.45); color: var(--ink2); }
-.admin-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.admin-toggle-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.55; }
-.admin-toggle.is-on { background: rgba(56, 255, 176, 0.12); border-color: rgba(56, 255, 176, 0.38); color: var(--lime); }
-.admin-toggle.is-on .admin-toggle-dot { opacity: 1; box-shadow: 0 0 8px var(--lime); }
+.ui .admin-toggle:hover { color: var(--ink); background: var(--ctl-bg-hover); }
+.ui .admin-toggle:active { transform: translateY(1px); background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); }
+.ui .admin-toggle:focus-visible { outline: var(--focus-accent); outline-offset: 2px; }
+.admin-toggle-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+/* Publié = état, donc arête haute à la teinte de l'état (jamais blanche). */
+.ui .admin-toggle.is-on {
+  color: var(--win);
+  background: linear-gradient(180deg, rgba(56, 255, 176, .18), rgba(56, 255, 176, .06));
+  box-shadow: inset 0 1px 0 rgba(56, 255, 176, .32), inset 0 -1px 0 rgba(0, 0, 0, .26), 0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .3);
+}
+.ui .admin-toggle.is-on .admin-toggle-dot { opacity: 1; }
 
 .admin-hidden {
   font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
@@ -1101,7 +1124,6 @@ body::before {
 /* (Lignes de données, listes clé-valeur et défilement discret : design-tokens.css.) */
 .ui .data-num { font-variant-numeric: tabular-nums; }
 .ui .table-wrap { overflow-x: visible; background: transparent; border: 0; }
-.ui .table-scroll > .data-list { min-width: 640px; }
 .ui .acct2-empty { min-height: 0; }
 
 /* ===== Calendrier — quatre traitements distincts ===== */

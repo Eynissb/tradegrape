@@ -8,6 +8,9 @@ import { toggleFirmPublish } from './actions';
 
 export const metadata = { title: 'Firms — Admin Tradegrape' };
 
+/* Colonnes déterministes : en-tête et lignes sont deux grilles distinctes. */
+const COLS_FIRMS = 'minmax(0,1.2fr) minmax(0,1fr) 100px 84px 116px 88px';
+
 interface FirmRow {
   id: string;
   name: string;
@@ -55,46 +58,36 @@ export default async function FirmsList() {
           }
         />
       ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Slug</th>
-                <th>Marché</th>
-                <th className="num">Health</th>
-                <th>Statut</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {firms.map((f) => (
-                <tr key={f.id}>
-                  <td data-label="Nom">
-                    <span className="cell-firm">{f.name}</span>
-                  </td>
-                  <td data-label="Slug" className="mono" style={{ color: 'var(--text-3)' }}>
-                    {f.slug}
-                  </td>
-                  <td data-label="Marché">{f.market_type}</td>
-                  <td data-label="Health" className="num">{f.health_score ?? '—'}</td>
-                  <td data-label="Statut">
-                    <PublishToggle
-                      action={toggleFirmPublish}
-                      id={f.id}
-                      isPublished={f.is_published}
-                      back="/admin/firms"
-                    />
-                  </td>
-                  <td className="admin-row-actions">
-                    <Link href={`/admin/firms/${f.id}`} className="link-accent">
-                      Éditer
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="table-scroll">
+          <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_FIRMS }}>
+            <div className="data-head" role="row">
+              <span role="columnheader">Nom</span>
+              <span role="columnheader">Slug</span>
+              <span role="columnheader">Marché</span>
+              <span role="columnheader" style={{ textAlign: 'right' }}>Health</span>
+              <span role="columnheader">Statut</span>
+              <span role="columnheader"></span>
+            </div>
+            {firms.map((f) => (
+              <div key={f.id} className="data-row" role="row">
+                <span role="cell" data-label="Nom" className="admin-strong">{f.name}</span>
+                <span role="cell" data-label="Slug" className="mono" style={{ color: 'var(--ink3)' }}>{f.slug}</span>
+                <span role="cell" data-label="Marché">{f.market_type}</span>
+                <span role="cell" data-label="Health" className="num" style={{ textAlign: 'right' }}>{f.health_score ?? '—'}</span>
+                <span role="cell" data-label="Statut">
+                  <PublishToggle
+                    action={toggleFirmPublish}
+                    id={f.id}
+                    isPublished={f.is_published}
+                    back="/admin/firms"
+                  />
+                </span>
+                <span role="cell" className="data-actions">
+                  <Link href={`/admin/firms/${f.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -324,6 +324,36 @@
 .ui .kv-key .kv-meta { color: var(--ink3); font-size: 11px; }
 .ui .kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
 
+/* Au-dessus du seuil d'empilement, le contenu ne descend pas sous sa largeur
+   utile : mieux vaut défiler que compresser des colonnes illisibles. */
+.ui .table-scroll > .data-list { min-width: 640px; }
+
+/* Empilement mobile — reprend le rôle que `data-label` jouait sur les `<table>`
+   (`.table td::before { content: attr(data-label) }`). Sans cette règle, une
+   grille convertie se contenterait de défiler horizontalement là où le tableau
+   se pliait en fiches lisibles. L'attribut garde donc sa raison d'être : il
+   porte le libellé de colonne quand l'en-tête disparaît. */
+@media (max-width: 640px) {
+  .ui .data-head { display: none; }
+  .ui .data-row {
+    grid-template-columns: 1fr;
+    gap: 0; padding: 12px 14px; min-height: 0;
+  }
+  .ui .data-row > * {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    white-space: normal; overflow: visible; text-align: left;
+    padding: .3rem 0;
+  }
+  .ui .data-row > [data-label]::before {
+    content: attr(data-label);
+    flex: none; color: var(--ink3);
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  }
+  /* Plus rien à faire défiler une fois les lignes empilées. */
+  .ui .table-scroll { overflow-x: visible; }
+  .ui .table-scroll > .data-list { min-width: 0; }
+}
+
 /* Défilement horizontal résiduel : discret, invisible au repos. */
 .ui .table-scroll {
   overflow-x: auto;
