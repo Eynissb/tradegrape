@@ -94,10 +94,10 @@ export default async function AggregateAnalytics({
         <div className="agg-controls">
           <AccountPicker accounts={accounts.map((x) => ({ id: x.id, label: x.label ?? 'Compte' }))} value="all" />
           <AnalyticsControls
+            basePath="/app/analytics"
             preset={a.range.preset}
             from={a.range.from}
             to={a.range.to}
-            buildHref={(p, extra) => `/app/analytics?period=${p}${extra}`}
           />
         </div>
 

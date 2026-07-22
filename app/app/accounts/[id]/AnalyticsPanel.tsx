@@ -16,7 +16,13 @@ export default function AnalyticsPanel({
 }) {
   return (
     <div className="acct2-analytics">
-      <AnalyticsControls accountId={accountId} preset={analytics.range.preset} from={analytics.range.from} to={analytics.range.to} />
+      <AnalyticsControls
+        basePath={`/app/accounts/${accountId}`}
+        baseParams={{ view: 'analytics' }}
+        preset={analytics.range.preset}
+        from={analytics.range.from}
+        to={analytics.range.to}
+      />
 
       {analytics.rangeEntries === 0 ? (
         <div className="card acct2-empty">Aucune entrée sur cette période. Change de période ou saisis un P&L.</div>

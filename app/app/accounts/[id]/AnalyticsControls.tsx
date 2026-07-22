@@ -12,29 +12,34 @@ import type { PeriodPreset } from '@/lib/journal/analytics';
  * recalculé côté serveur. La période personnalisée ouvre deux sélecteurs de date.
  */
 export default function AnalyticsControls({
-  accountId,
+  basePath,
+  baseParams,
   preset,
   from,
   to,
-  buildHref,
 }: {
-  accountId?: string;
+  /** Chemin cible, ex. « /app/analytics » ou « /app/accounts/<id> ». */
+  basePath: string;
+  /**
+   * Paramètres d'URL constants à reconduire, ex. `{ view: 'analytics' }`.
+   * Données PURES, jamais une fonction : ce composant est un Client Component
+   * et React ne peut pas sérialiser une closure passée depuis le serveur.
+   */
+  baseParams?: Record<string, string>;
   preset: PeriodPreset;
   from: string;
   to: string;
-  /** Override du lien (vue agrégée). Par défaut : l'onglet Analytics du compte. */
-  buildHref?: (period: PeriodPreset, extra: string) => string;
 }) {
   const router = useRouter();
   const [custom, setCustom] = useState(preset === 'custom');
   const [cFrom, setCFrom] = useState(from);
   const [cTo, setCTo] = useState(to);
 
-  function go(period: PeriodPreset, extra = '') {
-    const href = buildHref
-      ? buildHref(period, extra)
-      : `/app/accounts/${accountId}?view=analytics&period=${period}${extra}`;
-    router.push(href);
+  function go(period: PeriodPreset, extra?: Record<string, string>) {
+    const params = new URLSearchParams(baseParams);
+    params.set('period', period);
+    for (const [k, v] of Object.entries(extra ?? {})) params.set(k, v);
+    router.push(`${basePath}?${params.toString()}`);
   }
 
   return (
@@ -66,7 +71,7 @@ export default function AnalyticsControls({
             type="button"
             size="sm"
             disabled={!cFrom || !cTo || cFrom > cTo}
-            onClick={() => go('custom', `&from=${cFrom}&to=${cTo}`)}
+            onClick={() => go('custom', { from: cFrom, to: cTo })}
           >
             Appliquer
           </Button>
