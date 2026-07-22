@@ -120,11 +120,11 @@ export default async function BalancePage() {
                 </div>
                 {b.byFirm.map((f) => (
                   <div key={f.firm} className="data-row" role="row">
-                    <span role="cell">{f.firm}</span>
-                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{f.accounts}</span>
-                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{money(f.spent, currency)}</span>
-                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{money(f.payouts, currency)}</span>
-                    <span role="cell" className="num" style={{ textAlign: 'right', color: pnlColor(f.net) }}>{signed(f.net, currency)}</span>
+                    <span role="cell" data-label="Firm">{f.firm}</span>
+                    <span role="cell" data-label="Comptes" className="num" style={{ textAlign: 'right' }}>{f.accounts}</span>
+                    <span role="cell" data-label="Dépensé" className="num" style={{ textAlign: 'right' }}>{money(f.spent, currency)}</span>
+                    <span role="cell" data-label="Payouts" className="num" style={{ textAlign: 'right' }}>{money(f.payouts, currency)}</span>
+                    <span role="cell" data-label="Net" className="num" style={{ textAlign: 'right', color: pnlColor(f.net) }}>{signed(f.net, currency)}</span>
                   </div>
                 ))}
               </div>

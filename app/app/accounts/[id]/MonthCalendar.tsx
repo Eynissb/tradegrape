@@ -5,9 +5,21 @@ const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const GREEN = '56, 255, 176';
 const RED = '255, 77, 94';
 
-function compact(n: number): string {
-  // Deux décimales systématiques : un P&L journalier de 26,50 ne doit jamais s'afficher « 27 ».
+/**
+ * Montant SIGNÉ à deux décimales (« +26,50 »). Rien à voir avec l'abréviation
+ * des axes : le nom `compact` prêtait à confusion avec `compactNumber`, qui
+ * abrège au contraire (« 12,4 k »). Deux décimales systématiques — un P&L de
+ * 26,50 ne doit jamais s'afficher « 27 ».
+ */
+function signedAmount(n: number): string {
   return `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/** « lun. 20 juil. » — construit en heure locale pour ne pas décaler d'un jour. */
+const DAY_FMT = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+function dayLabel(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return DAY_FMT.format(new Date(y, m - 1, d));
 }
 
 /**
@@ -25,7 +37,7 @@ function intensity(pnl: number | null, maxAbs: number): number | undefined {
 
 function DayContent({ c, maxAbs }: { c: DayCell; maxAbs: number }) {
   const title = [
-    c.pnl !== null ? `P&L ${compact(c.pnl)}` : 'aucune entrée',
+    c.pnl !== null ? `P&L ${signedAmount(c.pnl)}` : 'aucune entrée',
     c.trades ? `${c.trades} trade(s)` : '',
     c.dailyLoss === 'breached' ? 'daily loss dépassé' : c.dailyLoss === 'approached' ? 'daily loss approché' : '',
     c.isConsistencyBreaker ? 'jour qui casse la cohérence' : '',
@@ -49,7 +61,7 @@ function DayContent({ c, maxAbs }: { c: DayCell; maxAbs: number }) {
       </div>
       {c.pnl !== null ? (
         <div className="jcal-pnl num" style={{ color: `rgb(${c.pnl >= 0 ? GREEN : RED})` }}>
-          {compact(c.pnl)}
+          {signedAmount(c.pnl)}
         </div>
       ) : null}
       {c.trades > 0 ? (
@@ -84,6 +96,10 @@ export default function MonthCalendar({
   consistency?: { date: string; sharePct: number; limitPct: number } | null;
 }) {
   const mk = monthKey(view.year, view.month);
+  // Jours du mois porteurs d'information — la liste mobile n'affiche qu'eux.
+  const activeDays = view.weeks
+    .flatMap((w) => w.days)
+    .filter((c) => c.inMonth && (c.pnl !== null || c.trades > 0));
 
   return (
     <div className="jcal glass">
@@ -126,11 +142,48 @@ export default function MonthCalendar({
               );
             })}
             <div className={`jcal-total num${week.total >= 0 ? '' : ' is-neg'}${week.hasData ? '' : ' is-empty'}`}>
-              {week.hasData ? compact(week.total) : ''}
+              {week.hasData ? signedAmount(week.total) : ''}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Sous 640 px, la grille 7 colonnes devient illisible (cellule de 32 px,
+          P&L tronqué) et un mois vide à 90 % n'apporte rien : on liste les
+          seuls jours actifs. La grille reste la vue au-delà du seuil. */}
+      <ul className="jcal-list">
+        {activeDays.length === 0 ? (
+          <li className="jcal-list-empty">Aucune entrée ce mois-ci.</li>
+        ) : (
+          activeDays.map((c) => (
+            <li key={c.date}>
+              <Link
+                href={`/app/accounts/${accountId}?view=calendrier&month=${mk}&day=${c.date}`}
+                className={`jcal-listrow${activeDay === c.date ? ' is-active' : ''}`}
+              >
+                <span className="jcal-listday">
+                  {dayLabel(c.date)}
+                  {c.isConsistencyBreaker ? <span className="jcal-star" title="Casse la cohérence">★</span> : null}
+                </span>
+                <span className="jcal-listmeta">
+                  {c.trades > 0 ? <span className="num">{c.trades}t</span> : null}
+                  {c.isTradingDay ? <span className="jcal-dot" style={{ background: `rgb(${GREEN})` }} title="Jour de trading validé" /> : null}
+                  {c.dailyLoss !== 'none' ? (
+                    <span
+                      className="jcal-dot"
+                      style={{ background: c.dailyLoss === 'breached' ? `rgb(${RED})` : 'var(--amber)' }}
+                      title={c.dailyLoss === 'breached' ? 'Daily loss dépassé' : 'Daily loss approché'}
+                    />
+                  ) : null}
+                </span>
+                <span className="jcal-listpnl num" style={{ color: c.pnl === null ? 'var(--ink3)' : `rgb(${c.pnl >= 0 ? GREEN : RED})` }}>
+                  {c.pnl === null ? '—' : signedAmount(c.pnl)}
+                </span>
+              </Link>
+            </li>
+          ))
+        )}
+      </ul>
 
       {consistency ? (
         <div className="jcal-consistency">

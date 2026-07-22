@@ -223,10 +223,10 @@ export default function HistoryPanel({
                       className="checkbox"
                     />
                   </span>
-                  <Link href={editHref} role="cell" className="num">{t.trade_date}</Link>
-                  <Link href={editHref} role="cell">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</Link>
-                  <Link href={editHref} role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</Link>
-                  <span role="cell" className="jchips">
+                  <Link href={editHref} role="cell" data-label="Date" className="num">{t.trade_date}</Link>
+                  <Link href={editHref} role="cell" data-label="Type">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</Link>
+                  <Link href={editHref} role="cell" data-label="P&L" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</Link>
+                  <span role="cell" data-label="Tags" className="jchips">
                     {t.tags.map((tag) => <span key={tag} className="jchip">{tagLabel(tag)}</span>)}
                   </span>
                   <span role="cell" className="data-actions">

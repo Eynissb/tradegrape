@@ -1,8 +1,7 @@
 import { Target, Coins, Sigma, Ratio, Scale, TrendingUp, TrendingDown, Flame, type LucideIcon } from 'lucide-react';
 import type { Bucket, DistributionBin } from '@/lib/journal/analytics';
-import { money, pnlColor, signed } from '@/app/app/_components/journal-ui';
+import { compactNumber, money, pnlColor, signed } from '@/app/app/_components/journal-ui';
 
-const compact = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 });
 
 /** Carte de métrique : icône + libellé gris en haut, valeur très grosse en dessous. */
 export function Stat({ label, value, color, sub, icon: Icon }: { label: string; value: string; color?: string; sub?: string; icon?: LucideIcon }) {
@@ -69,7 +68,7 @@ export function DistributionBars({ bins }: { bins: DistributionBin[] }) {
     <div className="acct2-dist">
       {bins.map((b, i) => (
         <div key={i} className="acct2-dist-row">
-          <span className="acct2-dist-label num">{compact.format(b.from)} … {compact.format(b.to)}</span>
+          <span className="acct2-dist-label num">{compactNumber(b.from)} … {compactNumber(b.to)}</span>
           <span className="acct2-dist-track">
             <span className={`acct2-dist-bar ${b.from >= 0 ? 'is-win' : 'is-loss'}`} style={{ width: `${(b.count / max) * 100}%` }} />
           </span>

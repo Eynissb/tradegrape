@@ -1,4 +1,5 @@
 import type { CumulativePoint } from '@/lib/journal/analytics';
+import { compactNumber } from '@/app/app/_components/journal-ui';
 
 /**
  * P&L net cumulé, tous comptes confondus. Pas de plancher de drawdown : les règles
@@ -29,7 +30,6 @@ export default function CumulativeChart({ points, currency }: { points: Cumulati
   const x = (i: number) => padL + (i / (points.length - 1)) * innerW;
   const y = (v: number) => padT + (1 - (v - yMin) / (yMax - yMin)) * innerH;
 
-  const fmt = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 });
   const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.pnl).toFixed(1)}`).join(' ');
   const area = `${line} L ${x(points.length - 1).toFixed(1)} ${y(0).toFixed(1)} L ${x(0).toFixed(1)} ${y(0).toFixed(1)} Z`;
   const last = points[points.length - 1].pnl;
@@ -56,7 +56,7 @@ export default function CumulativeChart({ points, currency }: { points: Cumulati
         {ticks.map((v, i) => (
           <g key={i}>
             <line x1={padL} x2={W - padR} y1={y(v)} y2={y(v)} className="eq-grid" />
-            <text x={padL - 10} y={y(v) + 4} textAnchor="end" className="eq-axis">{fmt.format(v)}</text>
+            <text x={padL - 10} y={y(v) + 4} textAnchor="end" className="eq-axis">{compactNumber(v)}</text>
           </g>
         ))}
         <line x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} className="eq-start" />

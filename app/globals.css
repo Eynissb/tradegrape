@@ -204,6 +204,38 @@ h1, h2, h3 {
 /* (`.admin-table*` supprimé : les cinq tableaux de l'admin sont des grilles
    `.data-row`. Ces règles n'avaient plus aucun consommateur.) */
 
+/* ---- Calendrier : grille au-dessus de 640 px, LISTE en dessous ---- */
+.jcal-list { display: none; list-style: none; margin: 0; padding: 0; }
+@media (max-width: 640px) {
+  /* `.ui` en préfixe : la règle de base `.jcal-grid` est déclarée plus bas dans
+     le fichier et une media query n'ajoute aucune spécificité. */
+  .ui .jcal-grid { display: none; }
+  .ui .jcal-list { display: flex; flex-direction: column; gap: 6px; }
+}
+.ui .jcal-listrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center; gap: 12px; min-height: 44px; padding: 6px 12px;
+  border-radius: var(--r-md); text-decoration: none; color: var(--ink);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+  transition: background .15s;
+}
+.ui .jcal-listrow:hover { background: rgba(255, 255, 255, .06); }
+.ui .jcal-listrow.is-active { background: linear-gradient(180deg, rgba(120, 90, 255, .2), rgba(120, 90, 255, .08)), var(--elev-2-bg); }
+.ui .jcal-listday { display: flex; align-items: center; gap: 6px; font-size: 13.5px; text-transform: capitalize; }
+.ui .jcal-listmeta { display: flex; align-items: center; gap: 7px; color: var(--ink3); font-size: 11.5px; }
+.ui .jcal-listpnl { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.ui .jcal-list-empty { padding: 1.4rem 1rem; text-align: center; color: var(--ink2); font-size: 14px; }
+
+/* ---- Rails d'onglets : fondu à droite quand le contenu défile ---- */
+.ui .tabs { position: relative; }
+.ui .tabs::after {
+  content: ''; position: sticky; right: -4px; flex: none;
+  width: 28px; align-self: stretch; margin-right: -4px; margin-left: -28px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(7, 5, 16, .92));
+  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+}
+
 /* ---- Connexion / inscription ---- */
 .ui .auth-card { padding: 2rem 1.8rem; }
 .ui .auth-h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.4px; color: var(--ink); }
@@ -299,9 +331,9 @@ h1, h2, h3 {
    passent par `Button variant="danger"`, déjà au système.) */
 
 @media (max-width: 860px) {
-  .admin-grid { grid-template-columns: 1fr 1fr; }
+  /* (`.admin-grid` retiré : il forçait 2 colonnes et écrasait l'auto-fit —
+     à 420 px on obtenait deux colonnes de 156 px. L'auto-fit fait le travail.) */
   .admin-cards { grid-template-columns: 1fr; }
-  .admin-soon { display: none; }
 }
 
 /* =====================================================================

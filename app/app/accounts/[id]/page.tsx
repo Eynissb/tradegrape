@@ -506,13 +506,13 @@ export default async function AccountPage({
                           const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
                           return (
                             <div key={t.id} className="data-row" role="row">
-                              <Link href={editHref} role="cell">
+                              <Link href={editHref} role="cell" data-label="Type">
                                 {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
                               </Link>
-                              <Link href={editHref} role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>
+                              <Link href={editHref} role="cell" data-label="P&L" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>
                                 {signed(pnlNet, currency)}
                               </Link>
-                              <span role="cell" className="jchips">
+                              <span role="cell" data-label="Tags" className="jchips">
                                 {t.tags.map((tag) => (
                                   <span key={tag} className="jchip">{tagLabel(tag)}</span>
                                 ))}
@@ -571,10 +571,10 @@ export default async function AccountPage({
                             const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
                             return (
                               <Link key={t.id} href={editHref} className="data-row" role="row">
-                                <span role="cell" className="num">{t.trade_date}</span>
-                                <span role="cell">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</span>
-                                <span role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</span>
-                                <span role="cell" className="jchips">
+                                <span role="cell" data-label="Date" className="num">{t.trade_date}</span>
+                                <span role="cell" data-label="Type">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</span>
+                                <span role="cell" data-label="P&L" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</span>
+                                <span role="cell" data-label="Tags" className="jchips">
                                   {t.tags.map((tag) => <span key={tag} className="jchip">{tagLabel(tag)}</span>)}
                                 </span>
                               </Link>

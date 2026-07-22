@@ -18,6 +18,16 @@ export function stateColor(state: RuleState): string {
 }
 
 /** Couleur d'un P&L : suit le SIGNE, jamais le statut de la règle. */
+/**
+ * Nombre abrégé pour les axes et graduations (« 12,4 k »). Une seule
+ * définition : elle était recopiée à l'identique dans EquityChart,
+ * CumulativeChart et analytics-ui.
+ */
+const compactFmt = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 });
+export function compactNumber(value: number): string {
+  return compactFmt.format(value);
+}
+
 export function pnlColor(value: number): string {
   return value >= 0 ? 'var(--ok)' : 'var(--danger)';
 }

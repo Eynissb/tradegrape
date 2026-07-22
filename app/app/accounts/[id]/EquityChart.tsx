@@ -1,4 +1,5 @@
 import type { EquityPoint } from '@/lib/journal/analytics';
+import { compactNumber } from '@/app/app/_components/journal-ui';
 
 /**
  * Courbe d'équité avec le plancher de drawdown superposé — notre angle : on
@@ -43,7 +44,6 @@ export default function EquityChart({
   const x = (i: number) => padL + (i / (points.length - 1)) * innerW;
   const y = (v: number) => padT + (1 - (v - yMin) / (yMax - yMin)) * innerH;
 
-  const fmt = new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 });
   const fmtFull = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 
   const equityPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.equity).toFixed(1)}`).join(' ');
@@ -80,7 +80,7 @@ export default function EquityChart({
         {ticks.map((v, i) => (
           <g key={i}>
             <line x1={padL} x2={W - padR} y1={y(v)} y2={y(v)} className="eq-grid" />
-            <text x={padL - 10} y={y(v) + 4} textAnchor="end" className="eq-axis">{fmt.format(v)}</text>
+            <text x={padL - 10} y={y(v) + 4} textAnchor="end" className="eq-axis">{compactNumber(v)}</text>
           </g>
         ))}
 
