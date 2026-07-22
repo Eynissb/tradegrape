@@ -54,9 +54,9 @@ export default function AddAccountForms({ offers }: { offers: OfferOption[] }) {
 
       {catalog ? (
         offers.length === 0 ? (
-          <div className="card" style={{ color: 'var(--text-3)' }}>
-            <p style={{ color: 'var(--text-1)' }}>Aucune offre publiée dans le comparateur pour l’instant.</p>
-            <p className="mt-2">Utilise « Ma firm n’est pas listée » pour saisir tes règles à la main.</p>
+          <div className="card empty">
+            <p className="empty-title">Aucune offre publiée dans le comparateur pour l’instant.</p>
+            <p className="empty-desc">Utilise « Ma firm n’est pas listée » pour saisir tes règles à la main.</p>
           </div>
         ) : (
           <form action={createAccount} className="card flex flex-col gap-4">
