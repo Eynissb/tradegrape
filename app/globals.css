@@ -721,17 +721,34 @@ h1, h2, h3 {
 .dash .card {
   /* Fond FRANCHEMENT transparent → le flou et le halo ambiant traversent (vrai verre).
      Bordure en dégradé (arête haute plus claire = épaisseur du verre) + reflet interne. */
-  /* Presque noir : simple voile blanc très faible, AUCUNE teinte colorée. Le verre
-     vient du traitement (voile + backdrop-filter + arête haute claire + reflet). */
-  background:
-    rgba(255, 255, 255, .04) padding-box,
-    linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .03) 42%) border-box;
-  border: 1px solid transparent;
+  /* Presque noir NEUTRE : aucune teinte violette, AUCUN backdrop-filter.
+     Le relief vient d'un ÉCLAIRAGE DIRECTIONNEL, pas d'une ombre portée invisible. */
+  position: relative;
+  background: rgba(16, 14, 22, .66);
+  border: 0;
   border-radius: 24px;
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .07);
   padding: 20px 22px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .1),   /* arête haute lumineuse */
+    inset 0 -1px 0 rgba(0, 0, 0, .35),         /* arête basse sombre */
+    0 1px 2px rgba(0, 0, 0, .55),
+    0 8px 20px rgba(0, 0, 0, .45),
+    0 24px 48px rgba(0, 0, 0, .3);
+}
+/* Bordure en dégradé masquée : source lumineuse unique à 145° (clair haut-gauche → transparent).
+   Toutes les cartes de .dash partagent cet angle. */
+.dash .card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .16), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 .dash .acct2 { gap: 1.4rem; }
 .dash .acct2-console { gap: 1.4rem; }
@@ -746,15 +763,13 @@ h1, h2, h3 {
 }
 
 /* Bloc dégradé = payout (signature). Progression VERTICALE franche : vif → profond. */
-/* Seule carte « colorée » : même fond sombre que les autres + une lueur violette
-   qui vient d'un coin et s'estompe vers le transparent (pas un bloc plein). */
+/* Seule carte « colorée » : MÊME fond sombre + MÊME relief que les autres, plus une
+   lueur violette qui vient d'un coin et s'estompe vers le transparent (pas un bloc
+   plein). Elle hérite du box-shadow et de la bordure ::before à 145°. */
 .dash .card-grad {
   background:
-    radial-gradient(95% 78% at 16% -6%, rgba(168, 90, 255, .5), transparent 62%) padding-box,
-    rgba(255, 255, 255, .04) padding-box,
-    linear-gradient(180deg, rgba(214, 158, 255, .3), rgba(255, 255, 255, .03)) border-box;
-  border: 1px solid transparent;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .12);
+    radial-gradient(95% 78% at 16% -6%, rgba(168, 90, 255, .5), transparent 62%),
+    rgba(16, 14, 22, .66);
 }
 /* Dans une carte dégradée : valeurs blanc pur, libellés blanc atténué, JAMAIS de
    couleur sémantique. */
