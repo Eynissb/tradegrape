@@ -762,9 +762,10 @@ h1, h2, h3 {
   box-shadow: var(--elev-3-shadow);
 }
 
-/* DANGER plein. */
-.ui .btn.btn-danger { color: var(--loss); border-color: transparent; background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05)); box-shadow: var(--ctl-shadow); }
-.ui .btn.btn-danger:hover:not(:disabled) { color: #ff8a94; background: linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .08)); }
+/* DANGER plein : arête haute rouge, jamais blanche — une action destructrice
+   doit se reconnaître au premier coup d'œil. */
+.ui .btn.btn-danger { color: #ff9aa3; border-color: transparent; background: var(--ctl-danger-bg); box-shadow: var(--ctl-danger-shadow); }
+.ui .btn.btn-danger:hover:not(:disabled) { color: #ffb3ba; background: var(--ctl-danger-bg-hover); }
 
 /* =====================================================================
    CHAMPS DE SAISIE — POSÉS comme les boutons (aucun creusement)

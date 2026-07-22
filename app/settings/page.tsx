@@ -95,7 +95,7 @@ export default async function UserSettings({
           <div className="mt-3"><Button type="submit" variant="secondary" size="sm">Changer l’email</Button></div>
         </form>
 
-        <form action={changePassword} className="mt-6" style={{ borderTop: '1px solid var(--border)', paddingTop: '1.2rem' }}>
+        <form action={changePassword} className="mt-6 ui-sep">
           <div className="admin-grid">
             <Input id="password" name="password" label="Nouveau mot de passe" type="password" width="md" autoComplete="new-password" />
             <Input id="password_confirm" name="password_confirm" label="Confirmer" type="password" width="md" autoComplete="new-password" />
