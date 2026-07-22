@@ -527,20 +527,23 @@ h1, h2, h3 {
 
 /* Dépliages de saisie : garder la saisie quotidienne courte (date + montant) */
 .jentry-disclosures { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Bouton standard, STRICTEMENT identique aux autres .btn de la page :
+   même recette que `.app-shell .btn` (dégradé .085 + quatre arêtes). */
 .jentry-toggle {
-  display: inline-flex; align-items: center; gap: 6px; height: var(--h-control-sm); padding: 0 14px;
+  display: inline-flex; align-items: center; gap: 6px; height: var(--h-control); padding: 0 18px;
   font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--ink2);
   border-radius: var(--r-pill); border: 1px solid transparent; cursor: pointer;
   background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset 1px 0 0 rgba(255, 255, 255, .05),
     inset -1px 0 0 rgba(0, 0, 0, .20),
     inset 0 -1px 0 rgba(0, 0, 0, .28),
     0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .32);
   transition: color .15s, background .15s, box-shadow .15s, transform .1s;
 }
 .jentry-toggle:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); }
-.jentry-toggle:active { transform: translateY(1px); background: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14)); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .55); }
+.jentry-toggle:active { transform: translateY(1px); background: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14)); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .06); }
 .jentry-toggle[aria-expanded="true"] { color: var(--ink); }
 .jentry-toggle .lucide { width: 15px; height: 15px; transition: transform .15s; }
 .jentry-toggle[aria-expanded="true"] .lucide { transform: rotate(180deg); }
@@ -552,22 +555,24 @@ h1, h2, h3 {
 /* Tag = pill toggle : input natif masqué (form + a11y), la pill porte l'état. */
 .jtag {
   display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; height: var(--h-control-sm); padding: 0 13px;
-  color: var(--ink2); border-radius: var(--r-pill);
+  color: var(--ink2); border-radius: var(--r-pill); border: none;
   cursor: pointer; user-select: none;
-  /* Non sélectionné = zone à choisir, pas une action : contour fin, zéro relief. */
-  background: rgba(255, 255, 255, .02);
-  border: 1px solid rgba(255, 255, 255, .08);
-  box-shadow: none;
-  transition: color .15s, background .15s, border-color .15s, box-shadow .15s;
+  /* Même famille que les champs, un cran plus clair : c'est cliquable. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .014));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    inset 0 -1px 0 rgba(0, 0, 0, .24),
+    0 1px 2px rgba(0, 0, 0, .38);
+  transition: color .15s, background .15s, box-shadow .15s;
 }
 .jtag input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.jtag:hover { color: var(--ink); background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .13); }
+.jtag:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)); }
 /* Coché = LISERÉ (sélection lisible sans rivaliser avec l'action primaire). */
 .jtag:has(input:checked) {
   color: var(--ink); border: 1px solid rgba(140, 90, 255, .30);
   background:
     radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .18), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   box-shadow: inset 0 1px 0 rgba(180, 140, 255, .24), inset 0 -8px 14px -8px rgba(140, 90, 255, .22), 0 2px 8px rgba(0, 0, 0, .45);
 }
 .jtag:has(input:focus-visible) { outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 2px; }
@@ -813,30 +818,39 @@ h1, h2, h3 {
   padding: 0 18px;
   border-radius: var(--r-pill);
   color: var(--ink);
-  /* Le CONTOUR fait tout le travail. Fond légèrement plus sombre que la carte,
-     contour uniforme à basse opacité. Aucun inset, aucune ombre portée, aucun
-     dégradé : sur une capture, seuls les boutons doivent paraître en relief. */
-  background: rgba(0, 0, 0, .20);
-  border: 1px solid rgba(255, 255, 255, .09);
-  box-shadow: none;
-  transition: border-color .15s, background .15s, box-shadow .15s;
+  border: none;
+  /* Traitement des sous-cartes de niveau 2 (blocs Récap / Retrait), un cran
+     plus sombre. Dégradé + arêtes comme tout le dashboard : AUCUN contour
+     dessiné — c'est ce qui faisait tache dans le bloc formulaire. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35);
+  transition: background .15s, box-shadow .15s;
 }
 .app-shell .input::placeholder,
 .app-shell .select-trigger .placeholder { color: var(--ink3); }
 .app-shell .select-trigger .chevron { color: var(--ink3); }
 .app-shell .input:hover:not(:disabled),
-.app-shell .select-trigger:hover:not(:disabled) { border-color: rgba(255, 255, 255, .14); }
-/* Focus : le contour vire à l'accent + halo diffus. Toujours aucun relief. */
+.app-shell .select-trigger:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .015));
+}
+/* Focus : l'arête haute vire à l'accent + anneau. Toujours aucun contour. */
 .app-shell .input:focus,
 .app-shell .input:focus-visible,
 .app-shell .select-trigger:focus-visible,
 .app-shell .select.is-open .select-trigger {
   outline: none;
-  border-color: rgba(140, 90, 255, .45);
-  box-shadow: 0 0 0 3px rgba(120, 90, 255, .14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .018));
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .16),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35),
+    0 0 0 2px rgba(120, 90, 255, .40);
 }
-/* Notes : seul champ rectangulaire (exception assumée), même contour.
-   Coin de redimensionnement natif masqué (il casse le contour). */
+/* Notes : seul champ rectangulaire (exception assumée), même modelé.
+   Coin de redimensionnement natif masqué (il casse l'arête). */
 .app-shell textarea.input {
   height: auto; min-height: 96px; padding: 10px 16px;
   border-radius: var(--r-md); line-height: 1.55; resize: vertical;
@@ -892,7 +906,7 @@ body::before {
   color: var(--ink);
   background:
     radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   border: 1px solid rgba(140, 90, 255, .30);
   box-shadow:
     inset 0 1px 0 rgba(180, 140, 255, .22),
@@ -917,10 +931,12 @@ body::before {
 .app-search {
   flex: 1; max-width: 440px; display: flex; align-items: center; gap: 10px;
   height: var(--h-control); padding: 0 18px; border-radius: var(--r-pill);
-  color: var(--ink3);
-  background: rgba(0, 0, 0, .20);
-  border: 1px solid rgba(255, 255, 255, .09);
-  box-shadow: none;
+  color: var(--ink3); border: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35);
 }
 .app-search .lucide { width: 17px; height: 17px; }
 .app-search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 14px; font-family: inherit; }
@@ -1092,7 +1108,7 @@ body::before {
   color: var(--ink);
   background:
     radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
   border: 1px solid rgba(140, 90, 255, .30);
   box-shadow:
     inset 0 1px 0 rgba(180, 140, 255, .22),
