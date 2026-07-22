@@ -142,6 +142,15 @@
   mask-composite: exclude;
   pointer-events: none;
 }
+/* Carte cliquable : le survol MONTE la carte. Aucun halo ni contour violet —
+   l'accent ne sert qu'aux états actifs et à l'action primaire. */
+.ui .card-interactive::before { display: none; }
+.ui .card-interactive:hover, .ui .card-interactive.is-hover {
+  transform: translateY(-3px); border-color: transparent;
+  box-shadow: var(--elev-1-shadow), 0 14px 32px rgba(0, 0, 0, .4);
+}
+.ui .card-interactive:focus-visible { outline: var(--focus-accent); outline-offset: 2px; box-shadow: var(--elev-1-shadow); }
+
 /* Sous-carte de niveau 2 : un cran sous la carte qui la contient. */
 .ui .surface-2 {
   position: relative;
@@ -295,14 +304,29 @@
    Ce sont les endroits où le style se perd : ils sont définis ici, pas
    improvisés page par page.
    ===================================================================== */
-.ui .empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
-  padding: 2.4rem 1.5rem; text-align: center;
-  color: var(--ink2); font-size: 14px;
-  border-radius: var(--r-md);
+/* État vide — surface posée. Plus de contour tireté ni de pavé violet. */
+.ui .empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
+  padding: 2.6rem 1.5rem; text-align: center;
+  color: var(--ink2);
+  border: 0; border-radius: var(--r-lg);
   background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
 }
-.ui .empty-state strong { color: var(--ink); font-weight: 650; }
+.ui .empty-title { color: var(--ink); font-size: 1.05rem; font-weight: 650; }
+.ui .empty-desc { color: var(--ink3); font-size: .9rem; max-width: 44ch; margin: 0; }
+/* Pavé d'icône : contrôle de niveau 3, jamais un bloc de marque. */
+.ui .empty-icon, .ui .icon-tile {
+  width: 52px; height: 52px; border-radius: var(--r-md);
+  background: var(--ctl-bg); box-shadow: var(--ctl-shadow); border: 0;
+  color: var(--ink2); display: grid; place-items: center; margin-bottom: .4rem;
+}
+.ui .empty-icon .lucide, .ui .icon-tile .lucide { filter: none; stroke-width: 1.7; }
+.ui .empty .btn { margin-top: .9rem; }
+/* Ligne d'état vide compacte (dans une carte). */
+.ui .acct2-empty {
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.6rem 1rem; text-align: center; color: var(--ink2); font-size: 14px;
+}
 
 .ui .notice {
   position: relative; display: flex; align-items: flex-start; gap: .65rem;
