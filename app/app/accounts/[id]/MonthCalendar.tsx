@@ -110,7 +110,7 @@ export default function MonthCalendar({
                 </div>
               );
             })}
-            <div className={`jcal-total num${week.total >= 0 ? '' : ' is-neg'}`}>
+            <div className={`jcal-total num${week.total >= 0 ? '' : ' is-neg'}${week.hasData ? '' : ' is-empty'}`}>
               {week.hasData ? compact(week.total) : ''}
             </div>
           </div>
