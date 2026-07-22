@@ -202,7 +202,7 @@ export default function HistoryPanel({
           <div className="table-scroll">
           <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_TRADES }}>
             <div className="data-head" role="row">
-              <span><input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" /></span>
+              <span role="columnheader"><input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" /></span>
               <span role="columnheader">Date</span>
               <span role="columnheader">Type</span>
               <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
@@ -214,7 +214,7 @@ export default function HistoryPanel({
               const editHref = `/app/accounts/${accountId}/trades/${t.id}`;
               return (
                 <div key={t.id} className={`data-row${selected.has(t.id) ? ' is-selected' : ''}`} role="row">
-                  <span>
+                  <span role="cell">
                     <input
                       type="checkbox"
                       aria-label={`Sélectionner l’entrée du ${t.trade_date}`}

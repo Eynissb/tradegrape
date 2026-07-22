@@ -35,21 +35,25 @@ export function Breakdown({
   emptyHint: string;
   catHeader?: string;
 }) {
-  void catHeader;
   return (
     <div className="card acct2-bd">
       <h3 className="acct-rules-title">{title}</h3>
       {buckets.length === 0 ? (
         <p className="jsub">{emptyHint}</p>
       ) : (
-        <div className="kv-list">
+        <div className="kv-list" role="table" aria-label={title}>
+          {/* En-têtes : sans eux « ES · 12 · 58% » ne dit pas ce que valent 12 et 58%. */}
+          <div className="kv-head" role="row">
+            <span role="columnheader">{catHeader}</span>
+            <span role="columnheader">P&L net</span>
+          </div>
           {buckets.map((b) => (
-            <div key={b.key} className="kv-row">
-              <span className="kv-key">
+            <div key={b.key} className="kv-row" role="row">
+              <span className="kv-key" role="cell">
                 {b.label}
-                <span className="kv-meta"> · {b.entries} · {b.winRate === null ? '—' : `${b.winRate}%`}</span>
+                <span className="kv-meta"> · {b.entries} entrée{b.entries > 1 ? 's' : ''} · {b.winRate === null ? '—' : `${b.winRate}% réussite`}</span>
               </span>
-              <span className="kv-val" style={{ color: pnlColor(b.netPnl) }}>{signed(b.netPnl, currency)}</span>
+              <span className="kv-val" role="cell" style={{ color: pnlColor(b.netPnl) }}>{signed(b.netPnl, currency)}</span>
             </div>
           ))}
         </div>

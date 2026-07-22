@@ -398,7 +398,6 @@ h1, h2, h3 {
 .acct2-monthstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .acct2-stat { padding: 14px 16px; border: 1px solid var(--card-brd); border-radius: var(--r-md); background: rgba(8, 11, 20, 0.4); }
 .acct2-stat-k { font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
-.acct2-stat-l { font-size: 11.5px; color: var(--ink3); margin-top: 3px; }
 .acct2-stat-sub { font-family: var(--font-mono); font-size: 11px; color: var(--ink3); margin-top: 2px; }
 .acct2-recent-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .4rem; }
 
@@ -417,7 +416,6 @@ h1, h2, h3 {
 .jhist-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 .jhist-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: rgba(150, 110, 240, .08); }
 .jhist-selcount { font-weight: 600; color: var(--ink); }
-.jhist-cbcol { width: 42px; text-align: center; }
 /* Case à cocher : modelée comme les autres contrôles (arête haute claire,
    arête basse sombre). Coche dessinée en blanc plein. */
 .jhist-cb {
@@ -637,8 +635,6 @@ h1, h2, h3 {
 .jdetails > summary:hover { color: var(--ink); }
 
 /* lien couvrant une cellule d'historique (clic sur la ligne → édition) */
-.jrow-link { display: block; color: inherit; text-decoration: none; }
-.jrow-link:hover { color: var(--ink); }
 
 /* ---------- Calendrier mensuel ---------- */
 .jcal { padding: 20px 22px; }
@@ -1208,6 +1204,10 @@ body::before {
 
 /* Liste clé-valeur (ventilations 2 colonnes) — largeur élastique, aucun scroll. */
 .kv-list { display: flex; flex-direction: column; }
+.kv-head {
+  display: flex; justify-content: space-between; gap: 12px; padding: 2px 12px 6px;
+  color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+}
 .kv-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 12px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
 .kv-row + .kv-row { margin-top: 6px; }
 .kv-key { color: var(--ink2); font-size: 13px; min-width: 0; }
@@ -1253,12 +1253,19 @@ body::before {
 .dash .jcal-cell.is-breaker { outline: 1.5px solid var(--amber); outline-offset: -1.5px; }
 /* 3. Cellules colorées : radial d'angle + arête haute TEINTÉE de l'état (jamais blanche),
       élévation supérieure aux cellules vides. */
+/* `--i` (0,3 → 1) est posé par la cellule et vaut l'ampleur du P&L rapportée au
+   plus gros jour du mois : l'opacité module le FOND, la structure (dégradé
+   d'angle, arête teintée, ombres) reste identique d'une case à l'autre. */
 .dash .jcal-cell.day--win {
-  background: radial-gradient(130% 100% at 0% 0%, rgba(56, 255, 176, .3), transparent 70%), rgba(56, 255, 176, .07);
+  background:
+    radial-gradient(130% 100% at 0% 0%, rgba(56, 255, 176, calc(.30 * var(--i, 1))), transparent 70%),
+    rgba(56, 255, 176, calc(.07 * var(--i, 1)));
   box-shadow: inset 0 1px 0 rgba(56, 255, 176, .32), inset 0 -1px 0 rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .45), 0 4px 12px rgba(0, 0, 0, .3);
 }
 .dash .jcal-cell.day--loss {
-  background: radial-gradient(130% 100% at 0% 0%, rgba(255, 77, 94, .28), transparent 70%), rgba(255, 77, 94, .06);
+  background:
+    radial-gradient(130% 100% at 0% 0%, rgba(255, 77, 94, calc(.28 * var(--i, 1))), transparent 70%),
+    rgba(255, 77, 94, calc(.06 * var(--i, 1)));
   box-shadow: inset 0 1px 0 rgba(255, 77, 94, .3), inset 0 -1px 0 rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .45), 0 4px 12px rgba(0, 0, 0, .3);
 }
 /* 4. La colonne SEM. = sous-carte niveau 2 ; les semaines sans donnée ne sont pas
@@ -1266,7 +1273,8 @@ body::before {
 .dash .jcal-total { position: relative; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); border-radius: 10px; padding: 0 10px; }
 .dash .jcal-total.is-empty { background: transparent; box-shadow: none; }
 
-.dash .table-wrap { background: rgba(10, 8, 20, .4); border-color: rgba(150, 110, 240, .1); }
+/* (`.dash .table-wrap` retiré : il réintroduisait fond et bordure que
+   `.app-shell .table-wrap` annule, en gagnant sur l'ordre de cascade.) */
 /* Tables denses : lignes resserrées, en-têtes discrets */
 .dash .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
 .dash .table td { padding: 8px 12px; }

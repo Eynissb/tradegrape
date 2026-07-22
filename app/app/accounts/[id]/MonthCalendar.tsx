@@ -10,7 +10,20 @@ function compact(n: number): string {
   return `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function DayContent({ c }: { c: DayCell }) {
+/**
+ * Intensité du fond proportionnelle au montant (CLAUDE.md §11) : un jour à
+ * +50 $ ne doit pas se lire comme un jour à +5 000 $. Renvoie un facteur
+ * 0,3 → 1 appliqué UNIQUEMENT aux alphas du fond ; le dégradé d'angle et
+ * l'arête teintée gardent leur structure. Plancher à 0,3 pour qu'une petite
+ * journée reste lisible.
+ */
+function intensity(pnl: number | null, maxAbs: number): number | undefined {
+  if (pnl === null || pnl === 0) return undefined;
+  const mag = maxAbs > 0 ? Math.min(1, Math.abs(pnl) / maxAbs) : 0;
+  return Number((0.3 + 0.7 * mag).toFixed(3));
+}
+
+function DayContent({ c, maxAbs }: { c: DayCell; maxAbs: number }) {
   const title = [
     c.pnl !== null ? `P&L ${compact(c.pnl)}` : 'aucune entrée',
     c.trades ? `${c.trades} trade(s)` : '',
@@ -22,10 +35,12 @@ function DayContent({ c }: { c: DayCell }) {
 
   const win = c.pnl !== null && c.pnl > 0;
   const loss = c.pnl !== null && c.pnl < 0;
+  const i = intensity(c.pnl, maxAbs);
 
   return (
     <div
       className={`jcal-cell${c.inMonth ? '' : ' is-out'}${c.weekend ? ' is-weekend' : ''}${win ? ' day--win' : ''}${loss ? ' day--loss' : ''}${c.dailyLoss === 'breached' ? ' is-dl-breach' : ''}${c.dailyLoss === 'approached' ? ' is-dl-approach' : ''}${c.isConsistencyBreaker ? ' is-breaker' : ''}`}
+      style={i === undefined ? undefined : ({ ['--i' as string]: i } as React.CSSProperties)}
       title={title}
     >
       <div className="jcal-day">
@@ -95,7 +110,7 @@ export default function MonthCalendar({
             {week.days.map((c) => {
               const isActive = activeDay === c.date;
               const isAdded = addedDay === c.date && c.inMonth;
-              const inner = <DayContent c={c} />;
+              const inner = <DayContent c={c} maxAbs={view.maxAbs} />;
               return c.inMonth ? (
                 <Link
                   key={c.date}

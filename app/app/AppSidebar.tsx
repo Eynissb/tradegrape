@@ -58,7 +58,7 @@ export default function AppSidebar({ staff }: { staff: boolean }) {
 
   return (
     <aside className="app-side">
-      <Link href="/app" className="app-side-logo" aria-label="Tradegrape — accueil">
+      <Link href="/app" className="app-side-logo" aria-label="Tradegrape — mes comptes">
         <Image src="/brand/logo.png" alt="Tradegrape" width={132} height={33} priority />
       </Link>
 

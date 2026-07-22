@@ -559,11 +559,12 @@ export default async function AccountPage({
                       {recentTrades.length === 0 ? (
                         <p className="jsub mt-3">Aucune entrée. Commence par un P&L rapide dans la console.</p>
                       ) : (
-                        <div className="data-list mt-3" role="table" style={{ ['--cols' as string]: 'minmax(0,1fr) minmax(0,1.4fr) 110px' }}>
+                        <div className="data-list mt-3" role="table" style={{ ['--cols' as string]: 'minmax(0,1fr) minmax(0,1.2fr) 104px minmax(0,1fr)' }}>
                           <div className="data-head" role="row">
                             <span role="columnheader">Date</span>
                             <span role="columnheader">Type</span>
                             <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
+                            <span role="columnheader">Tags</span>
                           </div>
                           {recentTrades.map((t) => {
                             const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
@@ -573,6 +574,9 @@ export default async function AccountPage({
                                 <span role="cell" className="num">{t.trade_date}</span>
                                 <span role="cell">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</span>
                                 <span role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</span>
+                                <span role="cell" className="jchips">
+                                  {t.tags.map((tag) => <span key={tag} className="jchip">{tagLabel(tag)}</span>)}
+                                </span>
                               </Link>
                             );
                           })}
