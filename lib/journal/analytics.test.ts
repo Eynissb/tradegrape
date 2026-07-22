@@ -5,6 +5,7 @@ import {
   buildCumulative,
   buildDistribution,
   buildEquityCurve,
+  computeMaxDrawdown,
   computeMetrics,
   resolveRange,
   type AggregateTrade,
@@ -268,5 +269,94 @@ describe('resolveRange', () => {
       from: '2026-01-01',
       to: '2026-01-10',
     });
+  });
+});
+
+describe('computeMaxDrawdown', () => {
+  it('mesure le plus grand repli pic→creux, pas le dernier', () => {
+    const dd = computeMaxDrawdown([
+      { date: '2026-01-01', value: 100 },
+      { date: '2026-01-02', value: 140 }, // pic
+      { date: '2026-01-03', value: 90 },  // creux → repli de 50
+      { date: '2026-01-04', value: 120 },
+      { date: '2026-01-05', value: 100 }, // repli de 20 seulement
+    ]);
+    expect(dd.amount).toBe(50);
+    expect(dd.peakDate).toBe('2026-01-02');
+    expect(dd.troughDate).toBe('2026-01-03');
+  });
+
+  it('renvoie zéro quand la série ne fait que monter', () => {
+    const dd = computeMaxDrawdown([
+      { date: '2026-01-01', value: 10 },
+      { date: '2026-01-02', value: 20 },
+    ]);
+    expect(dd.amount).toBe(0);
+    expect(dd.peakDate).toBeNull();
+    expect(dd.troughDate).toBeNull();
+  });
+
+  it('donne le même montant si toute la série est décalée d’une constante', () => {
+    const base = [
+      { date: '2026-01-01', value: 0 },
+      { date: '2026-01-02', value: -300 },
+      { date: '2026-01-03', value: 200 },
+    ];
+    const shifted = base.map((p) => ({ ...p, value: p.value + 50_000 }));
+    expect(computeMaxDrawdown(base).amount).toBe(computeMaxDrawdown(shifted).amount);
+  });
+
+  it('ne calcule pas de pourcentage quand le pic n’est pas positif', () => {
+    const dd = computeMaxDrawdown([
+      { date: '2026-01-01', value: 0 },
+      { date: '2026-01-02', value: -120 },
+    ]);
+    expect(dd.amount).toBe(120);
+    expect(dd.pct).toBeNull();
+  });
+
+  it('rapporte le repli au pic quand celui-ci est positif', () => {
+    const dd = computeMaxDrawdown([
+      { date: '2026-01-01', value: 1_000 },
+      { date: '2026-01-02', value: 750 },
+    ]);
+    expect(dd.pct).toBe(25);
+  });
+
+  it('tolère une série vide', () => {
+    expect(computeMaxDrawdown([]).amount).toBe(0);
+  });
+});
+
+describe('maxDrawdown dans buildAnalytics', () => {
+  const trades = [daily('2026-03-02', 400), daily('2026-03-03', -700), daily('2026-03-04', 500)];
+
+  it('mesure le repli sur la courbe d’équité du compte', () => {
+    const range = resolveRange('all', '2026-03-31', trades);
+    const a = buildAnalytics({ rules: STATIC_25K, startingBalance: 25_000, allTrades: trades, range });
+    // pic 25 400 le 02, creux 24 700 le 03 → 700
+    expect(a.maxDrawdown.amount).toBe(700);
+    expect(a.maxDrawdown.troughDate).toBe('2026-03-03');
+  });
+
+  it('sème le pic avec l’équité d’avant la période : un repli dès le premier jour affiché compte', () => {
+    // Période réduite au seul 03 : sans graine, aucun repli ne serait vu.
+    const range = resolveRange('custom', '2026-03-31', trades, '2026-03-03', '2026-03-03');
+    const a = buildAnalytics({ rules: STATIC_25K, startingBalance: 25_000, allTrades: trades, range });
+    expect(a.maxDrawdown.amount).toBe(700);
+  });
+});
+
+describe('maxDrawdown dans buildAggregateAnalytics', () => {
+  it('donne le montant du repli mais AUCUN pourcentage', () => {
+    const trades: AggregateTrade[] = [
+      { ...daily('2026-04-01', 220), accountId: 'a', accountLabel: 'A' },
+      { ...daily('2026-04-02', -242), accountId: 'a', accountLabel: 'A' },
+    ];
+    const range = resolveRange('all', '2026-04-30', trades);
+    const agg = buildAggregateAnalytics({ allTrades: trades, range });
+    expect(agg.maxDrawdown.amount).toBe(242);
+    // Un % rapporté à un pic de P&L cumulé donnerait 110 % : trompeur.
+    expect(agg.maxDrawdown.pct).toBeNull();
   });
 });

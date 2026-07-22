@@ -109,7 +109,7 @@ export default async function AggregateAnalytics({
           <>
             <div className="card">
               <h3 className="acct-rules-title">Métriques consolidées · {a.rangeEntries} entrée(s)</h3>
-              <MetricsGrid metrics={a.metrics} currency={currency} />
+              <MetricsGrid metrics={a.metrics} currency={currency} maxDrawdown={a.maxDrawdown} />
             </div>
 
             <div className="card">

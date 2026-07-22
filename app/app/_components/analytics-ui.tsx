@@ -1,4 +1,4 @@
-import { Target, Coins, Sigma, Ratio, Scale, TrendingUp, TrendingDown, Flame, type LucideIcon } from 'lucide-react';
+import { Target, Coins, Sigma, Ratio, Scale, TrendingUp, TrendingDown, Flame, ArrowDownRight, type LucideIcon } from 'lucide-react';
 import type { Bucket, DistributionBin } from '@/lib/journal/analytics';
 import { compactNumber, money, pnlColor, signed } from '@/app/app/_components/journal-ui';
 
@@ -80,10 +80,29 @@ export function DistributionBars({ bins }: { bins: DistributionBin[] }) {
 }
 
 /** Grille de métriques communes (win rate, expectancy, R, profit factor…). */
-export function MetricsGrid({ metrics, currency }: { metrics: import('@/lib/journal/analytics').Metrics; currency: string }) {
+export function MetricsGrid({
+  metrics,
+  currency,
+  maxDrawdown,
+}: {
+  metrics: import('@/lib/journal/analytics').Metrics;
+  currency: string;
+  /** Repli max subi sur la période. Optionnel : toutes les vues n'ont pas de courbe. */
+  maxDrawdown?: import('@/lib/journal/analytics').MaxDrawdown;
+}) {
   const m = metrics;
   const profitFactor =
     m.profitFactor !== null ? m.profitFactor.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) : m.grossWin > 0 ? '∞' : '—';
+
+  /* Drawdown SUBI (pic→creux réel), à ne pas confondre avec le plancher de
+     drawdown de la firm, qui est une limite contractuelle. */
+  const dd = maxDrawdown;
+  const ddValue = !dd || dd.amount === 0 ? money(0, currency) : `−${money(dd.amount, currency)}`;
+  const ddSub = !dd || dd.amount === 0
+    ? 'aucun repli sur la période'
+    : [dd.pct !== null ? `${dd.pct.toLocaleString('fr-FR', { maximumFractionDigits: 2 })}%` : null,
+       `${dd.peakDate} → ${dd.troughDate}`].filter(Boolean).join(' · ');
+
   return (
     <div className="acct2-monthstats">
       <Stat icon={Target} label="Taux de réussite" value={m.winRate === null ? '—' : `${m.winRate}%`} sub={`${m.wins} G · ${m.losses} P`} />
@@ -94,6 +113,9 @@ export function MetricsGrid({ metrics, currency }: { metrics: import('@/lib/jour
       <Stat icon={TrendingUp} label="Gain moyen" value={money(m.avgWin, currency)} />
       <Stat icon={TrendingDown} label="Perte moyenne" value={m.avgLoss ? `−${money(m.avgLoss, currency)}` : money(0, currency)} />
       <Stat icon={Flame} label="Série gains / pertes" value={`${m.maxWinStreak} / ${m.maxLossStreak}`} sub="plus longues séries" />
+      {maxDrawdown ? (
+        <Stat icon={ArrowDownRight} label="Drawdown max subi" value={ddValue} sub={ddSub} />
+      ) : null}
     </div>
   );
 }

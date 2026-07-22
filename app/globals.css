@@ -447,13 +447,19 @@ h1, h2, h3 {
 
 /* ===== Onglet Analytics (tranche 2) — surface solide, lisibilité chirurgicale ===== */
 .acct2-analytics { display: flex; flex-direction: column; gap: 1.2rem; }
-.agg-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.4rem; }
+.agg-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.4rem; min-width: 0; }
+.agg-controls > * { min-width: 0; }
 .jbal-hero { text-align: center; padding: 2rem 1.5rem; }
 .ui .jbal-hero-k { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 2.6rem; letter-spacing: -1px; line-height: 1.05; }
 .ui .jbal-hero-l { color: var(--ink2); margin-top: .5rem; font-size: 14px; }
 /* (Courbe cumulée : elle réutilise .eq-equity / .eq-area du système —
    les anciennes classes .cum-* faisaient doublon avec des valeurs divergentes.) */
-.acct2-period { display: flex; flex-direction: column; gap: .9rem; }
+/* `min-width: 0` indispensable : un enfant flex vaut `min-width: auto` par
+   défaut et refuse de descendre sous la largeur de son contenu. Sans lui, le
+   rail d'onglets impose sa largeur naturelle (499 px pour quatre périodes),
+   son `overflow-x` ne s'active jamais et c'est la PAGE qui déborde. */
+.acct2-period { display: flex; flex-direction: column; gap: .9rem; min-width: 0; }
+.acct2-period > * { min-width: 0; max-width: 100%; }
 .acct2-period-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 
 /* Chaque carte prend sa hauteur naturelle : « Par symbole / setup / émotion »

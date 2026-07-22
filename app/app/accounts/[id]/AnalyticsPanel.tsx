@@ -30,7 +30,7 @@ export default function AnalyticsPanel({
         <>
           <div className="card">
             <h3 className="acct-rules-title">Métriques · {analytics.rangeEntries} entrée(s)</h3>
-            <MetricsGrid metrics={analytics.metrics} currency={currency} />
+            <MetricsGrid metrics={analytics.metrics} currency={currency} maxDrawdown={analytics.maxDrawdown} />
           </div>
 
           <div className="card">

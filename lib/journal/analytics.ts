@@ -224,6 +224,58 @@ export function buildEquityCurve(
   return points;
 }
 
+/* ---------------------------------------------------------- drawdown constaté */
+
+export interface MaxDrawdown {
+  /** Repli pic→creux le plus grand, en valeur absolue (0 si aucun repli). */
+  amount: number;
+  /** Repli en % du pic. `null` quand le pic n'est pas strictement positif
+   *  (cas d'une série de P&L cumulé, où un pourcentage n'aurait aucun sens). */
+  pct: number | null;
+  peakDate: string | null;
+  troughDate: string | null;
+}
+
+/**
+ * Plus grand repli pic→creux d'une série datée — le drawdown réellement SUBI,
+ * à ne pas confondre avec le plancher de drawdown de la firm (qui est une
+ * limite contractuelle calculée par le moteur).
+ *
+ * Fonction pure et agnostique du support : on lui passe une équité (compte) ou
+ * un P&L cumulé (agrégat). Le montant est identique dans les deux cas — ajouter
+ * une constante à toute la série ne change pas un écart pic→creux ; seul le
+ * pourcentage dépend du pic, d'où son `null` quand celui-ci n'est pas positif.
+ */
+export function computeMaxDrawdown(series: { date: string; value: number }[]): MaxDrawdown {
+  let peak = -Infinity;
+  let peakDate: string | null = null;
+  let worst = 0;
+  let worstPeak = 0;
+  let worstPeakDate: string | null = null;
+  let worstTroughDate: string | null = null;
+
+  for (const p of series) {
+    if (p.value > peak) {
+      peak = p.value;
+      peakDate = p.date;
+    }
+    const decline = peak - p.value;
+    if (decline > worst) {
+      worst = decline;
+      worstPeak = peak;
+      worstPeakDate = peakDate;
+      worstTroughDate = p.date;
+    }
+  }
+
+  return {
+    amount: round2(worst),
+    pct: worst > 0 && worstPeak > 0 ? round2((worst / worstPeak) * 100) : null,
+    peakDate: worst > 0 ? worstPeakDate : null,
+    troughDate: worst > 0 ? worstTroughDate : null,
+  };
+}
+
 /* -------------------------------------------------------------------- période */
 
 export type PeriodPreset = 'month' | 'quarter' | 'all' | 'custom';
@@ -275,6 +327,8 @@ export interface Analytics {
   distribution: DistributionBin[];
   /** Courbe restreinte à la période affichée (valeurs absolues, plancher réel). */
   equity: EquityPoint[];
+  /** Plus grand repli subi SUR LA PÉRIODE affichée (cf. `computeMaxDrawdown`). */
+  maxDrawdown: MaxDrawdown;
 }
 
 function famKeys(t: AnalyticsTrade, family: 'setup' | 'emotion'): string[] | null {
@@ -308,18 +362,30 @@ export function buildAnalytics(params: {
   const byEmotion = bucketize(windowed, (t) => famKeys(t, 'emotion'), tagLabel).sort(byEntriesDesc);
 
   const fullEquity = buildEquityCurve(rules, startingBalance, allTrades);
+  const windowedEquity = fullEquity.filter((p) => p.date >= range.from && p.date <= range.to);
+
+  /* Le pic est SEMÉ avec l'équité juste avant la période — sinon un repli
+     survenu dès le premier jour affiché partirait d'un pic déjà entamé et
+     serait sous-estimé. À défaut d'antériorité, c'est le capital initial. */
+  const previous = fullEquity.filter((p) => p.date < range.from).at(-1);
+  const seed = previous ? previous.equity : startingBalance;
+  const maxDrawdown = computeMaxDrawdown([
+    { date: previous?.date ?? range.from, value: seed },
+    ...windowedEquity.map((p) => ({ date: p.date, value: p.equity })),
+  ]);
 
   return {
     range,
     rangeEntries: windowed.length,
     metrics: computeMetrics(windowed),
+    maxDrawdown,
     bySymbol,
     byWeekday,
     byHour,
     bySetup,
     byEmotion,
     distribution: buildDistribution(windowed),
-    equity: fullEquity.filter((p) => p.date >= range.from && p.date <= range.to),
+    equity: windowedEquity,
   };
 }
 
@@ -348,6 +414,10 @@ export interface AggregateAnalytics {
   byAccount: Bucket[];
   distribution: DistributionBin[];
   cumulative: CumulativePoint[];
+  /** Repli max du P&L cumulé sur la période, tous comptes confondus.
+   *  `pct` y vaut le plus souvent `null` : un pourcentage rapporté à un pic de
+   *  P&L cumulé (qui part de zéro) n'aurait pas de sens. */
+  maxDrawdown: MaxDrawdown;
 }
 
 /** P&L net cumulé jour par jour, tous comptes confondus (sans plancher). */
@@ -377,6 +447,8 @@ export function buildAggregateAnalytics(params: {
   const labels = new Map<string, string>();
   for (const t of windowed) if (!labels.has(t.accountId)) labels.set(t.accountId, t.accountLabel);
 
+  const cumulative = buildCumulative(windowed);
+
   return {
     range,
     rangeEntries: windowed.length,
@@ -395,6 +467,19 @@ export function buildAggregateAnalytics(params: {
       byEntriesDesc,
     ),
     distribution: buildDistribution(windowed),
-    cumulative: buildCumulative(windowed),
+    cumulative,
+    /* Le cumulé démarre à zéro par construction : on sème le pic à 0 pour que
+       la période qui commence par une perte compte bien son repli.
+       Le POURCENTAGE est écarté : rapporté à un pic de P&L cumulé (220 € après
+       deux jours, par exemple), il produit des « 110 % » qui ne veulent rien
+       dire. Seul le montant est comparable entre comptes ; un ratio n'aurait de
+       sens que rapporté au capital, qui diffère d'un compte à l'autre. */
+    maxDrawdown: {
+      ...computeMaxDrawdown([
+        { date: range.from, value: 0 },
+        ...cumulative.map((p) => ({ date: p.date, value: p.pnl })),
+      ]),
+      pct: null,
+    },
   };
 }
