@@ -230,6 +230,146 @@
   box-shadow: var(--input-shadow);
   -webkit-backdrop-filter: none; backdrop-filter: none;
 }
+/* PONT : les composants existants utilisent les classes du DS (.btn, .input…).
+   Plutôt que de réécrire tout le JSX, on mappe ces classes sur les TOKENS.
+   Aucune valeur en dur ici — tout vient de design-tokens.css. */
+.ui .btn {
+  height: var(--h-control);
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  color: var(--ink2);
+  background: var(--ctl-bg);
+  box-shadow: var(--ctl-shadow);
+  transition: background .15s, box-shadow .15s, transform .1s, color .15s, filter .15s;
+}
+.ui .btn-sm { height: var(--h-control-sm); }
+.ui .btn-lg { height: var(--h-lg); }
+.ui .btn-icon { width: var(--h-control); }
+.ui .btn-icon.btn-sm { width: var(--h-control-sm); }
+.ui .btn:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--ink); background: var(--ctl-bg-hover); }
+.ui .btn:active:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); transform: translateY(1px);
+}
+.ui .btn:disabled, .ui .btn[aria-disabled="true"] {
+  opacity: .40; box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+/* PRIMARY : une seule par écran. */
+.ui .btn.btn-primary { color: #fff; background: var(--ctl-primary-bg); box-shadow: var(--ctl-primary-shadow); }
+.ui .btn.btn-primary:hover:not(:disabled) { filter: brightness(1.07); }
+.ui .btn.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .40), 0 1px 6px rgba(91, 63, 255, .30);
+}
+
+/* SECONDARY : pilule posée neutre (pas de verre flou dans la scène). */
+.ui .btn.btn-secondary { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* GHOST : transparent au repos, se lève au survol seulement. */
+.ui .btn.btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.ui .btn.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
+  box-shadow: var(--elev-3-shadow);
+}
+.ui .btn.btn-danger-ghost:hover:not(:disabled) {
+  color: #ff8a94;
+  background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
+  box-shadow: var(--elev-3-shadow);
+}
+
+/* DANGER plein : arête haute rouge, jamais blanche — une action destructrice
+   doit se reconnaître au premier coup d'œil. */
+.ui .btn.btn-danger { color: #ff9aa3; border-color: transparent; background: var(--ctl-danger-bg); box-shadow: var(--ctl-danger-shadow); }
+.ui .btn.btn-danger:hover:not(:disabled) { color: #ffb3ba; background: var(--ctl-danger-bg-hover); }
+
+/* =====================================================================
+   CHAMPS DE SAISIE — POSÉS comme les boutons (aucun creusement)
+   Même gabarit (38 px, pilule) et même éclairage directionnel que .btn.
+   Seule différence : le fond est légèrement plus sombre (.06 contre .085)
+   — c'est ce qui distingue une zone de saisie d'une action.
+   Aucune bordure.
+   NB : `.field` est déjà le conteneur libellé+contrôle du DS — on style
+   donc les contrôles réels, jamais une classe `.field`.
+   ===================================================================== */
+.ui .input,
+.ui .select-trigger {
+  height: var(--h-control);
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  border: none;
+  background: var(--input-bg);
+  box-shadow: var(--input-shadow);
+  transition: background .15s, box-shadow .15s;
+}
+.ui .input::placeholder,
+.ui .select-trigger .placeholder { color: var(--ink3); }
+.ui .select-trigger .chevron { color: var(--ink3); }
+.ui .input:hover:not(:disabled),
+.ui .select-trigger:hover:not(:disabled) { background: var(--input-bg-hover); }
+/* Focus : l'arête haute vire à l'accent + anneau. Toujours aucun contour. */
+.ui .input:focus,
+.ui .input:focus-visible,
+.ui .select-trigger:focus-visible,
+.ui .select.is-open .select-trigger {
+  outline: none;
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-shadow-focus);
+}
+/* Notes : seul champ rectangulaire (exception assumée), même modelé.
+   Coin de redimensionnement natif masqué (il casse l'arête). */
+.ui textarea.input {
+  height: auto; min-height: 96px; padding: 10px 16px;
+  border-radius: var(--r-md); line-height: 1.55; resize: vertical;
+}
+.ui textarea.input::-webkit-resizer { display: none; }
+
+/* =====================================================================
+   SURCHARGES RESPONSIVE — à garder ICI, juste après le pont
+   ---------------------------------------------------------------------
+   Le design system portait ces règles sur des sélecteurs NUS (`.btn`,
+   `.input`, `.tab`…). Le rescope `.ui` les a toutes neutralisées : une
+   media query n'ajoute aucune spécificité, et `.ui X` (0,2,0) bat `X`
+   (0,1,0) quel que soit l'ordre. Elles sont donc reprises ici, au niveau
+   de spécificité du système.
+
+   Les cibles tactiles passent par les TOKENS plutôt que par des règles :
+   une variable est lue au point d'usage, donc elle échappe complètement
+   au conflit de cascade — tout ce qui consomme `--h-control` suit, y
+   compris les contrôles maison (bascule du tiroir, tags, toggles) que le
+   DS ne connaissait pas.
+   ===================================================================== */
+
+/* Pointeur grossier (tactile) : 44 px minimum, seuil Apple HIG / Material.
+   Ne dépend PAS de la largeur — une tablette ou un portable tactile large
+   est concerné au même titre qu'un téléphone. */
+@media (pointer: coarse) {
+  :root {
+    --h-control: 44px;
+    --h-control-sm: 38px;
+  }
+  /* La case à cocher garde sa taille dessinée mais gagne une zone de
+     frappe conforme, via un pseudo-élément (le DS ne traitait pas ce cas). */
+  .ui .checkbox, .ui .check-box { position: relative; }
+  .ui .checkbox::after, .ui .check input + .check-box::after {
+    content: ''; position: absolute; left: 50%; top: 50%;
+    width: 44px; height: 44px; transform: translate(-50%, -50%);
+  }
+}
+
+/* Sous 380 px (iPhone SE = 375 px), un libellé long doit pouvoir se replier
+   au lieu d'être écrasé dans une hauteur fixe. */
+@media (max-width: 380px) {
+  .ui .btn {
+    height: auto;
+    min-height: var(--h-control);
+    padding-block: .45rem;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: center;
+  }
+}
 
 /* =====================================================================
    CASE À COCHER
@@ -324,6 +464,18 @@
 .ui .kv-key .kv-meta { color: var(--ink3); font-size: 11px; }
 .ui .kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
 
+/* Défilement horizontal résiduel : discret, invisible au repos.
+   DÉCLARÉ AVANT la media query d'empilement — sinon il la battrait (même
+   sélecteur, même spécificité : c'est l'ordre qui tranche). */
+.ui .table-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .10) transparent;
+}
+.ui .table-scroll::-webkit-scrollbar { height: 6px; }
+.ui .table-scroll::-webkit-scrollbar-track { background: transparent; }
+.ui .table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .10); border-radius: 999px; }
+.ui .table-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .22); }
 /* Au-dessus du seuil d'empilement, le contenu ne descend pas sous sa largeur
    utile : mieux vaut défiler que compresser des colonnes illisibles. */
 .ui .table-scroll > .data-list { min-width: 640px; }
@@ -353,17 +505,6 @@
   .ui .table-scroll { overflow-x: visible; }
   .ui .table-scroll > .data-list { min-width: 0; }
 }
-
-/* Défilement horizontal résiduel : discret, invisible au repos. */
-.ui .table-scroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, .10) transparent;
-}
-.ui .table-scroll::-webkit-scrollbar { height: 6px; }
-.ui .table-scroll::-webkit-scrollbar-track { background: transparent; }
-.ui .table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .10); border-radius: 999px; }
-.ui .table-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .22); }
 
 /* =====================================================================
    ÉTATS TRANSVERSAUX — vide, erreur, chargement, notification, infobulle

@@ -386,18 +386,6 @@ h1, h2, h3 {
 .acct2 { display: grid; gap: 1.6rem; }
 .acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .acct2-work { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
-@media (min-width: 1280px) {
-  .acct2 { grid-template-columns: 560px minmax(0, 1fr); align-items: start; gap: 2rem; }
-  /* La console (état + saisie, priorités 1 et 2) reste épinglée : jauges et
-     saisie visibles pendant qu'on parcourt calendrier et entrées à droite. */
-  .acct2-console { position: sticky; top: 84px; }
-  /* Onglet Historique : la colonne de travail s'étire à la hauteur de la console
-     pour que la table remplisse (surface solide) au lieu de finir en aplat noir. */
-  .acct2-stretch { align-items: stretch; }
-}
-@media (min-width: 1800px) {
-  .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
-}
 
 /* Cockpit : statut + solde, jauges, payout — une seule carte solide */
 .acct2-cockpit { display: flex; flex-direction: column; gap: 1.3rem; }
@@ -713,7 +701,6 @@ h1, h2, h3 {
 @media (max-width: 620px) {
   .jhead { flex-direction: column; }
   .jhead-right { align-items: flex-start; text-align: left; }
-  .jpayout-figs { gap: 24px; }
 }
 
 /* =====================================================================
@@ -736,102 +723,6 @@ h1, h2, h3 {
      coloré qui rivalise avec l'action primaire (onglets, items de nav).
    ===================================================================== */
 
-/* PONT : les composants existants utilisent les classes du DS (.btn, .input…).
-   Plutôt que de réécrire tout le JSX, on mappe ces classes sur les TOKENS.
-   Aucune valeur en dur ici — tout vient de design-tokens.css. */
-.ui .btn {
-  height: var(--h-control);
-  border-radius: var(--r-pill);
-  border: 1px solid transparent;
-  color: var(--ink2);
-  background: var(--ctl-bg);
-  box-shadow: var(--ctl-shadow);
-  transition: background .15s, box-shadow .15s, transform .1s, color .15s, filter .15s;
-}
-.ui .btn-sm { height: var(--h-control-sm); }
-.ui .btn-lg { height: var(--h-lg); }
-.ui .btn-icon { width: var(--h-control); }
-.ui .btn-icon.btn-sm { width: var(--h-control-sm); }
-.ui .btn:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--ink); background: var(--ctl-bg-hover); }
-.ui .btn:active:not(:disabled):not([aria-disabled="true"]) {
-  background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); transform: translateY(1px);
-}
-.ui .btn:disabled, .ui .btn[aria-disabled="true"] {
-  opacity: .40; box-shadow: none; transform: none; cursor: not-allowed;
-}
-
-/* PRIMARY : une seule par écran. */
-.ui .btn.btn-primary { color: #fff; background: var(--ctl-primary-bg); box-shadow: var(--ctl-primary-shadow); }
-.ui .btn.btn-primary:hover:not(:disabled) { filter: brightness(1.07); }
-.ui .btn.btn-primary:active:not(:disabled) {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .40), 0 1px 6px rgba(91, 63, 255, .30);
-}
-
-/* SECONDARY : pilule posée neutre (pas de verre flou dans la scène). */
-.ui .btn.btn-secondary { -webkit-backdrop-filter: none; backdrop-filter: none; }
-
-/* GHOST : transparent au repos, se lève au survol seulement. */
-.ui .btn.btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
-.ui .btn.btn-ghost:hover:not(:disabled) {
-  color: var(--ink);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
-  box-shadow: var(--elev-3-shadow);
-}
-.ui .btn.btn-danger-ghost:hover:not(:disabled) {
-  color: #ff8a94;
-  background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
-  box-shadow: var(--elev-3-shadow);
-}
-
-/* DANGER plein : arête haute rouge, jamais blanche — une action destructrice
-   doit se reconnaître au premier coup d'œil. */
-.ui .btn.btn-danger { color: #ff9aa3; border-color: transparent; background: var(--ctl-danger-bg); box-shadow: var(--ctl-danger-shadow); }
-.ui .btn.btn-danger:hover:not(:disabled) { color: #ffb3ba; background: var(--ctl-danger-bg-hover); }
-
-/* =====================================================================
-   CHAMPS DE SAISIE — POSÉS comme les boutons (aucun creusement)
-   Même gabarit (38 px, pilule) et même éclairage directionnel que .btn.
-   Seule différence : le fond est légèrement plus sombre (.06 contre .085)
-   — c'est ce qui distingue une zone de saisie d'une action.
-   Aucune bordure.
-   NB : `.field` est déjà le conteneur libellé+contrôle du DS — on style
-   donc les contrôles réels, jamais une classe `.field`.
-   ===================================================================== */
-.ui .input,
-.ui .select-trigger {
-  height: var(--h-control);
-  padding: 0 18px;
-  border-radius: var(--r-pill);
-  color: var(--ink);
-  border: none;
-  background: var(--input-bg);
-  box-shadow: var(--input-shadow);
-  transition: background .15s, box-shadow .15s;
-}
-.ui .input::placeholder,
-.ui .select-trigger .placeholder { color: var(--ink3); }
-.ui .select-trigger .chevron { color: var(--ink3); }
-.ui .input:hover:not(:disabled),
-.ui .select-trigger:hover:not(:disabled) { background: var(--input-bg-hover); }
-/* Focus : l'arête haute vire à l'accent + anneau. Toujours aucun contour. */
-.ui .input:focus,
-.ui .input:focus-visible,
-.ui .select-trigger:focus-visible,
-.ui .select.is-open .select-trigger {
-  outline: none;
-  background: var(--input-bg-focus);
-  box-shadow: var(--input-shadow-focus);
-}
-/* Notes : seul champ rectangulaire (exception assumée), même modelé.
-   Coin de redimensionnement natif masqué (il casse l'arête). */
-.ui textarea.input {
-  height: auto; min-height: 96px; padding: 10px 16px;
-  border-radius: var(--r-md); line-height: 1.55; resize: vertical;
-}
-.ui textarea.input::-webkit-resizer { display: none; }
-
-/* (Anneau de focus : design-tokens.css.) */
 
 /* Le NOIR domine. Les glows vivent UNIQUEMENT dans body::before, centres ancrés
    hors viewport : la lueur vient d'ailleurs, jamais posée sur une carte. */
@@ -1165,9 +1056,9 @@ body::before {
 
 /* (`.dash .table-wrap` retiré : il réintroduisait fond et bordure que
    `.app-shell .table-wrap` annule, en gagnant sur l'ordre de cascade.) */
-/* Tables denses : lignes resserrées, en-têtes discrets */
-.ui .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
-.ui .table td { padding: 8px 12px; }
+/* (`.ui .table th/td` supprimé : plus aucune `<table>` dans le produit, toutes
+   converties en grilles `.data-row`. La règle neutralisait au passage
+   l'empilement mobile `.table td` du DS, sur une cible qui n'existe plus.) */
 
 /* ---- Navigation mobile : la barre devient un TIROIR ----
    Sous le seuil, la sidebar ne disparaît plus (le produit se retrouvait sans
@@ -1219,4 +1110,29 @@ body::before {
 
 @media (max-width: 860px) and (prefers-reduced-motion: reduce) {
   .app-side, .app-side-veil { transition: none; }
+}
+
+/* =====================================================================
+   SURCHARGES RESPONSIVE DU JOURNAL — À GARDER EN FIN DE FICHIER
+   ---------------------------------------------------------------------
+   Ces règles ciblent des sélecteurs dont la déclaration de base vit plus
+   haut dans ce même fichier. Une media query n'ajoutant AUCUNE
+   spécificité, elles doivent être déclarées APRÈS pour l'emporter — sinon
+   la règle de base gagne silencieusement sur l'ordre de cascade.
+   Toute nouvelle surcharge responsive du journal se met ici.
+   ===================================================================== */
+@media (min-width: 1280px) {
+  .ui .acct2 { grid-template-columns: 560px minmax(0, 1fr); align-items: start; gap: 2rem; }
+  /* La console (état + saisie, priorités 1 et 2) reste épinglée : jauges et
+     saisie visibles pendant qu'on parcourt calendrier et entrées à droite. */
+  .ui .acct2-console { position: sticky; top: 84px; }
+  /* Onglet Historique : la colonne de travail s'étire à la hauteur de la console
+     pour que la table remplisse (surface solide) au lieu de finir en aplat noir. */
+  .ui .acct2-stretch { align-items: stretch; }
+}
+@media (min-width: 1800px) {
+  .ui .acct2 { grid-template-columns: 600px minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .ui .card-grad .jpayout-figs { gap: 24px; }
 }
