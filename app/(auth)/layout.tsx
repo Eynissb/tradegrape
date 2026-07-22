@@ -9,9 +9,7 @@ export default function AuthLayout({
 }) {
   return (
     <main className="ui relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
-      <div className="glow glow-a" style={{ top: '-10%', left: '-8%' }} />
-      <div className="glow glow-b" style={{ bottom: '-14%', right: '-8%' }} />
-
+      {/* Pas de div de halo : la lueur ambiante vient de `body::before`. */}
       <div className="relative z-10 w-full max-w-md">
         <Link
           href="/"

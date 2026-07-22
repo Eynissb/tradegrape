@@ -13,9 +13,9 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <section className="lg-glass" style={{ borderRadius: 'var(--r-xl)', padding: '2rem 1.8rem' }}>
-      <h1 className="text-2xl font-bold">Créer un compte</h1>
-      <p className="mt-1.5 text-sm" style={{ color: 'var(--text-2)' }}>
+    <section className="card auth-card">
+      <h1 className="auth-h1">Créer un compte</h1>
+      <p className="jsub mt-1">
         Gratuit. Aucune carte requise.
       </p>
 
@@ -47,7 +47,7 @@ export default async function SignupPage({
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-3)' }}>
+      <p className="auth-alt mt-6">
         Déjà inscrit ?{' '}
         <Link href="/login" className="link-accent">
           Se connecter

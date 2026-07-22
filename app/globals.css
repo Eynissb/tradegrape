@@ -204,6 +204,11 @@ h1, h2, h3 {
 /* (`.admin-table*` supprimé : les cinq tableaux de l'admin sont des grilles
    `.data-row`. Ces règles n'avaient plus aucun consommateur.) */
 
+/* ---- Connexion / inscription ---- */
+.ui .auth-card { padding: 2rem 1.8rem; }
+.ui .auth-h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; letter-spacing: -.4px; color: var(--ink); }
+.ui .auth-alt { text-align: center; font-size: 13.5px; color: var(--ink3); }
+
 /* Header du back-office : contexte seulement, la navigation vit dans la sidebar. */
 .admin-top { justify-content: flex-end; }
 .admin-context { display: flex; align-items: center; gap: 12px; }

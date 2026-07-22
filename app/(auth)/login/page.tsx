@@ -13,9 +13,9 @@ export default async function LoginPage({
   const { error, message, redirect } = await searchParams;
 
   return (
-    <section className="lg-glass" style={{ borderRadius: 'var(--r-xl)', padding: '2rem 1.8rem' }}>
-      <h1 className="text-2xl font-bold">Se connecter</h1>
-      <p className="mt-1.5 text-sm" style={{ color: 'var(--text-2)' }}>
+    <section className="card auth-card">
+      <h1 className="auth-h1">Se connecter</h1>
+      <p className="jsub mt-1">
         Accède à ton journal et à tes comparaisons.
       </p>
 
@@ -49,7 +49,7 @@ export default async function LoginPage({
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm" style={{ color: 'var(--text-3)' }}>
+      <p className="auth-alt mt-6">
         Pas encore de compte ?{' '}
         <Link href="/signup" className="link-accent">
           Créer un compte
