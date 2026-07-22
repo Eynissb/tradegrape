@@ -1,14 +1,11 @@
-import Image from 'next/image';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getProfile, isStaff } from '@/lib/auth/roles';
-import { signout } from '@/app/(auth)/actions';
-import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import AdminSidebar from './AdminSidebar';
 
 /**
  * Garde /admin : staff uniquement (owner, admin, editor, moderator, analyst).
- * Fournit aussi le chrome commun du back-office (barre + navigation).
+ * Chrome du back-office : sidebar (navigation) + header (contexte seulement).
  */
 export default async function AdminLayout({
   children,
@@ -20,37 +17,23 @@ export default async function AdminLayout({
   if (!profile) redirect('/login?redirect=/admin');
   if (!isStaff(profile.role)) redirect('/');
 
+  const env = process.env.NODE_ENV === 'production' ? null : 'dev';
+
   return (
-    <div className="ui flex min-h-full flex-col">
-      <header className="admin-bar">
-        <div className="admin-bar-in">
-          <Link href="/" className="admin-brand" aria-label="Tradegrape — accueil">
-            <Image
-              src="/brand/logo.png"
-              alt="Tradegrape"
-              width={116}
-              height={29}
-              priority
-            />
-            <span className="admin-pill">admin</span>
-          </Link>
+    <div className="app-shell ui">
+      <AdminSidebar />
 
-          <nav className="admin-nav">
-            <Link href="/admin/firms">Firms</Link>
-            <Link href="/admin/requested-firms">Demandes</Link>
-            <span className="admin-soon">Plans · Offers · Promos (à venir)</span>
-          </nav>
-
-          <div className="admin-user">
-            <Badge variant="brand" mono>{profile.role}</Badge>
-            <form action={signout}>
-              <Button type="submit" variant="ghost" size="sm">Déconnexion</Button>
-            </form>
+      <div className="app-main">
+        {/* Le header ne porte plus de navigation : contexte et actions globales. */}
+        <header className="app-top admin-top">
+          <div className="admin-context">
+            <Badge variant="neutral" mono>{profile.role}</Badge>
+            {env ? <span className="admin-env">{env}</span> : null}
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="admin-main">{children}</main>
+        <div className="app-content">{children}</div>
+      </div>
     </div>
   );
 }
