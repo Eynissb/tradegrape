@@ -471,7 +471,9 @@ h1, h2, h3 {
 .acct2-period { display: flex; flex-direction: column; gap: .9rem; }
 .acct2-period-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 
-.acct2-breakdowns { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: stretch; }
+/* Chaque carte prend sa hauteur naturelle : « Par symbole / setup / émotion »
+   ne s'étirent plus sur la plus haute de la rangée. */
+.acct2-breakdowns { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
 
 /* Courbe d'équité (SVG pur) */
 /* Graphique : AUCUN fond propre — il repose sur sa carte. La donnée ne porte
@@ -733,9 +735,8 @@ h1, h2, h3 {
     inset 0 -1px 0 rgba(0, 0, 0, .2),
     0 1px 2px rgba(0, 0, 0, .35);
 
-  /* Surface creusée — saisie uniquement */
-  --sunken-bg: rgba(0, 0, 0, .28);
-  --sunken-shadow: inset 0 1px 3px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .05);
+  /* Plus AUCUNE surface creusée dans la scène : tout est posé (dégradé +
+     arêtes). Seul un contrôle enfoncé au clic (:active) s'enfonce. */
 
   /* États */
   --win: #38ffb0; --loss: #ff4d5e; --warn: #ffb43b;
@@ -1088,7 +1089,14 @@ body::before {
 .dash .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
 .dash .card-grad .ctitle-ic { background: rgba(255, 255, 255, .2); color: #fff; }
 /* badge d'état neutralisé sur fond dégradé */
-.dash .card-grad .badge { background: rgba(255, 255, 255, .16) !important; color: #fff !important; border-color: rgba(255, 255, 255, .28) !important; }
+/* Sur fond accentué, le badge était le point le plus clair de la carte et
+   captait l'œil avant le titre : on l'assombrit. (Sur fond noir il ne bouge pas.) */
+.dash .card-grad .badge {
+  background: linear-gradient(180deg, rgba(0, 0, 0, .30), rgba(0, 0, 0, .16)) !important;
+  color: rgba(255, 255, 255, .88) !important;
+  border-color: transparent !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) !important;
+}
 .dash .card-grad .badge svg { color: #fff; }
 /* lignes internes en barres distinctes */
 .dash .card-grad .jpayout-figs { gap: 14px; }
@@ -1110,7 +1118,9 @@ body::before {
 .acct2-stat-head { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 500; color: var(--ink2); margin-bottom: 5px; }
 .acct2-stat-head .lucide { width: 14px; height: 14px; }
 .dash .acct2-stat-k { font-size: 1.7rem; line-height: 1.1; white-space: nowrap; color: var(--ink); }
-.acct2-stat-sub { color: var(--ink3); }
+/* Hauteur réservée même quand la sous-ligne est vide → valeurs alignées
+   horizontalement d'une carte à l'autre. */
+.acct2-stat-sub { color: var(--ink3); font-size: 11px; line-height: 15px; min-height: 15px; }
 
 /* Solde */
 .acct2-balance { display: flex; flex-direction: column; gap: 2px; }
@@ -1139,11 +1149,21 @@ body::before {
 
 /* Onglets segmentés façon iOS (en verre) */
 /* Track d'onglets = surface creusée ; onglet actif = contrôle niveau 3 + violet. */
+/* Rail d'onglets : gouttière POSÉE (valeurs des sous-cartes de niveau 2), plus
+   creusée. Elle reste plus sombre que l'onglet actif qui se pose dessus —
+   c'est cet écart qui produit la hiérarchie. */
 .app-shell .tabs {
-  background: rgba(0, 0, 0, .22); border: 0; border-radius: var(--r-pill); padding: 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
+  border: none; border-radius: var(--r-pill); padding: 4px;
   -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), inset 0 -1px 0 rgba(255, 255, 255, .05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35);
 }
+/* Les onglets de période sont le MÊME composant : rail identique, largeur
+   naturelle (sans quoi le flex-column les étirerait sur toute la colonne). */
+.acct2-period { align-items: flex-start; }
 /* Onglet : même gabarit que les boutons — pilule, 38 px. Aucune valeur intermédiaire. */
 .app-shell .tab {
   position: relative; height: var(--h-control); border-radius: var(--r-pill);
@@ -1167,14 +1187,22 @@ body::before {
 .dash .badge { box-shadow: var(--elev-3-shadow); }
 
 /* ===== Lignes de données (un <table> ne porte pas le relief → grille sur des div) ===== */
+/* Définition UNIQUE de la ligne : « Dernières entrées » et le tableau de
+   l'Historique la partagent (même hauteur, même padding, même relief, même
+   espacement). `min-height` fige la hauteur pour qu'une ligne contenant un
+   bouton ne soit pas plus haute qu'une ligne de texte. */
 .data-list { display: flex; flex-direction: column; gap: 6px; }
-.data-head, .data-row { display: grid; grid-template-columns: var(--cols, 1fr); align-items: center; gap: 12px; padding: 10px 14px; }
-.data-head { color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 14px 4px; }
-.data-row { position: relative; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); transition: background .15s; }
+.data-head, .data-row { display: grid; grid-template-columns: var(--cols, 1fr); align-items: center; gap: 10px; padding: 4px 10px; }
+.data-head { color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 10px 4px; min-height: 0; background: none; box-shadow: none; }
+.data-row { position: relative; min-height: 44px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); transition: background .15s; }
 .data-row:hover { background: rgba(255, 255, 255, .06); }
 .data-row > *, .data-head > * { min-width: 0; }
-.data-row a { color: inherit; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.data-row a.num { white-space: nowrap; overflow: visible; }
+/* Une cellule ne se renvoie JAMAIS à la ligne : elle ferait grandir la ligne et
+   les deux tableaux n'auraient plus la même hauteur. Seuls les tags peuvent
+   passer à la ligne, et leur conteneur est en overflow caché. */
+.data-row > *:not(.jchips), .data-head > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.data-row > .jchips { overflow: hidden; flex-wrap: nowrap; }
+.data-row a { color: inherit; text-decoration: none; }
 .data-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .data-num { font-variant-numeric: tabular-nums; }
 
@@ -1190,6 +1218,21 @@ body::before {
 /* Aucun défilement horizontal dans une carte : la grille s'adapte en `fr`. */
 .app-shell .table-wrap { overflow-x: visible; background: transparent; border: 0; }
 .app-shell .kv-key { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tableau des trades : sur écran large les colonnes tiennent (aucun scroll).
+   Sur écran étroit le défilement reste possible mais DISCRET — barre fine,
+   grise, invisible au repos. */
+.table-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .10) transparent;
+}
+.table-scroll::-webkit-scrollbar { height: 6px; }
+.table-scroll::-webkit-scrollbar-track { background: transparent; }
+.table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .10); border-radius: 999px; }
+.table-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .22); }
+/* Le contenu ne descend jamais sous sa largeur minimale utile. */
+.table-scroll > .data-list { min-width: 640px; }
 .dash .acct2-empty { min-height: 0; }
 
 /* ===== Calendrier — quatre traitements distincts ===== */

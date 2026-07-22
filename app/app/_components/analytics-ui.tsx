@@ -13,7 +13,10 @@ export function Stat({ label, value, color, sub, icon: Icon }: { label: string; 
         <span>{label}</span>
       </div>
       <div className="acct2-stat-k" style={color ? { color } : undefined}>{value}</div>
-      {sub ? <div className="acct2-stat-sub">{sub}</div> : null}
+      {/* Sous-ligne TOUJOURS réservée, même vide : sans quoi les cartes sans
+          sous-ligne (« Jours actifs ») sont plus courtes que celles qui en ont
+          une (« Meilleur jour ») et les valeurs ne s'alignent plus entre elles. */}
+      <div className="acct2-stat-sub">{sub ?? ' '}</div>
     </div>
   );
 }

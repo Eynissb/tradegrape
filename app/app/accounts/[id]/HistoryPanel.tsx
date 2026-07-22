@@ -36,7 +36,7 @@ function platformLabel(key: string | null): string {
  * en `fr` pour qu'aucune barre de défilement horizontale n'apparaisse.
  * Ordre : case · date · type · P&L · tags · action.
  */
-const COLS_TRADES = '18px minmax(0,1fr) minmax(0,1.2fr) 110px minmax(0,1fr) 84px';
+const COLS_TRADES = '18px 104px minmax(0,1.1fr) 104px minmax(0,1fr) 76px';
 
 export default function HistoryPanel({
   trades,
@@ -199,6 +199,7 @@ export default function HistoryPanel({
             {trades.length === 0 ? 'Aucune entrée. Commence par un P&L rapide dans la console.' : 'Aucune entrée pour ces filtres.'}
           </div>
         ) : (
+          <div className="table-scroll">
           <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_TRADES }}>
             <div className="data-head" role="row">
               <span><input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" /></span>
@@ -234,6 +235,7 @@ export default function HistoryPanel({
                 </div>
               );
             })}
+          </div>
           </div>
         )}
       </div>

@@ -12,9 +12,11 @@ export interface TagFamily {
 
 export const TAG_FAMILIES: readonly TagFamily[] = [
   {
+    // Neutre : le violet entrerait en conflit avec l'accent de marque, réservé
+    // aux états actifs. Émotion et Erreur gardent leurs teintes sémantiques.
     key: 'setup',
     label: 'Setup',
-    color: 'var(--c2)',
+    color: 'var(--ink3)',
     tags: [
       { key: 'breakout', label: 'Breakout' },
       { key: 'pullback', label: 'Pullback' },

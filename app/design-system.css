@@ -239,7 +239,9 @@
    ===================================================================== */
 .field { display: flex; flex-direction: column; gap: .45rem; }
 .label { font-size: .85rem; font-weight: 500; color: var(--text-1); }
-.label .req { color: var(--magenta); }
+/* Champ requis : NEUTRE. Le rouge partageait la teinte d'ERREUR et se lisait
+   comme une erreur de saisie plutôt que comme une obligation. */
+.label .req { color: var(--ink3); }
 .input-wrap { position: relative; display: flex; align-items: center; }
 .input-wrap > .lucide { position: absolute; left: 1.05rem; color: var(--text-3); pointer-events: none; }
 .input-wrap > .lucide ~ .input { padding-left: 2.8rem; }
