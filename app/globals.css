@@ -345,8 +345,19 @@ h1, h2, h3 {
  * -------------------------------------------------------------------------- */
 .acct2-top { margin-bottom: 4px; }
 .acct2-top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-.jsettings-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--ink2); text-decoration: none; white-space: nowrap; transition: color .15s; }
-.jsettings-link:hover { color: var(--ink); }
+.jsettings-link {
+  display: inline-flex; align-items: center; gap: 6px; height: var(--h-control-sm); padding: 0 14px;
+  border-radius: var(--r-pill); border: 1px solid transparent;
+  font-size: 13px; color: var(--ink2); text-decoration: none; white-space: nowrap;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .32);
+  transition: color .15s, background .15s;
+}
+.jsettings-link:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); }
 .jsettings-link .lucide { width: 16px; height: 16px; }
 .jdanger { border-color: rgba(255, 77, 94, .3); }
 .jcout-add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
@@ -517,14 +528,20 @@ h1, h2, h3 {
 /* Dépliages de saisie : garder la saisie quotidienne courte (date + montant) */
 .jentry-disclosures { display: flex; flex-wrap: wrap; gap: 8px; }
 .jentry-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px; height: var(--h-control-sm); padding: 0 14px;
   font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--ink2);
-  background: rgba(150, 110, 240, 0.06); border: 1px solid var(--card-brd);
-  border-radius: var(--r-pill); padding: 7px 14px; cursor: pointer;
-  transition: color .15s, border-color .15s, background .15s;
+  border-radius: var(--r-pill); border: 1px solid transparent; cursor: pointer;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .32);
+  transition: color .15s, background .15s, box-shadow .15s, transform .1s;
 }
-.jentry-toggle:hover { color: var(--ink); border-color: rgba(150, 110, 240, 0.32); }
-.jentry-toggle[aria-expanded="true"] { color: var(--ink); background: rgba(150, 110, 240, 0.12); }
+.jentry-toggle:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); }
+.jentry-toggle:active { transform: translateY(1px); background: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14)); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .55); }
+.jentry-toggle[aria-expanded="true"] { color: var(--ink); }
 .jentry-toggle .lucide { width: 15px; height: 15px; transition: transform .15s; }
 .jentry-toggle[aria-expanded="true"] .lucide { transform: rotate(180deg); }
 
@@ -534,20 +551,28 @@ h1, h2, h3 {
 .jtag-list { display: flex; flex-wrap: wrap; gap: 7px; }
 /* Tag = pill toggle : input natif masqué (form + a11y), la pill porte l'état. */
 .jtag {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px;
-  color: var(--text-2); background: rgba(8, 11, 20, 0.5);
-  border: 1px solid rgba(120, 150, 220, 0.18); border-radius: var(--r-pill);
-  padding: 6px 12px; cursor: pointer; user-select: none;
-  transition: color var(--transition), background var(--transition), border-color var(--transition);
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; height: var(--h-control-sm); padding: 0 13px;
+  color: var(--ink2); border: 1px solid transparent; border-radius: var(--r-pill);
+  cursor: pointer; user-select: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .32);
+  transition: color .15s, background .15s, box-shadow .15s;
 }
 .jtag input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.jtag:hover { border-color: rgba(192, 75, 255, 0.4); color: var(--text-1); }
+.jtag:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); }
+/* Coché = LISERÉ (sélection lisible sans rivaliser avec l'action primaire). */
 .jtag:has(input:checked) {
-  color: #fff; border-color: transparent;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 45%), var(--grad-brand);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 10px rgba(91, 63, 255, .3);
+  color: var(--ink); border: 1px solid rgba(140, 90, 255, .30);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .18), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+  box-shadow: inset 0 1px 0 rgba(180, 140, 255, .24), inset 0 -8px 14px -8px rgba(140, 90, 255, .22), 0 2px 8px rgba(0, 0, 0, .45);
 }
-.jtag:has(input:focus-visible) { box-shadow: var(--focus-ring); }
+.jtag:has(input:focus-visible) { outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 2px; }
 
 .jchips { display: flex; flex-wrap: wrap; gap: 5px; }
 .jchip { font-size: 11px; color: var(--ink2); background: rgba(150, 110, 240, 0.12); border-radius: 6px; padding: 2px 7px; }
@@ -664,6 +689,10 @@ h1, h2, h3 {
 
   /* États */
   --win: #38ffb0; --loss: #ff4d5e; --warn: #ffb43b;
+
+  /* Contrôles — hauteur unique boutons & champs (même gabarit → alignés) */
+  --h-control: 38px;
+  --h-control-sm: 30px;
 }
 
 /* Texte NEUTRE (jamais violacé) sur tout l'espace /app — trois niveaux seulement. */
@@ -679,20 +708,149 @@ h1, h2, h3 {
 .dash .link-accent, .dash .jcrumb { color: var(--ink2); }
 .dash .link-accent:hover { color: var(--ink); }
 
-/* Contrôle unifié : forme et élévation SÉPARÉES. .control ne définit pas de rayon. */
-.control {
-  color: var(--ink2); background: var(--elev-3-bg); border: 0;
-  box-shadow: var(--elev-3-shadow); cursor: pointer;
-  transition: background .15s, box-shadow .15s, transform .1s, color .15s;
+/* =====================================================================
+   CONTRÔLES — boutons & onglets (relief, jamais d'aplat)
+   Deux familles :
+   · ACTION  → pilule POSÉE : dégradé haut→bas + arêtes internes sur les
+     quatre côtés (.btn et ses variantes).
+   · BASCULE → transparente au repos, LISERÉ à l'état actif, aucun fond
+     coloré qui rivalise avec l'action primaire (onglets, items de nav).
+   ===================================================================== */
+
+/* — Base ACTION : toute pilule .btn de la scène ressort du fond. — */
+.app-shell .btn {
+  height: var(--h-control);
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  color: var(--ink2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset 1px 0 0 rgba(255, 255, 255, .05),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45),
+    0 3px 8px rgba(0, 0, 0, .32);
+  transition: background .15s, box-shadow .15s, transform .1s, color .15s, filter .15s;
 }
-.control--pill { border-radius: var(--r-pill); }
-.control--square { border-radius: var(--r-sm); }
-/* Tout bouton textuel de la scène est une PILULE ; seuls carrés d'icônes et cases
-   à cocher gardent des angles à --r-sm. */
-.dash .btn, .dash .tab, .app-side-item, .jcal-nav, .jsettings-link, .app-search { border-radius: var(--r-pill); }
-.control:hover { color: var(--ink); background: rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 2px 6px rgba(0, 0, 0, .4); }
-.control:active { background: rgba(0, 0, 0, .2); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); transform: translateY(1px); }
-.control:disabled, .control[aria-disabled="true"] { opacity: .4; box-shadow: none; transform: none; cursor: not-allowed; }
+.app-shell .btn-sm { height: var(--h-control-sm); }
+.app-shell .btn-lg { height: var(--h-lg); }
+.app-shell .btn-icon { width: var(--h-control); }
+.app-shell .btn-icon.btn-sm { width: var(--h-control-sm); }
+.app-shell .btn:hover:not(:disabled):not([aria-disabled="true"]) {
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05));
+}
+.app-shell .btn:active:not(:disabled):not([aria-disabled="true"]) {
+  background: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .06);
+  transform: translateY(1px);
+}
+.app-shell .btn:disabled, .app-shell .btn[aria-disabled="true"] {
+  opacity: .40; box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+/* — PRIMARY : une seule par écran (Enregistrer l'entrée), nettement colorée. — */
+.app-shell .btn.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(140, 105, 255, .62), rgba(91, 63, 255, .38));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .28),
+    inset 0 -1px 0 rgba(0, 0, 0, .30),
+    0 2px 10px rgba(91, 63, 255, .28);
+}
+.app-shell .btn.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+  background: linear-gradient(180deg, rgba(150, 115, 255, .70), rgba(101, 73, 255, .44));
+}
+.app-shell .btn.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .40), 0 1px 6px rgba(91, 63, 255, .30);
+}
+
+/* — SECONDARY : pilule posée neutre (pas de verre flou dans la scène). — */
+.app-shell .btn.btn-secondary { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* — GHOST : transparent au repos, se lève au survol seulement. — */
+.app-shell .btn.btn-ghost {
+  background: transparent; box-shadow: none; border-color: transparent;
+}
+.app-shell .btn.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
+  box-shadow: var(--elev-3-shadow);
+}
+.app-shell .btn.btn-danger-ghost:hover:not(:disabled) {
+  color: #ff8a94;
+  background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
+  box-shadow: var(--elev-3-shadow);
+}
+
+/* — DANGER plein (suppression de compte, etc.). — */
+.app-shell .btn.btn-danger {
+  color: var(--danger); border-color: transparent;
+  background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .10),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .30);
+}
+.app-shell .btn.btn-danger:hover:not(:disabled) {
+  color: #ff8a94;
+  background: linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .08));
+}
+
+/* =====================================================================
+   CHAMPS DE SAISIE — surface CREUSÉE (l'inverse exact du bouton)
+   Même gabarit que les boutons (38 px, pilule) : la distinction ne tient
+   qu'au SENS du relief — le bouton est posé, le champ est enfoncé.
+   La dernière ombre interne est le REBOND DE LUMIÈRE au fond du creux ;
+   sans elle le champ ressemble à un trou noir découpé.
+   NB : `.field` est déjà le conteneur libellé+contrôle du DS — on style
+   donc les contrôles réels, jamais une classe `.field`.
+   ===================================================================== */
+.app-shell .input,
+.app-shell .select-trigger {
+  height: var(--h-control);
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .42), rgba(0, 0, 0, .22));
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, .65),
+    inset 0 1px 1px rgba(0, 0, 0, .50),
+    inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 -6px 10px -6px rgba(255, 255, 255, .05);
+  transition: background .15s, box-shadow .15s;
+}
+.app-shell .input::placeholder,
+.app-shell .select-trigger .placeholder { color: var(--ink3); }
+.app-shell .select-trigger .chevron { color: var(--ink3); }
+.app-shell .input:hover:not(:disabled),
+.app-shell .select-trigger:hover:not(:disabled) {
+  border-color: transparent;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .48), rgba(0, 0, 0, .28));
+}
+/* Focus : le creux s'accentue + anneau d'accent (pas d'outline natif par-dessus). */
+.app-shell .input:focus,
+.app-shell .input:focus-visible,
+.app-shell .select-trigger:focus-visible,
+.app-shell .select.is-open .select-trigger {
+  outline: none;
+  border-color: transparent;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .50), rgba(0, 0, 0, .30));
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, .70),
+    inset 0 -1px 0 rgba(255, 255, 255, .10),
+    inset 0 -6px 10px -6px rgba(255, 255, 255, .06),
+    0 0 0 2px rgba(120, 90, 255, .45);
+}
+/* Notes : seul champ rectangulaire (exception assumée), même creux. */
+.app-shell textarea.input {
+  height: auto; min-height: 96px; padding: 10px 16px;
+  border-radius: var(--r-md); line-height: 1.55; resize: vertical;
+}
 
 /* Anneau d'accent au clavier sur tout élément cliquable de la scène. */
 .app-shell a:focus-visible,
@@ -731,23 +889,26 @@ body::before {
 }
 .app-side-item {
   position: relative;
-  display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px;
-  border-radius: 12px; color: var(--ink2); font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 12px; height: var(--h-control); padding: 0 14px;
+  border-radius: var(--r-pill); color: var(--ink2); font-size: 14px; font-weight: 500;
   text-decoration: none; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s;
-  background: transparent; border: 0; width: 100%; text-align: left; font-family: inherit;
+  background: transparent; border: 1px solid transparent; width: 100%; text-align: left; font-family: inherit;
 }
 .app-side-item .lucide { width: 18px; height: 18px; flex-shrink: 0; stroke-width: 1.7; }
-.app-side-item:hover { color: var(--ink); background: rgba(255, 255, 255, .06); }
-/* État actif : quatre signaux cumulés + barre d'accent verticale à gauche. */
+.app-side-item:hover:not(.is-active):not(.is-soon) { color: var(--ink); background: rgba(255, 255, 255, .06); }
+/* État actif = LISERÉ (le fond reste quasi noir, pas de fond coloré plein). */
 .app-side-item.is-active {
   color: var(--ink);
-  background: linear-gradient(180deg, rgba(120, 90, 255, .28), rgba(120, 90, 255, .1)), rgba(255, 255, 255, .06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -1px 0 rgba(0, 0, 0, .3), 0 2px 8px rgba(0, 0, 0, .45);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+  border: 1px solid rgba(140, 90, 255, .30);
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .22),
+    inset 0 -8px 14px -8px rgba(140, 90, 255, .20),
+    0 2px 8px rgba(0, 0, 0, .45);
 }
-.app-side-item.is-active::after {
-  content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 3px; border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #7a5aff, #c04bff);
-}
+.app-side-item.is-active::after { content: none; }
 .app-side-item.is-soon { color: var(--ink3); cursor: default; }
 .app-side-item.is-soon:hover { background: transparent; }
 .app-side-label { flex: 1; }
@@ -763,25 +924,36 @@ body::before {
 .app-top { display: flex; align-items: center; gap: 20px; padding: 16px 28px; }
 /* Barre de recherche = surface CREUSÉE (inverse de l'élévation). */
 .app-search {
-  flex: 1; max-width: 440px; display: flex; align-items: center; gap: 10px; height: 44px;
-  padding: 0 16px; border: 0; border-radius: 999px; color: var(--ink3);
-  background: rgba(0, 0, 0, .28);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .05);
+  flex: 1; max-width: 440px; display: flex; align-items: center; gap: 10px;
+  height: var(--h-control); padding: 0 18px; border-radius: var(--r-pill);
+  border: 1px solid transparent; color: var(--ink3);
+  background: linear-gradient(180deg, rgba(0, 0, 0, .42), rgba(0, 0, 0, .22));
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, .65),
+    inset 0 1px 1px rgba(0, 0, 0, .50),
+    inset 0 -1px 0 rgba(255, 255, 255, .09),
+    inset 0 -6px 10px -6px rgba(255, 255, 255, .05);
 }
 .app-search .lucide { width: 17px; height: 17px; }
 .app-search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 14px; font-family: inherit; }
 .app-search input::placeholder { color: var(--ink3); }
 .app-top-right { display: flex; align-items: center; gap: 16px; }
 .app-icon-btn {
-  width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; border: 0;
-  background: var(--elev-3-bg); box-shadow: var(--elev-3-shadow); color: var(--ink2); cursor: pointer;
+  width: var(--h-control); height: var(--h-control); display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid transparent; color: var(--ink2); cursor: pointer;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .32);
 }
 .app-icon-btn:hover:not(:disabled) { color: var(--ink); background: rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 2px 6px rgba(0, 0, 0, .4); }
 .app-icon-btn:active:not(:disabled) { background: rgba(0, 0, 0, .2); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); transform: translateY(1px); }
 .app-icon-btn .lucide { width: 18px; height: 18px; }
 .app-profile { display: flex; align-items: center; gap: 10px; }
 .app-avatar {
-  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  width: var(--h-control); height: var(--h-control); border-radius: 50%; display: grid; place-items: center;
   font-weight: 700; font-size: 13.5px; color: #fff; background: var(--grad);
   box-shadow: var(--elev-3-shadow);
 }
@@ -916,20 +1088,30 @@ body::before {
 
 /* Onglets segmentés façon iOS (en verre) */
 /* Track d'onglets = surface creusée ; onglet actif = contrôle niveau 3 + violet. */
-.dash .tabs {
-  background: rgba(0, 0, 0, .22); border: 0; border-radius: 13px; padding: 4px;
+.app-shell .tabs {
+  background: rgba(0, 0, 0, .22); border: 0; border-radius: var(--r-pill); padding: 4px;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), inset 0 -1px 0 rgba(255, 255, 255, .05);
 }
-.dash .tab { position: relative; border-radius: 9px; }
-.dash .tab[aria-selected="true"] {
+/* Onglet : même gabarit que les boutons — pilule, 38 px. Aucune valeur intermédiaire. */
+.app-shell .tab {
+  position: relative; height: var(--h-control); border-radius: var(--r-pill);
+  color: var(--ink2); background: transparent; border: 1px solid transparent; box-shadow: none;
+}
+.app-shell .tab:hover:not(:disabled):not([aria-selected="true"]) { color: var(--ink); background: rgba(255, 255, 255, .05); }
+/* Onglet actif = LISERÉ (même langage que la nav ; plus de barre ::after). */
+.app-shell .tab[aria-selected="true"] {
   color: var(--ink);
-  background: linear-gradient(180deg, rgba(120, 90, 255, .28), rgba(120, 90, 255, .1)), rgba(255, 255, 255, .06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), inset 0 -1px 0 rgba(0, 0, 0, .3), 0 2px 8px rgba(0, 0, 0, .45);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+  border: 1px solid rgba(140, 90, 255, .30);
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .22),
+    inset 0 -8px 14px -8px rgba(140, 90, 255, .20),
+    0 2px 8px rgba(0, 0, 0, .45);
 }
-.dash .tab[aria-selected="true"]::after {
-  content: ''; position: absolute; left: 20%; right: 20%; bottom: 2px; height: 3px; border-radius: 3px;
-  background: linear-gradient(90deg, #7a5aff, #c04bff);
-}
+.app-shell .tab[aria-selected="true"]::after { content: none; }
 /* Badges DS (statut, éligible) = contrôles niveau 3. */
 .dash .badge { box-shadow: var(--elev-3-shadow); }
 
