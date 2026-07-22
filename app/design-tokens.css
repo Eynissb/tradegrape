@@ -1,0 +1,345 @@
+/* =====================================================================
+   SYSTÈME VISUEL — SOURCE UNIQUE
+   ---------------------------------------------------------------------
+   Tous les tokens et toutes les classes de base du produit vivent ICI.
+   Aucun composant, aucune page ne doit redéfinir en dur une ombre, un
+   rayon, une couleur de fond ou de texte : il n'existe qu'un endroit à
+   modifier pour changer le système.
+
+   Principes (invariants) :
+   · Relief par ÉCLAIRAGE DIRECTIONNEL — source unique à 145°, arête haute
+     claire, arête basse sombre. Jamais d'ombre portée seule.
+   · Aucun aplat, aucune surface creusée. Seul un contrôle enfoncé au clic
+     (:active) s'enfonce.
+   · Pilule pour tous les contrôles. Carré (--r-sm) réservé aux carrés
+     d'icônes et aux cases à cocher ; --r-md au textarea.
+   · L'accent violet ne porte JAMAIS de donnée — il ne sert qu'aux états
+     actifs et à l'action primaire. Les états restent lime/amber/red.
+   · Trois niveaux de texte en blanc neutre, jamais violacé.
+   · Une seule action primaire par écran.
+
+   Portée : les classes de base sont NON SCOPÉES (le site public n'en
+   utilise aucune). Les trois niveaux de texte sont scopés à `.ui`, posé
+   sur les enveloppes produit (app, admin, auth, préférences), pour ne pas
+   écraser la palette de marque du site public.
+   ===================================================================== */
+
+:root {
+  /* ---- Élévation : trois niveaux, du conteneur au contrôle ---- */
+  --elev-1-bg: rgba(255, 255, 255, .035);
+  --elev-1-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .1),
+    inset 0 -1px 0 rgba(0, 0, 0, .35),
+    0 1px 2px rgba(0, 0, 0, .55),
+    0 8px 20px rgba(0, 0, 0, .45),
+    0 24px 48px rgba(0, 0, 0, .3);
+  --elev-2-bg: rgba(255, 255, 255, .025);
+  --elev-2-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    inset 0 -1px 0 rgba(0, 0, 0, .25),
+    0 1px 2px rgba(0, 0, 0, .4),
+    0 4px 10px rgba(0, 0, 0, .28);
+  --elev-3-bg: rgba(255, 255, 255, .05);
+  --elev-3-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(0, 0, 0, .2),
+    0 1px 2px rgba(0, 0, 0, .35);
+
+  /* ---- Surfaces des contrôles (hiérarchie de clarté) ----
+     champ (.030) < tag (.045) < bouton (.085) < actif (.10) < primaire */
+  --ctl-bg:        linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
+  --ctl-bg-hover:  linear-gradient(180deg, rgba(255, 255, 255, .12),  rgba(255, 255, 255, .05));
+  --ctl-bg-active: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14));
+  --ctl-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset 1px 0 0 rgba(255, 255, 255, .05),
+    inset -1px 0 0 rgba(0, 0, 0, .20),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    0 1px 2px rgba(0, 0, 0, .45),
+    0 3px 8px rgba(0, 0, 0, .32);
+  --ctl-shadow-pressed: inset 0 2px 4px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .06);
+
+  /* Zone de saisie : même modelé, un cran plus sombre qu'une action. */
+  --input-bg:       linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
+  --input-bg-hover: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .015));
+  --input-bg-focus: linear-gradient(180deg, rgba(255, 255, 255, .05),  rgba(255, 255, 255, .018));
+  --input-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .06),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35);
+  --input-shadow-focus:
+    inset 0 1px 0 rgba(180, 140, 255, .16),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35),
+    0 0 0 2px rgba(120, 90, 255, .40);
+
+  /* État ACTIF : fond quasi noir + liseré violet. Jamais un fond plein. */
+  --ctl-active-bg:
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .03));
+  --ctl-active-border: rgba(140, 90, 255, .30);
+  --ctl-active-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .22),
+    inset 0 -8px 14px -8px rgba(140, 90, 255, .20),
+    0 2px 8px rgba(0, 0, 0, .45);
+
+  /* Action PRIMAIRE : seule pièce en violet plein, une par écran. */
+  --ctl-primary-bg: linear-gradient(180deg, rgba(140, 105, 255, .62), rgba(91, 63, 255, .38));
+  --ctl-primary-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .28),
+    inset 0 -1px 0 rgba(0, 0, 0, .30),
+    0 2px 10px rgba(91, 63, 255, .28);
+
+  /* Bordure lumineuse directionnelle — source unique à 145°. */
+  --edge-145: linear-gradient(145deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, .04) 35%, transparent 70%);
+
+  --focus-accent: 2px solid rgba(120, 90, 255, .6);
+
+  /* ---- États sémantiques (jamais l'accent de marque) ---- */
+  --win: #38ffb0; --loss: #ff4d5e; --warn: #ffb43b;
+
+  /* ---- Gabarit des contrôles ---- */
+  --h-control: 38px;
+  --h-control-sm: 30px;
+}
+
+/* Trois niveaux de texte, blanc neutre. Posé sur les enveloppes produit. */
+.ui {
+  --ink: rgba(255, 255, 255, .95);
+  --ink2: rgba(255, 255, 255, .58);
+  --ink3: rgba(255, 255, 255, .38);
+  --text-1: rgba(255, 255, 255, .95);
+  --text-2: rgba(255, 255, 255, .58);
+  --text-3: rgba(255, 255, 255, .38);
+}
+/* Plus aucun texte violacé : liens d'accent et fils d'Ariane en blanc neutre. */
+.ui .link-accent, .ui .jcrumb { color: var(--ink2); }
+.ui .link-accent:hover { color: var(--ink); }
+
+/* =====================================================================
+   CARTE — conteneur de niveau 1
+   ===================================================================== */
+.ui .card {
+  position: relative;
+  background: var(--elev-1-bg);
+  border: 0;
+  border-radius: 20px;
+  padding: 20px 22px;
+  box-shadow: var(--elev-1-shadow);
+}
+/* Arête lumineuse à 145° sur toutes les surfaces élevées. */
+.ui .card::before,
+.ui .surface-2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--edge-145);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* Sous-carte de niveau 2 : un cran sous la carte qui la contient. */
+.ui .surface-2 {
+  position: relative;
+  background: var(--elev-2-bg);
+  box-shadow: var(--elev-2-shadow);
+  border: 0;
+  border-radius: var(--r-md);
+}
+
+/* =====================================================================
+   CONTRÔLES — boutons, onglets, bascules
+   ===================================================================== */
+.ui .control {
+  height: var(--h-control);
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  color: var(--ink2);
+  background: var(--ctl-bg);
+  box-shadow: var(--ctl-shadow);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-family: var(--font-body); font-weight: 600; line-height: 1; white-space: nowrap;
+  transition: background .15s, box-shadow .15s, transform .1s, color .15s, filter .15s;
+}
+.ui .control:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--ink); background: var(--ctl-bg-hover); }
+.ui .control:active:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); transform: translateY(1px);
+}
+.ui .control:disabled, .ui .control[aria-disabled="true"] {
+  opacity: .40; box-shadow: none; transform: none; cursor: not-allowed;
+}
+.ui .control--sm { height: var(--h-control-sm); padding: 0 14px; font-size: .82rem; }
+.ui .control--square { border-radius: var(--r-sm); }
+
+.ui .control--primary { color: #fff; background: var(--ctl-primary-bg); box-shadow: var(--ctl-primary-shadow); }
+.ui .control--primary:hover:not(:disabled) { filter: brightness(1.07); }
+.ui .control--primary:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .40), 0 1px 6px rgba(91, 63, 255, .30); }
+
+.ui .control--ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.ui .control--ghost:hover:not(:disabled) { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02)); box-shadow: var(--elev-3-shadow); }
+
+.ui .control--danger { color: var(--loss); background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05)); }
+.ui .control--danger:hover:not(:disabled) { color: #ff8a94; background: linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .08)); }
+
+/* État actif : liseré, jamais un fond plein qui rivaliserait avec le primaire. */
+.ui .control--active {
+  color: var(--ink);
+  background: var(--ctl-active-bg);
+  border: 1px solid var(--ctl-active-border);
+  box-shadow: var(--ctl-active-shadow);
+}
+
+/* Anneau d'accent au clavier, uniforme. */
+.ui a:focus-visible, .ui button:focus-visible, .ui [role="tab"]:focus-visible,
+.ui input:focus-visible, .ui textarea:focus-visible, .ui .control:focus-visible {
+  outline: var(--focus-accent); outline-offset: 2px;
+}
+
+/* =====================================================================
+   RAIL D'ONGLETS — gouttière posée, l'onglet actif se pose dessus
+   ===================================================================== */
+.ui .tab-rail {
+  display: inline-flex; gap: .25rem; padding: 4px; max-width: 100%;
+  border: none; border-radius: var(--r-pill);
+  background: var(--input-bg);
+  box-shadow: var(--input-shadow);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+
+/* =====================================================================
+   CASE À COCHER
+   ===================================================================== */
+.ui .checkbox {
+  appearance: none; -webkit-appearance: none;
+  width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; border: none;
+  border-radius: var(--r-sm);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(0, 0, 0, .24),
+    0 1px 2px rgba(0, 0, 0, .38);
+  transition: background .15s, box-shadow .15s;
+}
+.ui .checkbox:checked {
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"),
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .30), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+  background-repeat: no-repeat;
+  background-position: center, center, center;
+  background-size: 11px 11px, auto, auto;
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .24),
+    inset 0 -1px 0 rgba(0, 0, 0, .24),
+    0 1px 2px rgba(0, 0, 0, .38);
+}
+
+/* =====================================================================
+   LIGNES DE DONNÉES — un <table> ne porte pas le relief : grille sur div
+   ===================================================================== */
+.ui .data-list { display: flex; flex-direction: column; gap: 6px; }
+.ui .data-head, .ui .data-row {
+  display: grid; grid-template-columns: var(--cols, 1fr); align-items: center; gap: 10px; padding: 4px 10px;
+}
+.ui .data-head {
+  color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  padding: 2px 10px 4px; min-height: 0; background: none; box-shadow: none;
+}
+.ui .data-row {
+  position: relative; min-height: 44px; border-radius: var(--r-md);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); transition: background .15s;
+}
+.ui .data-row:hover { background: rgba(255, 255, 255, .06); }
+.ui .data-row.is-selected { background: linear-gradient(180deg, rgba(120, 90, 255, .2), rgba(120, 90, 255, .08)), var(--elev-2-bg); }
+.ui .data-row.is-selected:hover { background: linear-gradient(180deg, rgba(120, 90, 255, .26), rgba(120, 90, 255, .1)), var(--elev-2-bg); }
+.ui .data-row > *, .ui .data-head > * { min-width: 0; }
+.ui .data-row > *:not(.jchips), .ui .data-head > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui .data-row > .jchips { overflow: hidden; flex-wrap: nowrap; }
+.ui .data-row a { color: inherit; text-decoration: none; }
+.ui .data-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+/* Paire clé/valeur — pour les cartes étroites, sans défilement horizontal. */
+.ui .kv-list { display: flex; flex-direction: column; }
+.ui .kv-head {
+  display: flex; justify-content: space-between; gap: 12px; padding: 2px 12px 6px;
+  color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+}
+.ui .kv-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 12px;
+  border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+}
+.ui .kv-row + .kv-row { margin-top: 6px; }
+.ui .kv-key { color: var(--ink2); font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ui .kv-key .kv-meta { color: var(--ink3); font-size: 11px; }
+.ui .kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
+
+/* Défilement horizontal résiduel : discret, invisible au repos. */
+.ui .table-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .10) transparent;
+}
+.ui .table-scroll::-webkit-scrollbar { height: 6px; }
+.ui .table-scroll::-webkit-scrollbar-track { background: transparent; }
+.ui .table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .10); border-radius: 999px; }
+.ui .table-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .22); }
+
+/* =====================================================================
+   ÉTATS TRANSVERSAUX — vide, erreur, chargement, notification, infobulle
+   Ce sont les endroits où le style se perd : ils sont définis ici, pas
+   improvisés page par page.
+   ===================================================================== */
+.ui .empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem;
+  padding: 2.4rem 1.5rem; text-align: center;
+  color: var(--ink2); font-size: 14px;
+  border-radius: var(--r-md);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+}
+.ui .empty-state strong { color: var(--ink); font-weight: 650; }
+
+.ui .notice {
+  position: relative; display: flex; align-items: flex-start; gap: .65rem;
+  padding: 12px 16px; border-radius: var(--r-md); border: 0;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+}
+/* La couleur d'état passe par un filet à gauche, jamais par un aplat. */
+.ui .notice::after {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--ink3);
+}
+.ui .notice-error::after { background: var(--loss); }
+.ui .notice-warn::after  { background: var(--warn); }
+.ui .notice-ok::after    { background: var(--win); }
+.ui .notice-error { color: var(--ink); }
+
+.ui .skeleton {
+  border-radius: var(--r-md);
+  background: linear-gradient(90deg, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .07) 37%, rgba(255, 255, 255, .03) 63%);
+  background-size: 400% 100%;
+  animation: ui-shimmer 1.3s ease-in-out infinite;
+}
+@keyframes ui-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .ui .skeleton { animation: none; } }
+
+/* Infobulle — couche flottante, même modelé que les contrôles. */
+.ui .tooltip {
+  position: absolute; z-index: 50; padding: 6px 10px; border-radius: var(--r-sm);
+  font-size: 12px; color: var(--ink); white-space: nowrap; pointer-events: none;
+  background: var(--ctl-bg); box-shadow: var(--ctl-shadow);
+}
+
+/* Modale — seule couche autorisée à flouter (elle est au-dessus, pas dans le contenu). */
+.ui .modal {
+  background: var(--elev-1-bg);
+  border: 0; border-radius: 20px;
+  box-shadow: var(--elev-1-shadow);
+}
+.ui .modal-overlay { background: rgba(4, 2, 12, .68); }

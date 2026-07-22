@@ -21,7 +21,7 @@ export default async function AdminLayout({
   if (!isStaff(profile.role)) redirect('/');
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="ui flex min-h-full flex-col">
       <header className="admin-bar">
         <div className="admin-bar-in">
           <Link href="/" className="admin-brand" aria-label="Tradegrape — accueil">

@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const initials = name.trim().slice(0, 2).toUpperCase();
 
   return (
-    <div className="app-shell">
+    <div className="app-shell ui">
       <AppSidebar staff={staff} />
 
       <div className="app-main">

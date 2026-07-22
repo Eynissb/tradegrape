@@ -51,7 +51,7 @@ export default async function UserSettings({
   };
 
   return (
-    <main className="jwrap jwrap-narrow">
+    <main className="ui jwrap jwrap-narrow">
       <nav className="jcrumb">
         <Link href="/app" className="link-accent">Mes comptes</Link>{' / '}Mes préférences
       </nav>

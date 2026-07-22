@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "./design-system.css";
+/* Source unique du système visuel (tokens + classes de base). Importé APRÈS
+   le DS pour que ses valeurs priment sur les anciennes définitions. */
+@import "./design-tokens.css";
 
 /* =====================================================================
    Tradegrape — design tokens (verrouillés)
@@ -414,36 +417,13 @@ h1, h2, h3 {
 .jhist-batch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 10px 14px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
 .jhist-batch-plat { font-weight: 600; color: var(--ink); }
 .jhist-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
-.jhist-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: rgba(150, 110, 240, .08); }
-.jhist-selcount { font-weight: 600; color: var(--ink); }
-/* Case à cocher : modelée comme les autres contrôles (arête haute claire,
-   arête basse sombre). Coche dessinée en blanc plein. */
-.jhist-cb {
-  appearance: none; -webkit-appearance: none;
-  width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; border: none;
-  border-radius: var(--r-sm);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .09),
-    inset 0 -1px 0 rgba(0, 0, 0, .24),
-    0 1px 2px rgba(0, 0, 0, .38);
-  transition: background .15s, box-shadow .15s;
+/* Barre de sélection : surface de niveau 2, pas d'aplat violet ni de contour. */
+.ui .jhist-selbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem;
+  border: 0; border-radius: var(--r-md);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
 }
-.jhist-cb:checked {
-  background-image:
-    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"),
-    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .30), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
-  background-repeat: no-repeat;
-  background-position: center, center, center;
-  background-size: 11px 11px, auto, auto;
-  box-shadow:
-    inset 0 1px 0 rgba(180, 140, 255, .24),
-    inset 0 -1px 0 rgba(0, 0, 0, .24),
-    0 1px 2px rgba(0, 0, 0, .38);
-}
-.data-row.is-selected { background: linear-gradient(180deg, rgba(120, 90, 255, .2), rgba(120, 90, 255, .08)), var(--elev-2-bg); }
-.data-row.is-selected:hover { background: linear-gradient(180deg, rgba(120, 90, 255, .26), rgba(120, 90, 255, .1)), var(--elev-2-bg); }
+.ui .jhist-selcount { font-weight: 600; color: var(--ink); }
 
 /* Étape commissions à l'import */
 .jimport-comm { border-top: 1px solid var(--border); padding-top: 1.2rem; }
@@ -710,50 +690,9 @@ h1, h2, h3 {
    ===================================================================== */
 
 /* ---- Shell : sidebar + zone principale ---- */
-/* ===== Système d'ÉLÉVATION (surface posée sur surface, tous niveaux) ===== */
-:root {
-  --elev-1-bg: rgba(255, 255, 255, .035);
-  --elev-1-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .1),
-    inset 0 -1px 0 rgba(0, 0, 0, .35),
-    0 1px 2px rgba(0, 0, 0, .55),
-    0 8px 20px rgba(0, 0, 0, .45),
-    0 24px 48px rgba(0, 0, 0, .3);
-  --elev-2-bg: rgba(255, 255, 255, .025);
-  --elev-2-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .07),
-    inset 0 -1px 0 rgba(0, 0, 0, .25),
-    0 1px 2px rgba(0, 0, 0, .4),
-    0 4px 10px rgba(0, 0, 0, .28);
-  --elev-3-bg: rgba(255, 255, 255, .05);
-  --elev-3-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .09),
-    inset 0 -1px 0 rgba(0, 0, 0, .2),
-    0 1px 2px rgba(0, 0, 0, .35);
+/* (Tokens d'élévation, d'état et de gabarit : design-tokens.css.) */
 
-  /* Plus AUCUNE surface creusée dans la scène : tout est posé (dégradé +
-     arêtes). Seul un contrôle enfoncé au clic (:active) s'enfonce. */
-
-  /* États */
-  --win: #38ffb0; --loss: #ff4d5e; --warn: #ffb43b;
-
-  /* Contrôles — hauteur unique boutons & champs (même gabarit → alignés) */
-  --h-control: 38px;
-  --h-control-sm: 30px;
-}
-
-/* Texte NEUTRE (jamais violacé) sur tout l'espace /app — trois niveaux seulement. */
-.app-shell {
-  --ink: rgba(255, 255, 255, .95);
-  --ink2: rgba(255, 255, 255, .58);
-  --ink3: rgba(255, 255, 255, .38);
-  --text-1: rgba(255, 255, 255, .95);
-  --text-2: rgba(255, 255, 255, .58);
-  --text-3: rgba(255, 255, 255, .38);
-}
-/* Plus de texte violacé sur la page compte : fil d'Ariane, liens « Voir tout » → ink. */
-.dash .link-accent, .dash .jcrumb { color: var(--ink2); }
-.dash .link-accent:hover { color: var(--ink); }
+/* (Niveaux de texte et liens d'accent : définis dans design-tokens.css sur `.ui`.) */
 
 /* =====================================================================
    CONTRÔLES — boutons & onglets (relief, jamais d'aplat)
@@ -764,88 +703,57 @@ h1, h2, h3 {
      coloré qui rivalise avec l'action primaire (onglets, items de nav).
    ===================================================================== */
 
-/* — Base ACTION : toute pilule .btn de la scène ressort du fond. — */
-.app-shell .btn {
+/* PONT : les composants existants utilisent les classes du DS (.btn, .input…).
+   Plutôt que de réécrire tout le JSX, on mappe ces classes sur les TOKENS.
+   Aucune valeur en dur ici — tout vient de design-tokens.css. */
+.ui .btn {
   height: var(--h-control);
   border-radius: var(--r-pill);
   border: 1px solid transparent;
   color: var(--ink2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .030));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .14),
-    inset 1px 0 0 rgba(255, 255, 255, .05),
-    inset -1px 0 0 rgba(0, 0, 0, .20),
-    inset 0 -1px 0 rgba(0, 0, 0, .28),
-    0 1px 2px rgba(0, 0, 0, .45),
-    0 3px 8px rgba(0, 0, 0, .32);
+  background: var(--ctl-bg);
+  box-shadow: var(--ctl-shadow);
   transition: background .15s, box-shadow .15s, transform .1s, color .15s, filter .15s;
 }
-.app-shell .btn-sm { height: var(--h-control-sm); }
-.app-shell .btn-lg { height: var(--h-lg); }
-.app-shell .btn-icon { width: var(--h-control); }
-.app-shell .btn-icon.btn-sm { width: var(--h-control-sm); }
-.app-shell .btn:hover:not(:disabled):not([aria-disabled="true"]) {
-  color: var(--ink);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05));
+.ui .btn-sm { height: var(--h-control-sm); }
+.ui .btn-lg { height: var(--h-lg); }
+.ui .btn-icon { width: var(--h-control); }
+.ui .btn-icon.btn-sm { width: var(--h-control-sm); }
+.ui .btn:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--ink); background: var(--ctl-bg-hover); }
+.ui .btn:active:not(:disabled):not([aria-disabled="true"]) {
+  background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); transform: translateY(1px);
 }
-.app-shell .btn:active:not(:disabled):not([aria-disabled="true"]) {
-  background: linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, .14));
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .55), inset 0 -1px 0 rgba(255, 255, 255, .06);
-  transform: translateY(1px);
-}
-.app-shell .btn:disabled, .app-shell .btn[aria-disabled="true"] {
+.ui .btn:disabled, .ui .btn[aria-disabled="true"] {
   opacity: .40; box-shadow: none; transform: none; cursor: not-allowed;
 }
 
-/* — PRIMARY : une seule par écran (Enregistrer l'entrée), nettement colorée. — */
-.app-shell .btn.btn-primary {
-  color: #fff;
-  background: linear-gradient(180deg, rgba(140, 105, 255, .62), rgba(91, 63, 255, .38));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .28),
-    inset 0 -1px 0 rgba(0, 0, 0, .30),
-    0 2px 10px rgba(91, 63, 255, .28);
-}
-.app-shell .btn.btn-primary:hover:not(:disabled) {
-  filter: brightness(1.07);
-  background: linear-gradient(180deg, rgba(150, 115, 255, .70), rgba(101, 73, 255, .44));
-}
-.app-shell .btn.btn-primary:active:not(:disabled) {
+/* PRIMARY : une seule par écran. */
+.ui .btn.btn-primary { color: #fff; background: var(--ctl-primary-bg); box-shadow: var(--ctl-primary-shadow); }
+.ui .btn.btn-primary:hover:not(:disabled) { filter: brightness(1.07); }
+.ui .btn.btn-primary:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, .40), 0 1px 6px rgba(91, 63, 255, .30);
 }
 
-/* — SECONDARY : pilule posée neutre (pas de verre flou dans la scène). — */
-.app-shell .btn.btn-secondary { -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* SECONDARY : pilule posée neutre (pas de verre flou dans la scène). */
+.ui .btn.btn-secondary { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
-/* — GHOST : transparent au repos, se lève au survol seulement. — */
-.app-shell .btn.btn-ghost {
-  background: transparent; box-shadow: none; border-color: transparent;
-}
-.app-shell .btn.btn-ghost:hover:not(:disabled) {
+/* GHOST : transparent au repos, se lève au survol seulement. */
+.ui .btn.btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.ui .btn.btn-ghost:hover:not(:disabled) {
   color: var(--ink);
   background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
   box-shadow: var(--elev-3-shadow);
 }
-.app-shell .btn.btn-danger-ghost:hover:not(:disabled) {
+.ui .btn.btn-danger-ghost:hover:not(:disabled) {
   color: #ff8a94;
   background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
   box-shadow: var(--elev-3-shadow);
 }
 
-/* — DANGER plein (suppression de compte, etc.). — */
-.app-shell .btn.btn-danger {
-  color: var(--danger); border-color: transparent;
-  background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .10),
-    inset 0 -1px 0 rgba(0, 0, 0, .28),
-    0 1px 2px rgba(0, 0, 0, .45), 0 3px 8px rgba(0, 0, 0, .30);
-}
-.app-shell .btn.btn-danger:hover:not(:disabled) {
-  color: #ff8a94;
-  background: linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .08));
-}
+/* DANGER plein. */
+.ui .btn.btn-danger { color: var(--loss); border-color: transparent; background: linear-gradient(180deg, rgba(255, 77, 94, .14), rgba(255, 77, 94, .05)); box-shadow: var(--ctl-shadow); }
+.ui .btn.btn-danger:hover:not(:disabled) { color: #ff8a94; background: linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .08)); }
 
 /* =====================================================================
    CHAMPS DE SAISIE — POSÉS comme les boutons (aucun creusement)
@@ -856,59 +764,40 @@ h1, h2, h3 {
    NB : `.field` est déjà le conteneur libellé+contrôle du DS — on style
    donc les contrôles réels, jamais une classe `.field`.
    ===================================================================== */
-.app-shell .input,
-.app-shell .select-trigger {
+.ui .input,
+.ui .select-trigger {
   height: var(--h-control);
   padding: 0 18px;
   border-radius: var(--r-pill);
   color: var(--ink);
   border: none;
-  /* Traitement des sous-cartes de niveau 2 (blocs Récap / Retrait), un cran
-     plus sombre. Dégradé + arêtes comme tout le dashboard : AUCUN contour
-     dessiné — c'est ce qui faisait tache dans le bloc formulaire. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    inset 0 -1px 0 rgba(0, 0, 0, .22),
-    0 1px 2px rgba(0, 0, 0, .35);
+  background: var(--input-bg);
+  box-shadow: var(--input-shadow);
   transition: background .15s, box-shadow .15s;
 }
-.app-shell .input::placeholder,
-.app-shell .select-trigger .placeholder { color: var(--ink3); }
-.app-shell .select-trigger .chevron { color: var(--ink3); }
-.app-shell .input:hover:not(:disabled),
-.app-shell .select-trigger:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .015));
-}
+.ui .input::placeholder,
+.ui .select-trigger .placeholder { color: var(--ink3); }
+.ui .select-trigger .chevron { color: var(--ink3); }
+.ui .input:hover:not(:disabled),
+.ui .select-trigger:hover:not(:disabled) { background: var(--input-bg-hover); }
 /* Focus : l'arête haute vire à l'accent + anneau. Toujours aucun contour. */
-.app-shell .input:focus,
-.app-shell .input:focus-visible,
-.app-shell .select-trigger:focus-visible,
-.app-shell .select.is-open .select-trigger {
+.ui .input:focus,
+.ui .input:focus-visible,
+.ui .select-trigger:focus-visible,
+.ui .select.is-open .select-trigger {
   outline: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .018));
-  box-shadow:
-    inset 0 1px 0 rgba(180, 140, 255, .16),
-    inset 0 -1px 0 rgba(0, 0, 0, .22),
-    0 1px 2px rgba(0, 0, 0, .35),
-    0 0 0 2px rgba(120, 90, 255, .40);
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-shadow-focus);
 }
 /* Notes : seul champ rectangulaire (exception assumée), même modelé.
    Coin de redimensionnement natif masqué (il casse l'arête). */
-.app-shell textarea.input {
+.ui textarea.input {
   height: auto; min-height: 96px; padding: 10px 16px;
   border-radius: var(--r-md); line-height: 1.55; resize: vertical;
 }
-.app-shell textarea.input::-webkit-resizer { display: none; }
+.ui textarea.input::-webkit-resizer { display: none; }
 
-/* Anneau d'accent au clavier sur tout élément cliquable de la scène. */
-.app-shell a:focus-visible,
-.app-shell button:focus-visible,
-.app-shell [role="tab"]:focus-visible,
-.app-shell input:focus-visible,
-.app-shell .control:focus-visible {
-  outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 2px;
-}
+/* (Anneau de focus : design-tokens.css.) */
 
 /* Le NOIR domine. Les glows vivent UNIQUEMENT dans body::before, centres ancrés
    hors viewport : la lueur vient d'ailleurs, jamais posée sur une carte. */
@@ -1021,7 +910,7 @@ body::before {
 .app-search.is-soon input { cursor: not-allowed; }
 
 /* ---- Page compte (.dash) : cartes en VERRE (le halo transparaît) ---- */
-.dash .card {
+.ui .card {
   /* Fond FRANCHEMENT transparent → le flou et le halo ambiant traversent (vrai verre).
      Bordure en dégradé (arête haute plus claire = épaisseur du verre) + reflet interne. */
   /* Niveau 1 (cartes racine). Fond neutre, AUCUN backdrop-filter, aucune teinte
@@ -1034,12 +923,12 @@ body::before {
   box-shadow: var(--elev-1-shadow);
 }
 /* Bordure lumineuse directionnelle (niveaux 1 et 2) — source unique à 145°. */
-.dash .card::before,
-.dash .jcal::before,
+.ui .card::before,
+.ui .jcal::before,
 .rule-block::before,
-.dash .acct2-stat::before,
-.dash .card-grad .jpayout-figs > div::before,
-.dash .jcal-total:not(.is-empty)::before {
+.ui .acct2-stat::before,
+.ui .card-grad .jpayout-figs > div::before,
+.ui .jcal-total:not(.is-empty)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1052,51 +941,51 @@ body::before {
   mask-composite: exclude;
   pointer-events: none;
 }
-.dash .acct2 { gap: 1.4rem; }
-.dash .acct2-console { gap: 1.4rem; }
-.dash .acct2-analytics, .dash .acct2-hist, .dash .acct2-work { gap: 1.4rem; }
+.ui .acct2 { gap: 1.4rem; }
+.ui .acct2-console { gap: 1.4rem; }
+.ui .acct2-analytics, .ui .acct2-hist, .ui .acct2-work { gap: 1.4rem; }
 /* Valeurs : police proportionnelle serrée + tabular-nums (le mono restait daté).
    Le mono ne sert plus qu'aux petits chiffres techniques (dates dans les tables). */
-.dash .jbalance,
-.dash .acct2-stat-k,
-.dash .card-grad .jcard-k,
-.dash .rule-col-v {
+.ui .jbalance,
+.ui .acct2-stat-k,
+.ui .card-grad .jcard-k,
+.ui .rule-col-v {
   font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.4px;
 }
 
 /* Bloc dégradé = payout (signature). Progression VERTICALE franche : vif → profond. */
 /* Seule carte accentuée de la page (Retrait). Lueur d'angle qui s'estompe (62 % :
    au-delà de 70 % elle atteint le bas et redevient un bloc plein). Même relev-1. */
-.dash .card-grad {
+.ui .card-grad {
   background:
     radial-gradient(120% 90% at 0% 0%, rgba(160, 80, 255, .42), transparent 62%),
     var(--elev-1-bg);
 }
 /* Dans une carte dégradée : valeurs blanc pur, libellés blanc atténué, JAMAIS de
    couleur sémantique. */
-.dash .card-grad,
-.dash .card-grad .jcard-k,
-.dash .card-grad .jcard-k .num,
-.dash .card-grad .ctitle-h { color: #fff !important; }
-.dash .card-grad .jsub,
-.dash .card-grad .jcard-l,
-.dash .card-grad .jmissing-t { color: rgba(255, 255, 255, .78) !important; }
-.dash .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .2); }
-.dash .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
-.dash .card-grad .ctitle-ic { background: rgba(255, 255, 255, .2); color: #fff; }
+.ui .card-grad,
+.ui .card-grad .jcard-k,
+.ui .card-grad .jcard-k .num,
+.ui .card-grad .ctitle-h { color: #fff !important; }
+.ui .card-grad .jsub,
+.ui .card-grad .jcard-l,
+.ui .card-grad .jmissing-t { color: rgba(255, 255, 255, .78) !important; }
+.ui .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .2); }
+.ui .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
+.ui .card-grad .ctitle-ic { background: rgba(255, 255, 255, .2); color: #fff; }
 /* badge d'état neutralisé sur fond dégradé */
 /* Sur fond accentué, le badge était le point le plus clair de la carte et
    captait l'œil avant le titre : on l'assombrit. (Sur fond noir il ne bouge pas.) */
-.dash .card-grad .badge {
+.ui .card-grad .badge {
   background: linear-gradient(180deg, rgba(0, 0, 0, .30), rgba(0, 0, 0, .16)) !important;
   color: rgba(255, 255, 255, .88) !important;
   border-color: transparent !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10) !important;
 }
-.dash .card-grad .badge svg { color: #fff; }
+.ui .card-grad .badge svg { color: #fff; }
 /* lignes internes en barres distinctes */
-.dash .card-grad .jpayout-figs { gap: 14px; }
-.dash .card-grad .jpayout-figs > div { position: relative; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); border-radius: 12px; padding: 14px 18px; flex: 1; }
+.ui .card-grad .jpayout-figs { gap: 14px; }
+.ui .card-grad .jpayout-figs > div { position: relative; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); border-radius: 12px; padding: 14px 18px; flex: 1; }
 
 /* Titre de bloc avec icône en carré arrondi. Hiérarchie nette titre > libellé > valeur. */
 .ctitle { display: flex; align-items: center; gap: 11px; margin-bottom: 1.1rem; }
@@ -1109,18 +998,18 @@ body::before {
 .ctitle-right { margin-left: auto; }
 
 /* Cartes de métriques compactes : valeur qui remplit, pas de hauteur morte. */
-.dash .acct2-monthstats { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; }
-.dash .acct2-stat { position: relative; padding: 13px 15px; border-radius: 12px; border: 0; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
+.ui .acct2-monthstats { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: stretch; }
+.ui .acct2-stat { position: relative; padding: 13px 15px; border-radius: 12px; border: 0; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
 .acct2-stat-head { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 500; color: var(--ink2); margin-bottom: 5px; }
 .acct2-stat-head .lucide { width: 14px; height: 14px; }
-.dash .acct2-stat-k { font-size: 1.7rem; line-height: 1.1; white-space: nowrap; color: var(--ink); }
+.ui .acct2-stat-k { font-size: 1.7rem; line-height: 1.1; white-space: nowrap; color: var(--ink); }
 /* Hauteur réservée même quand la sous-ligne est vide → valeurs alignées
    horizontalement d'une carte à l'autre. */
 .acct2-stat-sub { color: var(--ink3); font-size: 11px; line-height: 15px; min-height: 15px; }
 
 /* Solde */
 .acct2-balance { display: flex; flex-direction: column; gap: 2px; }
-.dash .acct2-balance .jbalance { font-size: 2.15rem; letter-spacing: -1px; }
+.ui .acct2-balance .jbalance { font-size: 2.15rem; letter-spacing: -1px; }
 
 /* Blocs de règles compacts : grille 2 colonnes, fond légèrement plus clair (séparation
    par opacité, pas de trait). Le bloc fait la taille de son contenu. */
@@ -1148,7 +1037,7 @@ body::before {
 /* Rail d'onglets : gouttière POSÉE (valeurs des sous-cartes de niveau 2), plus
    creusée. Elle reste plus sombre que l'onglet actif qui se pose dessus —
    c'est cet écart qui produit la hiérarchie. */
-.app-shell .tabs {
+.ui .tabs {
   background: linear-gradient(180deg, rgba(255, 255, 255, .030), rgba(255, 255, 255, .008));
   border: none; border-radius: var(--r-pill); padding: 4px;
   -webkit-backdrop-filter: none; backdrop-filter: none;
@@ -1161,13 +1050,13 @@ body::before {
    naturelle (sans quoi le flex-column les étirerait sur toute la colonne). */
 .acct2-period { align-items: flex-start; }
 /* Onglet : même gabarit que les boutons — pilule, 38 px. Aucune valeur intermédiaire. */
-.app-shell .tab {
+.ui .tab {
   position: relative; height: var(--h-control); border-radius: var(--r-pill);
   color: var(--ink2); background: transparent; border: 1px solid transparent; box-shadow: none;
 }
-.app-shell .tab:hover:not(:disabled):not([aria-selected="true"]) { color: var(--ink); background: rgba(255, 255, 255, .05); }
+.ui .tab:hover:not(:disabled):not([aria-selected="true"]) { color: var(--ink); background: rgba(255, 255, 255, .05); }
 /* Onglet actif = LISERÉ (même langage que la nav ; plus de barre ::after). */
-.app-shell .tab[aria-selected="true"] {
+.ui .tab[aria-selected="true"] {
   color: var(--ink);
   background:
     radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .16), transparent 70%),
@@ -1178,91 +1067,44 @@ body::before {
     inset 0 -8px 14px -8px rgba(140, 90, 255, .20),
     0 2px 8px rgba(0, 0, 0, .45);
 }
-.app-shell .tab[aria-selected="true"]::after { content: none; }
+.ui .tab[aria-selected="true"]::after { content: none; }
 /* Badges DS (statut, éligible) = contrôles niveau 3. */
-.dash .badge { box-shadow: var(--elev-3-shadow); }
+.ui .badge { box-shadow: var(--elev-3-shadow); }
 
-/* ===== Lignes de données (un <table> ne porte pas le relief → grille sur des div) ===== */
-/* Définition UNIQUE de la ligne : « Dernières entrées » et le tableau de
-   l'Historique la partagent (même hauteur, même padding, même relief, même
-   espacement). `min-height` fige la hauteur pour qu'une ligne contenant un
-   bouton ne soit pas plus haute qu'une ligne de texte. */
-.data-list { display: flex; flex-direction: column; gap: 6px; }
-.data-head, .data-row { display: grid; grid-template-columns: var(--cols, 1fr); align-items: center; gap: 10px; padding: 4px 10px; }
-.data-head { color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 10px 4px; min-height: 0; background: none; box-shadow: none; }
-.data-row { position: relative; min-height: 44px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); transition: background .15s; }
-.data-row:hover { background: rgba(255, 255, 255, .06); }
-.data-row > *, .data-head > * { min-width: 0; }
-/* Une cellule ne se renvoie JAMAIS à la ligne : elle ferait grandir la ligne et
-   les deux tableaux n'auraient plus la même hauteur. Seuls les tags peuvent
-   passer à la ligne, et leur conteneur est en overflow caché. */
-.data-row > *:not(.jchips), .data-head > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.data-row > .jchips { overflow: hidden; flex-wrap: nowrap; }
-.data-row a { color: inherit; text-decoration: none; }
-.data-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-.data-num { font-variant-numeric: tabular-nums; }
-
-/* Liste clé-valeur (ventilations 2 colonnes) — largeur élastique, aucun scroll. */
-.kv-list { display: flex; flex-direction: column; }
-.kv-head {
-  display: flex; justify-content: space-between; gap: 12px; padding: 2px 12px 6px;
-  color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
-}
-.kv-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 12px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
-.kv-row + .kv-row { margin-top: 6px; }
-.kv-key { color: var(--ink2); font-size: 13px; min-width: 0; }
-.kv-key .kv-meta { color: var(--ink3); font-size: 11px; }
-.kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
-
-/* Aucun scroll horizontal dans une carte de la page compte. */
-/* Aucun défilement horizontal dans une carte : la grille s'adapte en `fr`. */
-.app-shell .table-wrap { overflow-x: visible; background: transparent; border: 0; }
-.app-shell .kv-key { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* Tableau des trades : sur écran large les colonnes tiennent (aucun scroll).
-   Sur écran étroit le défilement reste possible mais DISCRET — barre fine,
-   grise, invisible au repos. */
-.table-scroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, .10) transparent;
-}
-.table-scroll::-webkit-scrollbar { height: 6px; }
-.table-scroll::-webkit-scrollbar-track { background: transparent; }
-.table-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .10); border-radius: 999px; }
-.table-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .22); }
-/* Le contenu ne descend jamais sous sa largeur minimale utile. */
-.table-scroll > .data-list { min-width: 640px; }
-.dash .acct2-empty { min-height: 0; }
+/* (Lignes de données, listes clé-valeur et défilement discret : design-tokens.css.) */
+.ui .data-num { font-variant-numeric: tabular-nums; }
+.ui .table-wrap { overflow-x: visible; background: transparent; border: 0; }
+.ui .table-scroll > .data-list { min-width: 640px; }
+.ui .acct2-empty { min-height: 0; }
 
 /* ===== Calendrier — quatre traitements distincts ===== */
 /* 1. Conteneur : niveau 1 STANDARD (pas de fond creusé — même registre que les cartes
       voisines, calendrier et récap indiscernables). */
-.dash .jcal {
+.ui .jcal {
   position: relative; border: 0; border-radius: 16px;
   background: var(--elev-1-bg); box-shadow: var(--elev-1-shadow);
   -webkit-backdrop-filter: none; backdrop-filter: none;
 }
 /* 2. Cellules vides : légère élévation, arête haute blanche discrète. */
-.dash .jcal-cell {
+.ui .jcal-cell {
   border: 0; border-radius: 10px; background: rgba(255, 255, 255, .02);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 1px 2px rgba(0, 0, 0, .3);
 }
-.dash .jcal-cell.is-out { opacity: .45; }
-.dash .jcal-cell.is-dl-breach { outline: 1.5px solid rgba(255, 77, 94, .55); outline-offset: -1.5px; }
-.dash .jcal-cell.is-breaker { outline: 1.5px solid var(--amber); outline-offset: -1.5px; }
+.ui .jcal-cell.is-out { opacity: .45; }
+.ui .jcal-cell.is-dl-breach { outline: 1.5px solid rgba(255, 77, 94, .55); outline-offset: -1.5px; }
+.ui .jcal-cell.is-breaker { outline: 1.5px solid var(--amber); outline-offset: -1.5px; }
 /* 3. Cellules colorées : radial d'angle + arête haute TEINTÉE de l'état (jamais blanche),
       élévation supérieure aux cellules vides. */
 /* `--i` (0,3 → 1) est posé par la cellule et vaut l'ampleur du P&L rapportée au
    plus gros jour du mois : l'opacité module le FOND, la structure (dégradé
    d'angle, arête teintée, ombres) reste identique d'une case à l'autre. */
-.dash .jcal-cell.day--win {
+.ui .jcal-cell.day--win {
   background:
     radial-gradient(130% 100% at 0% 0%, rgba(56, 255, 176, calc(.30 * var(--i, 1))), transparent 70%),
     rgba(56, 255, 176, calc(.07 * var(--i, 1)));
   box-shadow: inset 0 1px 0 rgba(56, 255, 176, .32), inset 0 -1px 0 rgba(0, 0, 0, .3), 0 1px 2px rgba(0, 0, 0, .45), 0 4px 12px rgba(0, 0, 0, .3);
 }
-.dash .jcal-cell.day--loss {
+.ui .jcal-cell.day--loss {
   background:
     radial-gradient(130% 100% at 0% 0%, rgba(255, 77, 94, calc(.28 * var(--i, 1))), transparent 70%),
     rgba(255, 77, 94, calc(.06 * var(--i, 1)));
@@ -1270,14 +1112,14 @@ body::before {
 }
 /* 4. La colonne SEM. = sous-carte niveau 2 ; les semaines sans donnée ne sont pas
       des cellules vides (aucune surface). */
-.dash .jcal-total { position: relative; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); border-radius: 10px; padding: 0 10px; }
-.dash .jcal-total.is-empty { background: transparent; box-shadow: none; }
+.ui .jcal-total { position: relative; background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); border-radius: 10px; padding: 0 10px; }
+.ui .jcal-total.is-empty { background: transparent; box-shadow: none; }
 
 /* (`.dash .table-wrap` retiré : il réintroduisait fond et bordure que
    `.app-shell .table-wrap` annule, en gagnant sur l'ordre de cascade.) */
 /* Tables denses : lignes resserrées, en-têtes discrets */
-.dash .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
-.dash .table td { padding: 8px 12px; }
+.ui .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
+.ui .table td { padding: 8px 12px; }
 
 @media (max-width: 860px) {
   .app-side { display: none; }

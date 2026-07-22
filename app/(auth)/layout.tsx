@@ -8,7 +8,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
+    <main className="ui relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
       <div className="glow glow-a" style={{ top: '-10%', left: '-8%' }} />
       <div className="glow glow-b" style={{ bottom: '-14%', right: '-8%' }} />
 
