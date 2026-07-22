@@ -381,6 +381,12 @@
 .ui .notice-info::after  { background: var(--win); }
 .ui .notice-error, .ui .notice-warn, .ui .notice-ok, .ui .notice-info { color: var(--ink); }
 
+/* Texte réservé aux lecteurs d'écran (annonce d'un état de chargement). */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
 .ui .skeleton {
   border-radius: var(--r-md);
   background: linear-gradient(90deg, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .07) 37%, rgba(255, 255, 255, .03) 63%);
@@ -389,6 +395,32 @@
 }
 @keyframes ui-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .ui .skeleton { animation: none; } }
+
+/* Zone de dépôt de fichier — surface de SAISIE posée. Le tireté est conservé :
+   c'est l'affordance « on peut déposer ici », pas une décoration. Le survol
+   passe à l'accent comme un champ au focus ; un fichier choisi bascule
+   l'arête haute sur la teinte de succès (jamais du blanc). */
+.ui .dropzone {
+  border: 1px dashed rgba(255, 255, 255, .12);
+  border-radius: var(--r-lg);
+  background: var(--input-bg);
+  box-shadow: var(--input-shadow);
+  color: var(--ink2);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.ui .dropzone:hover, .ui .dropzone:focus-within {
+  border-color: rgba(140, 90, 255, .45);
+  background: var(--input-bg-hover);
+  box-shadow: var(--input-shadow), 0 0 0 2px rgba(120, 90, 255, .25);
+}
+.ui .dropzone.has-file {
+  border-style: solid; border-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(56, 255, 176, .32),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 1px 2px rgba(0, 0, 0, .35);
+}
+.ui .dropzone-label { color: var(--ink); font-weight: 500; }
 
 /* Séparateur intra-carte : un filet d'ombre, pas un trait dessiné. */
 .ui .ui-sep { padding-top: 1.2rem; border-top: 1px solid rgba(255, 255, 255, .06); }

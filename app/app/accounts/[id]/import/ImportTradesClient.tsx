@@ -14,6 +14,9 @@ const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 1
 
 const INITIAL: PreviewState = { ok: false };
 
+/* En-tête et lignes sont deux grilles distinctes : colonnes déterministes. */
+const COLS_PREVIEW = '116px minmax(0,1fr) 120px';
+
 const PLATFORM_OPTIONS = (Object.keys(ADAPTERS) as (keyof typeof ADAPTERS)[]).map((k) => ({
   value: k,
   label: ADAPTERS[k].label,
@@ -85,16 +88,29 @@ export default function ImportTradesClient({
 
       {state.error ? <div className="notice notice-error">{state.error}</div> : null}
 
+      {/* État transitoire — analyse en cours. Sans lui, seul le libellé du
+          bouton changeait : rien n'annonçait le récapitulatif à venir. */}
+      {pending ? (
+        <div className="card" aria-busy="true" aria-live="polite">
+          <span className="sr-only">Analyse du fichier en cours…</span>
+          <div className="skeleton" style={{ height: 22, width: '38%' }} />
+          <div className="skeleton mt-3" style={{ height: 14, width: '62%' }} />
+          <div className="jimport-skel mt-4">
+            {[0, 1, 2, 3, 4].map((i) => <div key={i} className="skeleton" style={{ height: 44 }} />)}
+          </div>
+        </div>
+      ) : null}
+
       {/* Étape 2 — récap avant application */}
       {state.ok ? (
         <div className="card">
           <h2 className="admin-h2">Récapitulatif</h2>
           <p className="admin-sub mt-1">
-            <span className="num" style={{ color: 'var(--ok)' }}>{state.createCount}</span> trade(s) à importer
+            <span className="num" style={{ color: 'var(--win)' }}>{state.createCount}</span> trade(s) à importer
             {state.invalidCount ? (
               <>
                 {' · '}
-                <span className="num" style={{ color: 'var(--danger)' }}>{state.invalidCount}</span> ligne(s) en erreur (ignorées)
+                <span className="num" style={{ color: 'var(--loss)' }}>{state.invalidCount}</span> ligne(s) en erreur (ignorées)
               </>
             ) : null}
           </p>
@@ -109,25 +125,21 @@ export default function ImportTradesClient({
           ) : null}
 
           {state.lines && state.lines.length > 0 ? (
-            <div className="table-wrap mt-4">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Symbole</th>
-                    <th className="num">P&L</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {state.lines.map((l, i) => (
-                    <tr key={i}>
-                      <td data-label="Date" className="num">{l.trade_date}</td>
-                      <td data-label="Symbole">{l.symbol}</td>
-                      <td data-label="P&L" className="num" style={{ color: pnlColor(l.pnl) }}>{signed(l.pnl, currency)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="table-scroll mt-4">
+              <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_PREVIEW }}>
+                <div className="data-head" role="row">
+                  <span role="columnheader">Date</span>
+                  <span role="columnheader">Symbole</span>
+                  <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
+                </div>
+                {state.lines.map((l, i) => (
+                  <div key={i} className="data-row" role="row">
+                    <span role="cell" className="num">{l.trade_date}</span>
+                    <span role="cell">{l.symbol}</span>
+                    <span role="cell" className="num" style={{ textAlign: 'right', color: pnlColor(l.pnl) }}>{signed(l.pnl, currency)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 
@@ -166,7 +178,7 @@ export default function ImportTradesClient({
 
               <div className="jimport-summary mt-3">
                 <span>Brut <b className="num" style={{ color: pnlColor(gross) }}>{signed(gross, currency)}</b></span>
-                <span>Commissions <b className="num" style={{ color: commValue ? 'var(--danger)' : 'var(--ink3)' }}>−{money(commValue, currency)}</b></span>
+                <span>Commissions <b className="num" style={{ color: commValue ? 'var(--loss)' : 'var(--ink3)' }}>−{money(commValue, currency)}</b></span>
                 <span>Net <b className="num" style={{ color: pnlColor(net) }}>{signed(net, currency)}</b></span>
               </div>
               <p className="jsub mt-1">Vérifie que le net correspond au chiffre de ta plateforme.</p>

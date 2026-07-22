@@ -433,9 +433,11 @@ h1, h2, h3 {
 .ui .jhist-selcount { font-weight: 600; color: var(--ink); }
 
 /* Étape commissions à l'import */
-.jimport-comm { border-top: 1px solid var(--border); padding-top: 1.2rem; }
-.jimport-summary { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: var(--ink2); }
-.jimport-summary b { font-family: var(--font-mono); font-weight: 700; margin-left: 6px; }
+.ui .jimport-comm { border-top: 1px solid rgba(255, 255, 255, .06); padding-top: 1.2rem; }
+.ui .jimport-summary { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: var(--ink2); }
+.ui .jimport-summary b { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; margin-left: 6px; }
+/* Squelette d'attente de l'aperçu : même gabarit que les lignes réelles. */
+.jimport-skel { display: flex; flex-direction: column; gap: 6px; }
 .acct2-hist-table { flex: 1; }
 .acct2-empty { display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 24px; text-align: center; color: var(--ink3); }
 
