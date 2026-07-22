@@ -418,7 +418,32 @@ h1, h2, h3 {
 .jhist-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: rgba(150, 110, 240, .08); }
 .jhist-selcount { font-weight: 600; color: var(--ink); }
 .jhist-cbcol { width: 42px; text-align: center; }
-.jhist-cb { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
+/* Case à cocher : modelée comme les autres contrôles (arête haute claire,
+   arête basse sombre). Coche dessinée en blanc plein. */
+.jhist-cb {
+  appearance: none; -webkit-appearance: none;
+  width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; border: none;
+  border-radius: var(--r-sm);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(0, 0, 0, .24),
+    0 1px 2px rgba(0, 0, 0, .38);
+  transition: background .15s, box-shadow .15s;
+}
+.jhist-cb:checked {
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"),
+    radial-gradient(120% 80% at 50% 0%, rgba(140, 90, 255, .30), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015));
+  background-repeat: no-repeat;
+  background-position: center, center, center;
+  background-size: 11px 11px, auto, auto;
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, .24),
+    inset 0 -1px 0 rgba(0, 0, 0, .24),
+    0 1px 2px rgba(0, 0, 0, .38);
+}
 .data-row.is-selected { background: linear-gradient(180deg, rgba(120, 90, 255, .2), rgba(120, 90, 255, .08)), var(--elev-2-bg); }
 .data-row.is-selected:hover { background: linear-gradient(180deg, rgba(120, 90, 255, .26), rgba(120, 90, 255, .1)), var(--elev-2-bg); }
 
@@ -449,27 +474,49 @@ h1, h2, h3 {
 .acct2-breakdowns { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: stretch; }
 
 /* Courbe d'équité (SVG pur) */
-.eq-chart { width: 100%; }
-.eq-grid { stroke: var(--border); stroke-width: 1; }
+/* Graphique : AUCUN fond propre — il repose sur sa carte. La donnée ne porte
+   jamais l'accent de marque ; la courbe prend la couleur de l'état. */
+.eq-chart { width: 100%; background: transparent; }
+.eq-grid { stroke: rgba(255, 255, 255, .05); stroke-width: 1; }
 .eq-axis { fill: var(--ink3); font-size: 11px; font-family: var(--font-mono); }
 .eq-axis-start { font-size: 10px; }
-.eq-start { stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
-.eq-margin { fill: rgba(56, 255, 176, .1); stroke: none; }
-.eq-floor { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 5 4; }
-.eq-equity { stroke: var(--c2); stroke-width: 2.5; }
+.eq-start { stroke: rgba(255, 255, 255, .20); stroke-width: 1; stroke-dasharray: 3 4; }
+.eq-area { stroke: none; }
+.eq-floor { stroke: var(--loss); stroke-width: 2; stroke-dasharray: 5 4; }
+.eq-equity { stroke-width: 2; }
+.eq-equity.is-win { stroke: var(--win); }
+.eq-equity.is-loss { stroke: var(--loss); }
 .eq-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--ink2); }
 .eq-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .eq-key { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
-.eq-key-equity { background: var(--c2); }
-.eq-key-floor { background: var(--danger); height: 3px; }
-.eq-key-margin { background: rgba(56, 255, 176, .55); height: 10px; border-radius: 2px; }
+.eq-key-equity.is-win { background: var(--win); }
+.eq-key-equity.is-loss { background: var(--loss); }
+.eq-key-floor { background: var(--loss); }
+.eq-key-start { background: rgba(255, 255, 255, .20); }
 
 /* Distribution du P&L */
 .acct2-dist { display: flex; flex-direction: column; gap: 6px; }
-.acct2-dist-row { display: grid; grid-template-columns: 130px 1fr 42px; align-items: center; gap: 10px; }
+.acct2-dist-row { display: grid; grid-template-columns: minmax(0, 130px) minmax(0, 1fr) 42px; align-items: center; gap: 10px; }
 .acct2-dist-label { font-size: 11px; color: var(--ink3); text-align: right; }
-.acct2-dist-track { height: 14px; background: rgba(255, 255, 255, .04); border-radius: 4px; overflow: hidden; }
-.acct2-dist-bar { display: block; height: 100%; border-radius: 4px; min-width: 2px; }
+/* Rail creusé + barre modelée : arête haute à la TEINTE DE L'ÉTAT, jamais du
+   blanc — même langage que les cellules du calendrier. */
+.acct2-dist-track {
+  height: 14px; border-radius: var(--r-pill); overflow: hidden;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .30), rgba(0, 0, 0, .16));
+}
+.acct2-dist-bar { display: block; height: 100%; border-radius: var(--r-pill); min-width: 2px; }
+.acct2-dist-bar.is-win {
+  background:
+    radial-gradient(130% 100% at 0% 0%, rgba(56, 255, 176, .42), transparent 70%),
+    linear-gradient(180deg, rgba(56, 255, 176, .22), rgba(56, 255, 176, .08));
+  box-shadow: inset 0 1px 0 rgba(56, 255, 176, .35), inset 0 -1px 0 rgba(0, 0, 0, .28);
+}
+.acct2-dist-bar.is-loss {
+  background:
+    radial-gradient(130% 100% at 0% 0%, rgba(255, 77, 94, .40), transparent 70%),
+    linear-gradient(180deg, rgba(255, 77, 94, .20), rgba(255, 77, 94, .07));
+  box-shadow: inset 0 1px 0 rgba(255, 77, 94, .32), inset 0 -1px 0 rgba(0, 0, 0, .28);
+}
 .acct2-dist-count { font-size: 12px; color: var(--ink2); text-align: right; }
 
 .acct-rules-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--text-1); margin-bottom: 1.1rem; }
@@ -1140,7 +1187,9 @@ body::before {
 .kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
 
 /* Aucun scroll horizontal dans une carte de la page compte. */
-.dash .table-wrap { overflow-x: visible; background: transparent; border: 0; }
+/* Aucun défilement horizontal dans une carte : la grille s'adapte en `fr`. */
+.app-shell .table-wrap { overflow-x: visible; background: transparent; border: 0; }
+.app-shell .kv-key { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dash .acct2-empty { min-height: 0; }
 
 /* ===== Calendrier — quatre traitements distincts ===== */

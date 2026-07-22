@@ -49,12 +49,15 @@ export default function EquityChart({
   const equityPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.equity).toFixed(1)}`).join(' ');
   const floorPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.floor).toFixed(1)}`).join(' ');
 
-  // Bande de marge : solde par-dessus, plancher au retour.
-  const marginArea =
-    points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(p.equity).toFixed(1)}`).join(' ') +
-    ' ' +
-    [...points].reverse().map((p, i) => `L ${x(points.length - 1 - i).toFixed(1)} ${y(p.floor).toFixed(1)}`).join(' ') +
-    ' Z';
+  // La donnée ne porte JAMAIS l'accent de marque : la courbe prend la couleur
+  // de l'état (au-dessus du capital initial = gain, en dessous = perte).
+  const above = points[points.length - 1].equity >= startingBalance;
+  const tone = above ? 'is-win' : 'is-loss';
+  const fillId = above ? 'eqFillWin' : 'eqFillLoss';
+
+  // Aire sous la courbe : de la courbe jusqu'au bas du cadre.
+  const baseY = (padT + innerH).toFixed(1);
+  const equityArea = `${equityPath} L ${x(points.length - 1).toFixed(1)} ${baseY} L ${x(0).toFixed(1)} ${baseY} Z`;
 
   // Ticks Y (4) + ligne du capital initial.
   const ticks = [0, 1, 2, 3].map((k) => yMin + (range * 1.12 * k) / 3);
@@ -62,6 +65,17 @@ export default function EquityChart({
   return (
     <div className="eq-chart">
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Courbe d'équité et plancher de drawdown" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="eqFillWin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(56,255,176,.18)" />
+            <stop offset="100%" stopColor="rgba(56,255,176,0)" />
+          </linearGradient>
+          <linearGradient id="eqFillLoss" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,77,94,.18)" />
+            <stop offset="100%" stopColor="rgba(255,77,94,0)" />
+          </linearGradient>
+        </defs>
+
         {/* grille + labels Y */}
         {ticks.map((v, i) => (
           <g key={i}>
@@ -76,12 +90,12 @@ export default function EquityChart({
           capital {fmtFull.format(startingBalance)}
         </text>
 
-        {/* marge (cushion) */}
-        <path d={marginArea} className="eq-margin" />
+        {/* aire sous la courbe, à la teinte de la ligne */}
+        <path d={equityArea} className="eq-area" fill={`url(#${fillId})`} />
 
         {/* plancher + équité */}
         <path d={floorPath} className="eq-floor" fill="none" />
-        <path d={equityPath} className="eq-equity" fill="none" />
+        <path d={equityPath} className={`eq-equity ${tone}`} fill="none" />
 
         {/* labels X : première et dernière date */}
         <text x={padL} y={H - 10} textAnchor="start" className="eq-axis">{points[0].date}</text>
@@ -89,9 +103,9 @@ export default function EquityChart({
       </svg>
 
       <div className="eq-legend">
-        <span><span className="eq-key eq-key-equity" /> Équité</span>
+        <span><span className={`eq-key eq-key-equity ${tone}`} /> Équité</span>
         <span><span className="eq-key eq-key-floor" /> Plancher de drawdown</span>
-        <span><span className="eq-key eq-key-margin" /> Marge (solde − plancher)</span>
+        <span><span className="eq-key eq-key-start" /> Capital initial</span>
       </div>
     </div>
   );

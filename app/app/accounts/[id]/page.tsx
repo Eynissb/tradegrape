@@ -494,7 +494,7 @@ export default async function AccountPage({
                     {dayTrades.length === 0 ? (
                       <p className="jsub mt-3">Aucune entrée ce jour-là.</p>
                     ) : (
-                      <div className="data-list mt-4" role="table" style={{ ['--cols' as string]: 'minmax(0,1fr) auto minmax(0,1.1fr) auto' }}>
+                      <div className="data-list mt-4" role="table" style={{ ['--cols' as string]: 'minmax(0,1.2fr) 110px minmax(0,1fr) 84px' }}>
                         <div className="data-head" role="row">
                           <span role="columnheader">Type</span>
                           <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
@@ -559,7 +559,7 @@ export default async function AccountPage({
                       {recentTrades.length === 0 ? (
                         <p className="jsub mt-3">Aucune entrée. Commence par un P&L rapide dans la console.</p>
                       ) : (
-                        <div className="data-list mt-3" role="table" style={{ ['--cols' as string]: 'auto 1fr auto' }}>
+                        <div className="data-list mt-3" role="table" style={{ ['--cols' as string]: 'minmax(0,1fr) minmax(0,1.4fr) 110px' }}>
                           <div className="data-head" role="row">
                             <span role="columnheader">Date</span>
                             <span role="columnheader">Type</span>

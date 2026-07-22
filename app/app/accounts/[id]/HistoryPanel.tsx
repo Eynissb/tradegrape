@@ -29,6 +29,15 @@ function platformLabel(key: string | null): string {
   return (ADAPTERS as Record<string, { label: string }>)[key]?.label ?? 'CSV';
 }
 
+/**
+ * En-tête et lignes sont des grilles SÉPARÉES : une colonne `auto` s'y résoudrait
+ * à des largeurs différentes (« P&L » dans l'en-tête vs « +340,00 » dans la ligne),
+ * d'où un décalage. Les colonnes non flexibles sont donc déterministes, les autres
+ * en `fr` pour qu'aucune barre de défilement horizontale n'apparaisse.
+ * Ordre : case · date · type · P&L · tags · action.
+ */
+const COLS_TRADES = '18px minmax(0,1fr) minmax(0,1.2fr) 110px minmax(0,1fr) 84px';
+
 export default function HistoryPanel({
   trades,
   accountId,
@@ -190,7 +199,7 @@ export default function HistoryPanel({
             {trades.length === 0 ? 'Aucune entrée. Commence par un P&L rapide dans la console.' : 'Aucune entrée pour ces filtres.'}
           </div>
         ) : (
-          <div className="data-list" role="table" style={{ ['--cols' as string]: '30px auto minmax(0,1fr) auto minmax(0,1.1fr) auto' }}>
+          <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_TRADES }}>
             <div className="data-head" role="row">
               <span><input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" /></span>
               <span role="columnheader">Date</span>

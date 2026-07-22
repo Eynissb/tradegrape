@@ -64,7 +64,7 @@ export function DistributionBars({ bins }: { bins: DistributionBin[] }) {
         <div key={i} className="acct2-dist-row">
           <span className="acct2-dist-label num">{compact.format(b.from)} … {compact.format(b.to)}</span>
           <span className="acct2-dist-track">
-            <span className="acct2-dist-bar" style={{ width: `${(b.count / max) * 100}%`, background: b.from >= 0 ? 'var(--ok)' : 'var(--danger)' }} />
+            <span className={`acct2-dist-bar ${b.from >= 0 ? 'is-win' : 'is-loss'}`} style={{ width: `${(b.count / max) * 100}%` }} />
           </span>
           <span className="acct2-dist-count num">{b.count}</span>
         </div>
