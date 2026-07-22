@@ -341,8 +341,9 @@
 }
 .ui .notice-error::after { background: var(--loss); }
 .ui .notice-warn::after  { background: var(--warn); }
-.ui .notice-ok::after    { background: var(--win); }
-.ui .notice-error { color: var(--ink); }
+.ui .notice-ok::after,
+.ui .notice-info::after  { background: var(--win); }
+.ui .notice-error, .ui .notice-warn, .ui .notice-ok, .ui .notice-info { color: var(--ink); }
 
 .ui .skeleton {
   border-radius: var(--r-md);

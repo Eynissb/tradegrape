@@ -168,8 +168,8 @@ h1, h2, h3 {
   font-size: 13.5px;
   line-height: 1.45;
 }
-.notice-error { background: rgba(255, 77, 94, 0.1); border: 1px solid rgba(255, 77, 94, 0.3); color: #ffb3ba; }
-.notice-info  { background: rgba(56, 255, 176, 0.08); border: 1px solid rgba(56, 255, 176, 0.28); color: #9dffd8; }
+/* (variantes de .notice : design-tokens.css — filet coloré, jamais un aplat) */
+
 
 /* =====================================================================
    Back-office (/admin)
@@ -274,7 +274,7 @@ h1, h2, h3 {
   color: var(--amber); border: 1px solid rgba(255, 180, 59, 0.4); border-radius: 5px; padding: 1px 5px;
 }
 
-.notice-warn { background: rgba(255, 180, 59, 0.1); border: 1px solid rgba(255, 180, 59, 0.32); color: #ffd79a; }
+
 
 /* Formulaire firm */
 .admin-section {
@@ -285,7 +285,8 @@ h1, h2, h3 {
   font-family: var(--font-display); font-weight: 600; font-size: 14px;
   color: var(--c2); padding: 0 8px; margin-left: -4px;
 }
-.admin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 16px; margin-top: 6px; }
+/* Colonnes élastiques : 3 colonnes fixes débordaient dans un formulaire étroit. */
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 16px; margin-top: 6px; align-items: start; }
 .admin-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink2); cursor: pointer; align-self: end; padding-bottom: 10px; }
 .admin-check input { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
 
@@ -367,7 +368,8 @@ h1, h2, h3 {
 }
 .jsettings-link:hover { color: var(--ink); background: linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .05)); }
 .jsettings-link .lucide { width: 16px; height: 16px; }
-.jdanger { border-color: rgba(255, 77, 94, .3); }
+/* Zone de danger : signalée par le titre et le bouton, pas par un contour. */
+.ui .jdanger { border: 0; }
 .jcout-add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 .acct2 { display: grid; gap: 1.6rem; }
 .acct2-console { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }

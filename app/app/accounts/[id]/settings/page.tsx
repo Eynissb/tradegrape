@@ -45,6 +45,10 @@ interface AccountRow {
 
 const v = (n: number | null | undefined): string => (n === null || n === undefined ? '' : String(n));
 
+/* Colonnes déterministes : en-tête et lignes sont deux grilles distinctes. */
+const COLS_COSTS = 'minmax(0,1fr) 116px 116px 88px';
+const COLS_PAYOUTS = '116px minmax(0,1fr) 88px';
+
 export default async function AccountSettings({
   params,
   searchParams,
@@ -191,28 +195,31 @@ export default async function AccountSettings({
 
         {/* Achats */}
         {purchases.length > 0 ? (
-          <div className="table-wrap">
-            <table className="table">
-              <thead><tr><th>Type</th><th className="num">Montant</th><th>Date</th><th></th></tr></thead>
-              <tbody>
-                {purchases.map((p) => (
-                  <tr key={p.id}>
-                    <td data-label="Type">{KIND_LABEL[p.kind] ?? p.kind}</td>
-                    <td data-label="Montant" className="num">{money(Number(p.amount), currency)}</td>
-                    <td data-label="Date" className="num">{p.purchased_at}</td>
-                    <td className="admin-row-actions">
-                      <form action={deletePurchase}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <input type="hidden" name="account_id" value={account.id} />
-                        <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
-                      </form>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="table-scroll">
+            <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_COSTS }}>
+              <div className="data-head" role="row">
+                <span role="columnheader">Type</span>
+                <span role="columnheader" style={{ textAlign: 'right' }}>Montant</span>
+                <span role="columnheader">Date</span>
+                <span role="columnheader"></span>
+              </div>
+              {purchases.map((p) => (
+                <div key={p.id} className="data-row" role="row">
+                  <span role="cell">{KIND_LABEL[p.kind] ?? p.kind}</span>
+                  <span role="cell" className="num" style={{ textAlign: 'right' }}>{money(Number(p.amount), currency)}</span>
+                  <span role="cell" className="num">{p.purchased_at}</span>
+                  <span role="cell" className="data-actions">
+                    <form action={deletePurchase}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="account_id" value={account.id} />
+                      <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
+                    </form>
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        ) : <p className="jsub">Aucun achat enregistré.</p>}
+        ) : <div className="acct2-empty">Aucun achat enregistré.</div>}
 
         <form action={addPurchase} className="jcout-add mt-3">
           <input type="hidden" name="account_id" value={account.id} />
@@ -227,27 +234,29 @@ export default async function AccountSettings({
         {/* Payouts */}
         <h3 className="acct-rules-title mt-6" style={{ fontSize: '.95rem' }}>Payouts reçus</h3>
         {payouts.length > 0 ? (
-          <div className="table-wrap">
-            <table className="table">
-              <thead><tr><th className="num">Montant</th><th>Reçu le</th><th></th></tr></thead>
-              <tbody>
-                {payouts.map((p) => (
-                  <tr key={p.id}>
-                    <td data-label="Montant" className="num" style={{ color: 'var(--ok)' }}>{signed(Number(p.amount), currency)}</td>
-                    <td data-label="Reçu le" className="num">{p.received_at ?? '— (en attente)'}</td>
-                    <td className="admin-row-actions">
-                      <form action={deletePayout}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <input type="hidden" name="account_id" value={account.id} />
-                        <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
-                      </form>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="table-scroll">
+            <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_PAYOUTS }}>
+              <div className="data-head" role="row">
+                <span role="columnheader" style={{ textAlign: 'right' }}>Montant</span>
+                <span role="columnheader">Reçu le</span>
+                <span role="columnheader"></span>
+              </div>
+              {payouts.map((p) => (
+                <div key={p.id} className="data-row" role="row">
+                  <span role="cell" className="num" style={{ textAlign: 'right', color: 'var(--win)' }}>{signed(Number(p.amount), currency)}</span>
+                  <span role="cell" className="num">{p.received_at ?? '— (en attente)'}</span>
+                  <span role="cell" className="data-actions">
+                    <form action={deletePayout}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="account_id" value={account.id} />
+                      <Button type="submit" variant="ghost" size="sm" className="btn-danger-ghost">Suppr.</Button>
+                    </form>
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        ) : <p className="jsub">Aucun payout enregistré.</p>}
+        ) : <div className="acct2-empty">Aucun payout enregistré.</div>}
 
         <form action={addPayout} className="jcout-add mt-3">
           <input type="hidden" name="account_id" value={account.id} />
