@@ -10,14 +10,7 @@ function compact(n: number): string {
   return `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function cellBg(pnl: number | null, maxAbs: number): string {
-  if (pnl === null || pnl === 0) return 'transparent';
-  const mag = maxAbs > 0 ? Math.min(1, Math.abs(pnl) / maxAbs) : 0;
-  const alpha = (0.1 + 0.45 * mag).toFixed(3);
-  return `rgba(${pnl > 0 ? GREEN : RED}, ${alpha})`;
-}
-
-function DayContent({ c, maxAbs }: { c: DayCell; maxAbs: number }) {
+function DayContent({ c }: { c: DayCell }) {
   const title = [
     c.pnl !== null ? `P&L ${compact(c.pnl)}` : 'aucune entrée',
     c.trades ? `${c.trades} trade(s)` : '',
@@ -27,10 +20,12 @@ function DayContent({ c, maxAbs }: { c: DayCell; maxAbs: number }) {
     .filter(Boolean)
     .join(' · ');
 
+  const win = c.pnl !== null && c.pnl > 0;
+  const loss = c.pnl !== null && c.pnl < 0;
+
   return (
     <div
-      className={`jcal-cell${c.inMonth ? '' : ' is-out'}${c.weekend ? ' is-weekend' : ''}${c.dailyLoss === 'breached' ? ' is-dl-breach' : ''}${c.dailyLoss === 'approached' ? ' is-dl-approach' : ''}${c.isConsistencyBreaker ? ' is-breaker' : ''}`}
-      style={{ background: cellBg(c.pnl, maxAbs) }}
+      className={`jcal-cell${c.inMonth ? '' : ' is-out'}${c.weekend ? ' is-weekend' : ''}${win ? ' day--win' : ''}${loss ? ' day--loss' : ''}${c.dailyLoss === 'breached' ? ' is-dl-breach' : ''}${c.dailyLoss === 'approached' ? ' is-dl-approach' : ''}${c.isConsistencyBreaker ? ' is-breaker' : ''}`}
       title={title}
     >
       <div className="jcal-day">
@@ -100,7 +95,7 @@ export default function MonthCalendar({
             {week.days.map((c) => {
               const isActive = activeDay === c.date;
               const isAdded = addedDay === c.date && c.inMonth;
-              const inner = <DayContent c={c} maxAbs={view.maxAbs} />;
+              const inner = <DayContent c={c} />;
               return c.inMonth ? (
                 <Link
                   key={c.date}

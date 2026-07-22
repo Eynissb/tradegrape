@@ -20,10 +20,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="app-shell">
-      {/* Glows ambiants diffus — indigo (haut-gauche) + fuchsia, très faible opacité */}
-      <div className="app-glow app-glow-1" aria-hidden="true" />
-      <div className="app-glow app-glow-2" aria-hidden="true" />
-
       <AppSidebar staff={staff} />
 
       <div className="app-main">
