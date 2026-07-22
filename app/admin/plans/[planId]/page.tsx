@@ -11,6 +11,9 @@ import Select from '@/components/ui/Select';
 
 export const metadata = { title: 'Éditer un plan — Admin Tradegrape' };
 
+/* Colonnes déterministes : en-tête et lignes sont deux grilles distinctes. */
+const COLS_OFFERS = '120px 120px minmax(0,1fr) 116px 88px';
+
 interface OfferRow {
   id: string;
   account_size: number;
@@ -137,39 +140,35 @@ export default async function EditPlan({
           .
         </div>
       ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th className="num">Taille</th>
-                <th className="num">Prix</th>
-                <th>Drawdown</th>
-                <th>Statut</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {offers.map((o) => (
-                <tr key={o.id}>
-                  <td data-label="Taille" className="num">{o.account_size.toLocaleString('fr-FR')}</td>
-                  <td data-label="Prix" className="num">{o.price.toLocaleString('fr-FR')}</td>
-                  <td data-label="Drawdown">{o.drawdown_type}</td>
-                  <td data-label="Statut">
-                    <PublishToggle
-                      action={toggleOfferPublish}
-                      id={o.id}
-                      isPublished={o.is_published}
-                      back={`/admin/plans/${plan.id}`}
-                      hidden={o.is_published && (planDraft || firmDraft)}
-                    />
-                  </td>
-                  <td className="admin-row-actions">
-                    <Link href={`/admin/offers/${o.id}`} className="link-accent">Éditer</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="table-scroll">
+          <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_OFFERS }}>
+            <div className="data-head" role="row">
+              <span role="columnheader" style={{ textAlign: 'right' }}>Taille</span>
+              <span role="columnheader" style={{ textAlign: 'right' }}>Prix</span>
+              <span role="columnheader">Drawdown</span>
+              <span role="columnheader">Statut</span>
+              <span role="columnheader"></span>
+            </div>
+            {offers.map((o) => (
+              <div key={o.id} className="data-row" role="row">
+                <span role="cell" data-label="Taille" className="num" style={{ textAlign: 'right' }}>{o.account_size.toLocaleString('fr-FR')}</span>
+                <span role="cell" data-label="Prix" className="num" style={{ textAlign: 'right' }}>{o.price.toLocaleString('fr-FR')}</span>
+                <span role="cell" data-label="Drawdown">{o.drawdown_type}</span>
+                <span role="cell" data-label="Statut">
+                  <PublishToggle
+                    action={toggleOfferPublish}
+                    id={o.id}
+                    isPublished={o.is_published}
+                    back={`/admin/plans/${plan.id}`}
+                    hidden={o.is_published && (planDraft || firmDraft)}
+                  />
+                </span>
+                <span role="cell" className="data-actions">
+                  <Link href={`/admin/offers/${o.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

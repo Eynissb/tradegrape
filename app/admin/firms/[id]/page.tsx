@@ -9,6 +9,9 @@ import { deleteFirm, toggleFirmPublish } from '../actions';
 
 export const metadata = { title: 'Éditer une firm — Admin Tradegrape' };
 
+/* Colonnes déterministes : en-tête et lignes sont deux grilles distinctes. */
+const COLS_PLANS = 'minmax(0,1.2fr) minmax(0,1fr) 120px 80px 116px 88px';
+
 interface PlanRow {
   id: string;
   name: string;
@@ -98,44 +101,38 @@ export default async function EditFirm({
           .
         </div>
       ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Slug</th>
-                <th>Type</th>
-                <th className="num">Note</th>
-                <th>Statut</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {plans.map((p) => (
-                <tr key={p.id}>
-                  <td data-label="Nom"><span className="cell-firm">{p.name}</span></td>
-                  <td data-label="Slug" className="mono" style={{ color: 'var(--text-3)' }}>{p.slug}</td>
-                  <td data-label="Type">{p.account_kind}</td>
-                  <td data-label="Note" className="num">{p.rating ?? '—'}</td>
-                  <td data-label="Statut">
-                    <PublishToggle
-                      action={togglePlanPublish}
-                      id={p.id}
-                      isPublished={p.is_published}
-                      back={`/admin/firms/${id}`}
-                      onLabel="Publié"
-                      hidden={p.is_published && !firm.is_published}
-                    />
-                  </td>
-                  <td className="admin-row-actions">
-                    <Link href={`/admin/plans/${p.id}`} className="link-accent">
-                      Éditer
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="table-scroll">
+          <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_PLANS }}>
+            <div className="data-head" role="row">
+              <span role="columnheader">Nom</span>
+              <span role="columnheader">Slug</span>
+              <span role="columnheader">Type</span>
+              <span role="columnheader" style={{ textAlign: 'right' }}>Note</span>
+              <span role="columnheader">Statut</span>
+              <span role="columnheader"></span>
+            </div>
+            {plans.map((p) => (
+              <div key={p.id} className="data-row" role="row">
+                <span role="cell" data-label="Nom" className="admin-strong">{p.name}</span>
+                <span role="cell" data-label="Slug" className="mono" style={{ color: 'var(--ink3)' }}>{p.slug}</span>
+                <span role="cell" data-label="Type">{p.account_kind}</span>
+                <span role="cell" data-label="Note" className="num" style={{ textAlign: 'right' }}>{p.rating ?? '—'}</span>
+                <span role="cell" data-label="Statut">
+                  <PublishToggle
+                    action={togglePlanPublish}
+                    id={p.id}
+                    isPublished={p.is_published}
+                    back={`/admin/firms/${id}`}
+                    onLabel="Publié"
+                    hidden={p.is_published && !firm.is_published}
+                  />
+                </span>
+                <span role="cell" className="data-actions">
+                  <Link href={`/admin/plans/${p.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

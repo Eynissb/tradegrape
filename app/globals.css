@@ -246,16 +246,8 @@ h1, h2, h3 {
 
 .ui .admin-empty { padding: 26px; text-align: center; color: var(--ink2); }
 
-.admin-table-wrap { overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--card-brd); }
-.admin-table { width: 100%; border-collapse: collapse; background: var(--card); font-size: 14px; }
-.admin-table th {
-  text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--ink3); padding: 12px 16px;
-  border-bottom: 1px solid var(--card-brd);
-}
-.admin-table td { padding: 13px 16px; border-bottom: 1px solid rgba(150, 110, 240, 0.08); color: var(--ink2); }
-.admin-table tr:last-child td { border-bottom: none; }
-.admin-table tr:hover td { background: rgba(150, 110, 240, 0.05); }
+/* (`.admin-table*` supprimé : les cinq tableaux de l'admin sont des grilles
+   `.data-row`. Ces règles n'avaient plus aucun consommateur.) */
 .ui .admin-strong { color: var(--ink); font-weight: 600; }
 .admin-row-actions { text-align: right; }
 /* Badge d'état : surface neutre en relief ; seul l'état « publié » se teinte. */
@@ -300,18 +292,19 @@ h1, h2, h3 {
 
 
 /* Formulaire firm */
-.admin-section {
-  border: 1px solid var(--card-brd); border-radius: var(--r-lg);
-  background: var(--card); padding: 18px 20px 22px;
+.ui .admin-section {
+  border: 0; border-radius: var(--r-lg); padding: 18px 20px 22px;
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
 }
-.admin-section > legend {
+/* Le libellé de section est du TEXTE, pas un état : il ne porte pas l'accent. */
+.ui .admin-section > legend {
   font-family: var(--font-display); font-weight: 600; font-size: 14px;
-  color: var(--c2); padding: 0 8px; margin-left: -4px;
+  color: var(--ink2); padding: 0 8px; margin-left: -4px;
 }
 /* Colonnes élastiques : 3 colonnes fixes débordaient dans un formulaire étroit. */
 .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 16px; margin-top: 6px; align-items: start; }
-.admin-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink2); cursor: pointer; align-self: end; padding-bottom: 10px; }
-.admin-check input { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
+/* (`.admin-check` supprimé : aucune référence JSX. Les cases de l'admin
+   passent par le composant `Checkbox`, déjà au système.) */
 
 .admin-dup { margin-top: 40px; padding: 22px 24px; }
 .admin-dup-form {
@@ -320,16 +313,19 @@ h1, h2, h3 {
 .admin-dup-form .btn-grad { height: 44px; }
 @media (max-width: 860px) { .admin-dup-form { grid-template-columns: 1fr; } }
 
-.admin-danger {
-  margin-top: 34px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  border: 1px solid rgba(255, 77, 94, 0.28); border-radius: var(--r-md);
-  padding: 14px 18px; font-size: 13.5px; color: var(--ink3);
+/* Zone de danger : surface posée + filet rouge, jamais un cadre rouge. */
+.ui .admin-danger {
+  position: relative; margin-top: 34px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border: 0; border-radius: var(--r-md); padding: 14px 18px; font-size: 13.5px; color: var(--ink2);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
 }
-.admin-btn-danger {
-  background: rgba(255, 77, 94, 0.12); border: 1px solid rgba(255, 77, 94, 0.4);
-  color: #ffb3ba; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 10px; cursor: pointer;
+.ui .admin-danger::after {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--loss);
 }
-.admin-btn-danger:hover { background: rgba(255, 77, 94, 0.2); }
+/* (`.admin-btn-danger` supprimé : aucune référence JSX. Les suppressions
+   passent par `Button variant="danger"`, déjà au système.) */
 
 @media (max-width: 860px) {
   .admin-grid { grid-template-columns: 1fr 1fr; }
@@ -350,19 +346,9 @@ h1, h2, h3 {
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.35s;
 }
 
-.app-bar {
-  position: sticky; top: 0; z-index: 50;
-  backdrop-filter: blur(18px); background: rgba(5, 7, 13, 0.6);
-  border-bottom: 1px solid rgba(150, 110, 240, 0.14);
-}
-.app-bar-in { max-width: var(--container); margin: 0 auto; padding: 13px var(--container-pad); display: flex; align-items: center; gap: 22px; }
-.app-brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--ink); text-decoration: none; letter-spacing: -0.4px; }
-.app-pill { font-family: var(--font-body); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c2); border: 1px solid rgba(192, 75, 255, 0.35); padding: 2px 8px; border-radius: 20px; }
-.app-nav { display: flex; align-items: center; gap: 18px; flex: 1; }
-.app-nav a { color: var(--ink2); text-decoration: none; font-size: 14px; font-weight: 500; }
-.app-nav a:hover { color: var(--ink); }
-.app-signout { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(120, 150, 220, 0.25); color: var(--ink2); font-size: 13px; padding: 7px 13px; border-radius: 9px; cursor: pointer; }
-.app-signout:hover { color: var(--ink); }
+/* (`.app-bar*` supprimé : l'ancien en-tête de /app a été remplacé par la
+   sidebar. Plus aucune référence dans le JSX — il portait encore un contour
+   violet et un contour bleuté.) */
 
 .jwrap { max-width: var(--container); margin: 0 auto; padding: 32px var(--container-pad) 72px; position: relative; z-index: 1; }
 .jwrap-narrow { max-width: var(--container-narrow); }
