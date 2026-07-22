@@ -445,12 +445,10 @@ h1, h2, h3 {
 .acct2-analytics { display: flex; flex-direction: column; gap: 1.2rem; }
 .agg-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.4rem; }
 .jbal-hero { text-align: center; padding: 2rem 1.5rem; }
-.jbal-hero-k { font-family: var(--font-mono); font-weight: 800; font-size: 2.6rem; letter-spacing: -1px; line-height: 1.05; }
-.jbal-hero-l { color: var(--ink2); margin-top: .5rem; font-size: 14px; }
-.cum-line-pos { stroke: var(--ok); stroke-width: 2.5; }
-.cum-line-neg { stroke: var(--danger); stroke-width: 2.5; }
-.cum-area-pos { fill: rgba(56, 255, 176, .1); stroke: none; }
-.cum-area-neg { fill: rgba(255, 77, 94, .1); stroke: none; }
+.ui .jbal-hero-k { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 2.6rem; letter-spacing: -1px; line-height: 1.05; }
+.ui .jbal-hero-l { color: var(--ink2); margin-top: .5rem; font-size: 14px; }
+/* (Courbe cumulée : elle réutilise .eq-equity / .eq-area du système —
+   les anciennes classes .cum-* faisaient doublon avec des valeurs divergentes.) */
 .acct2-period { display: flex; flex-direction: column; gap: .9rem; }
 .acct2-period-custom { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 
@@ -1016,7 +1014,12 @@ body::before {
 .ui .acct2-stat-k { font-size: 1.7rem; line-height: 1.1; white-space: nowrap; color: var(--ink); }
 /* Hauteur réservée même quand la sous-ligne est vide → valeurs alignées
    horizontalement d'une carte à l'autre. */
-.acct2-stat-sub { color: var(--ink3); font-size: 11px; line-height: 15px; min-height: 15px; }
+/* UNE ligne stricte : une sous-ligne qui se renvoie ferait grandir sa carte
+   et casserait l'alignement des valeurs entre cartes voisines. */
+.acct2-stat-sub {
+  color: var(--ink3); font-size: 11px; line-height: 15px; min-height: 15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* Solde */
 .acct2-balance { display: flex; flex-direction: column; gap: 2px; }

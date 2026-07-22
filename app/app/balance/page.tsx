@@ -12,6 +12,10 @@ import { Stat } from '@/app/app/_components/analytics-ui';
 
 export const metadata = { title: 'Bilan financier — Tradegrape' };
 
+/* En-tête et lignes sont deux grilles distinctes : colonnes déterministes
+   pour qu'elles s'alignent (cf. tableau des trades). */
+const COLS_BY_FIRM = 'minmax(0,1fr) 84px 116px 116px 116px';
+
 interface AccountRow {
   id: string;
   status: string;
@@ -105,29 +109,25 @@ export default async function BalancePage() {
           {/* Par firm */}
           <div className="card">
             <h3 className="acct-rules-title">Par firm</h3>
-            <div className="table-wrap">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Firm</th>
-                    <th className="num">Comptes</th>
-                    <th className="num">Dépensé</th>
-                    <th className="num">Payouts</th>
-                    <th className="num">Net</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {b.byFirm.map((f) => (
-                    <tr key={f.firm}>
-                      <td data-label="Firm">{f.firm}</td>
-                      <td data-label="Comptes" className="num">{f.accounts}</td>
-                      <td data-label="Dépensé" className="num">{money(f.spent, currency)}</td>
-                      <td data-label="Payouts" className="num">{money(f.payouts, currency)}</td>
-                      <td data-label="Net" className="num" style={{ color: pnlColor(f.net) }}>{signed(f.net, currency)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="table-scroll">
+              <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_BY_FIRM }}>
+                <div className="data-head" role="row">
+                  <span role="columnheader">Firm</span>
+                  <span role="columnheader" style={{ textAlign: 'right' }}>Comptes</span>
+                  <span role="columnheader" style={{ textAlign: 'right' }}>Dépensé</span>
+                  <span role="columnheader" style={{ textAlign: 'right' }}>Payouts</span>
+                  <span role="columnheader" style={{ textAlign: 'right' }}>Net</span>
+                </div>
+                {b.byFirm.map((f) => (
+                  <div key={f.firm} className="data-row" role="row">
+                    <span role="cell">{f.firm}</span>
+                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{f.accounts}</span>
+                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{money(f.spent, currency)}</span>
+                    <span role="cell" className="num" style={{ textAlign: 'right' }}>{money(f.payouts, currency)}</span>
+                    <span role="cell" className="num" style={{ textAlign: 'right', color: pnlColor(f.net) }}>{signed(f.net, currency)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
