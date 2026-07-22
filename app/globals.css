@@ -1132,7 +1132,54 @@ body::before {
 .ui .table th { padding: 8px 12px; font-size: 11px; color: #6a5f88; }
 .ui .table td { padding: 8px 12px; }
 
+/* ---- Navigation mobile : la barre devient un TIROIR ----
+   Sous le seuil, la sidebar ne disparaît plus (le produit se retrouvait sans
+   aucune navigation sur téléphone) : elle glisse depuis la gauche, par-dessus
+   un voile qui ferme au clic. Même comportement journal et back-office. */
+.app-side-toggle { display: none; }
+.app-side-veil { display: none; }
+
 @media (max-width: 860px) {
-  .app-side { display: none; }
-  .app-top { padding: 12px 16px; }
+  .app-top { padding: 12px 16px; gap: 12px; }
+  /* Le bloc profil (nom + email) poussait la page en débordement : on ne garde
+     que l'avatar, l'identité complète est dans les préférences. */
+  .app-profile-txt { display: none; }
+  .app-top-right { gap: 10px; min-width: 0; }
+  .app-search { min-width: 0; }
+
+  /* Bouton d'ouverture — contrôle carré du système. */
+  .ui .app-side-toggle {
+    display: grid; place-items: center; flex: none;
+    width: var(--h-control); height: var(--h-control);
+    border: 0; border-radius: var(--r-pill); cursor: pointer; color: var(--ink2);
+    background: var(--ctl-bg); box-shadow: var(--ctl-shadow);
+    transition: background .15s, color .15s, transform .1s;
+  }
+  .ui .app-side-toggle:hover { color: var(--ink); background: var(--ctl-bg-hover); }
+  .ui .app-side-toggle:active { transform: translateY(1px); background: var(--ctl-bg-active); box-shadow: var(--ctl-shadow-pressed); }
+  .ui .app-side-toggle .lucide { width: 19px; height: 19px; }
+
+  /* Voile : assombrit le contenu, ne le teinte pas. */
+  .app-side-veil {
+    display: block; position: fixed; inset: 0; z-index: 60;
+    background: rgba(4, 2, 12, .68);
+    opacity: 0; pointer-events: none; transition: opacity .2s ease;
+  }
+  .app-side-veil.is-open { opacity: 1; pointer-events: auto; }
+
+  /* Tiroir : même surface que la sidebar, posé au-dessus du contenu. */
+  .app-side {
+    position: fixed; top: 0; left: 0; bottom: 0; height: 100dvh; z-index: 61;
+    width: min(300px, 86vw);
+    transform: translateX(-100%);
+    transition: transform .22s cubic-bezier(.4, 0, .2, 1);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .04), 24px 0 48px rgba(0, 0, 0, .5);
+    overflow-y: auto;
+  }
+  .app-side.is-open { transform: translateX(0); }
+  .app-side:focus { outline: none; }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
+  .app-side, .app-side-veil { transition: none; }
 }

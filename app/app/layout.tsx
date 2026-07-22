@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getProfile, isStaff } from '@/lib/auth/roles';
 import { Search, Bell } from 'lucide-react';
+import { SideNavProvider, SideNavToggle } from '@/components/ui/SideNav';
 import AppSidebar from './AppSidebar';
 
 /** Garde /app : utilisateur connecté requis, + chrome commun du journal (sidebar + header). */
@@ -19,11 +20,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const initials = name.trim().slice(0, 2).toUpperCase();
 
   return (
+    <SideNavProvider>
     <div className="app-shell ui">
       <AppSidebar staff={staff} />
 
       <div className="app-main">
         <header className="app-top">
+          <SideNavToggle />
           <div className="app-search is-soon" title="Bientôt disponible">
             <Search aria-hidden="true" />
             <input type="search" placeholder="Rechercher…" aria-label="Rechercher" disabled />
@@ -46,5 +49,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="app-content">{children}</div>
       </div>
     </div>
+    </SideNavProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getProfile, isStaff } from '@/lib/auth/roles';
 import Badge from '@/components/ui/Badge';
+import { SideNavProvider, SideNavToggle } from '@/components/ui/SideNav';
 import AdminSidebar from './AdminSidebar';
 
 /**
@@ -20,12 +21,14 @@ export default async function AdminLayout({
   const env = process.env.NODE_ENV === 'production' ? null : 'dev';
 
   return (
+    <SideNavProvider>
     <div className="app-shell ui">
       <AdminSidebar />
 
       <div className="app-main">
         {/* Le header ne porte plus de navigation : contexte et actions globales. */}
         <header className="app-top admin-top">
+          <SideNavToggle />
           <div className="admin-context">
             <Badge variant="neutral" mono>{profile.role}</Badge>
             {env ? <span className="admin-env">{env}</span> : null}
@@ -35,5 +38,6 @@ export default async function AdminLayout({
         <div className="app-content">{children}</div>
       </div>
     </div>
+    </SideNavProvider>
   );
 }
