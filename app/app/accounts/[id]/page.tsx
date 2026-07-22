@@ -494,54 +494,40 @@ export default async function AccountPage({
                     {dayTrades.length === 0 ? (
                       <p className="jsub mt-3">Aucune entrée ce jour-là.</p>
                     ) : (
-                      <div className="table-wrap mt-4">
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th>Type</th>
-                              <th className="num">P&L</th>
-                              <th>Tags</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {dayTrades.map((t) => {
-                              const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                              const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
-                              return (
-                                <tr key={t.id}>
-                                  <td data-label="Type">
-                                    <Link href={editHref} className="jrow-link">
-                                      {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                                    </Link>
-                                  </td>
-                                  <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                                    <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
-                                      {signed(pnlNet, currency)}
-                                    </Link>
-                                  </td>
-                                  <td data-label="Tags">
-                                    <div className="jchips">
-                                      {t.tags.map((tag) => (
-                                        <span key={tag} className="jchip">{tagLabel(tag)}</span>
-                                      ))}
-                                    </div>
-                                  </td>
-                                  <td className="admin-row-actions">
-                                    <div className="flex items-center justify-end gap-1">
-                                      <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
-                                      <form action={deleteTrade}>
-                                        <input type="hidden" name="id" value={t.id} />
-                                        <input type="hidden" name="account_id" value={account.id} />
-                                        <Button type="submit" variant="ghost" size="sm" iconOnly icon={Trash2} className="btn-danger-ghost" aria-label="Supprimer l’entrée" />
-                                      </form>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                      <div className="data-list mt-4" role="table" style={{ ['--cols' as string]: 'minmax(0,1fr) auto minmax(0,1.1fr) auto' }}>
+                        <div className="data-head" role="row">
+                          <span role="columnheader">Type</span>
+                          <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
+                          <span role="columnheader">Tags</span>
+                          <span role="columnheader"></span>
+                        </div>
+                        {dayTrades.map((t) => {
+                          const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                          const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                          return (
+                            <div key={t.id} className="data-row" role="row">
+                              <Link href={editHref} role="cell">
+                                {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
+                              </Link>
+                              <Link href={editHref} role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>
+                                {signed(pnlNet, currency)}
+                              </Link>
+                              <span role="cell" className="jchips">
+                                {t.tags.map((tag) => (
+                                  <span key={tag} className="jchip">{tagLabel(tag)}</span>
+                                ))}
+                              </span>
+                              <span role="cell" className="data-actions">
+                                <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                                <form action={deleteTrade}>
+                                  <input type="hidden" name="id" value={t.id} />
+                                  <input type="hidden" name="account_id" value={account.id} />
+                                  <Button type="submit" variant="ghost" size="sm" iconOnly icon={Trash2} className="btn-danger-ghost" aria-label="Supprimer l’entrée" />
+                                </form>
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -573,39 +559,23 @@ export default async function AccountPage({
                       {recentTrades.length === 0 ? (
                         <p className="jsub mt-3">Aucune entrée. Commence par un P&L rapide dans la console.</p>
                       ) : (
-                        <div className="table-wrap mt-3">
-                          <table className="table jrecent">
-                            <thead>
-                              <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th className="num">P&L</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {recentTrades.map((t) => {
-                                const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
-                                const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
-                                return (
-                                  <tr key={t.id}>
-                                    <td data-label="Date" className="num">
-                                      <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
-                                    </td>
-                                    <td data-label="Type">
-                                      <Link href={editHref} className="jrow-link">
-                                        {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                                      </Link>
-                                    </td>
-                                    <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                                      <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>
-                                        {signed(pnlNet, currency)}
-                                      </Link>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                        <div className="data-list mt-3" role="table" style={{ ['--cols' as string]: 'auto 1fr auto' }}>
+                          <div className="data-head" role="row">
+                            <span role="columnheader">Date</span>
+                            <span role="columnheader">Type</span>
+                            <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
+                          </div>
+                          {recentTrades.map((t) => {
+                            const pnlNet = Number(t.pnl) - (t.fees === null ? 0 : Number(t.fees));
+                            const editHref = `/app/accounts/${account.id}/trades/${t.id}`;
+                            return (
+                              <Link key={t.id} href={editHref} className="data-row" role="row">
+                                <span role="cell" className="num">{t.trade_date}</span>
+                                <span role="cell">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</span>
+                                <span role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</span>
+                              </Link>
+                            );
+                          })}
                         </div>
                       )}
                     </div>

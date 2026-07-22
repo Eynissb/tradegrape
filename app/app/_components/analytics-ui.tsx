@@ -32,33 +32,23 @@ export function Breakdown({
   emptyHint: string;
   catHeader?: string;
 }) {
+  void catHeader;
   return (
     <div className="card acct2-bd">
       <h3 className="acct-rules-title">{title}</h3>
       {buckets.length === 0 ? (
         <p className="jsub">{emptyHint}</p>
       ) : (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>{catHeader}</th>
-                <th className="num">Entrées</th>
-                <th className="num">P&L net</th>
-                <th className="num">Réussite</th>
-              </tr>
-            </thead>
-            <tbody>
-              {buckets.map((b) => (
-                <tr key={b.key}>
-                  <td data-label={catHeader}>{b.label}</td>
-                  <td data-label="Entrées" className="num">{b.entries}</td>
-                  <td data-label="P&L net" className="num" style={{ color: pnlColor(b.netPnl) }}>{signed(b.netPnl, currency)}</td>
-                  <td data-label="Réussite" className="num">{b.winRate === null ? '—' : `${b.winRate}%`}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="kv-list">
+          {buckets.map((b) => (
+            <div key={b.key} className="kv-row">
+              <span className="kv-key">
+                {b.label}
+                <span className="kv-meta"> · {b.entries} · {b.winRate === null ? '—' : `${b.winRate}%`}</span>
+              </span>
+              <span className="kv-val" style={{ color: pnlColor(b.netPnl) }}>{signed(b.netPnl, currency)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

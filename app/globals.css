@@ -39,10 +39,10 @@
   --font-body:    var(--font-inter), system-ui, sans-serif;
   --font-mono:    var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 22px;
-  --r-pill: 40px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
 }
 
 body {
@@ -400,16 +400,16 @@ h1, h2, h3 {
 
 /* Historique : lots d'import, filtres, sélection multiple */
 .jhist { display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
-.jhist-batches { display: flex; flex-direction: column; gap: .2rem; }
-.jhist-batch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem .1rem; border-top: 1px solid var(--border); }
-.jhist-batch:first-child { border-top: 0; }
+.jhist-batches { display: flex; flex-direction: column; gap: 6px; margin-top: .7rem; }
+.jhist-batch { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 10px 14px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
 .jhist-batch-plat { font-weight: 600; color: var(--ink); }
 .jhist-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem; }
 .jhist-selbar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; padding: .7rem 1rem; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: rgba(150, 110, 240, .08); }
 .jhist-selcount { font-weight: 600; color: var(--ink); }
 .jhist-cbcol { width: 42px; text-align: center; }
 .jhist-cb { width: 16px; height: 16px; accent-color: var(--c2); cursor: pointer; }
-.jhist .table tbody tr.is-selected { background: rgba(150, 110, 240, .1); }
+.data-row.is-selected { background: linear-gradient(180deg, rgba(120, 90, 255, .2), rgba(120, 90, 255, .08)), var(--elev-2-bg); }
+.data-row.is-selected:hover { background: linear-gradient(180deg, rgba(120, 90, 255, .26), rgba(120, 90, 255, .1)), var(--elev-2-bg); }
 
 /* Étape commissions à l'import */
 .jimport-comm { border-top: 1px solid var(--border); padding-top: 1.2rem; }
@@ -679,12 +679,17 @@ h1, h2, h3 {
 .dash .link-accent, .dash .jcrumb { color: var(--ink2); }
 .dash .link-accent:hover { color: var(--ink); }
 
-/* Contrôle unifié : tout élément cliquable est soit posé (.control), soit creusé. */
+/* Contrôle unifié : forme et élévation SÉPARÉES. .control ne définit pas de rayon. */
 .control {
   color: var(--ink2); background: var(--elev-3-bg); border: 0;
-  border-radius: var(--r-sm); box-shadow: var(--elev-3-shadow); cursor: pointer;
+  box-shadow: var(--elev-3-shadow); cursor: pointer;
   transition: background .15s, box-shadow .15s, transform .1s, color .15s;
 }
+.control--pill { border-radius: var(--r-pill); }
+.control--square { border-radius: var(--r-sm); }
+/* Tout bouton textuel de la scène est une PILULE ; seuls carrés d'icônes et cases
+   à cocher gardent des angles à --r-sm. */
+.dash .btn, .dash .tab, .app-side-item, .jcal-nav, .jsettings-link, .app-search { border-radius: var(--r-pill); }
 .control:hover { color: var(--ink); background: rgba(255, 255, 255, .08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 -1px 0 rgba(0, 0, 0, .2), 0 2px 6px rgba(0, 0, 0, .4); }
 .control:active { background: rgba(0, 0, 0, .2); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); transform: translateY(1px); }
 .control:disabled, .control[aria-disabled="true"] { opacity: .4; box-shadow: none; transform: none; cursor: not-allowed; }
@@ -927,6 +932,30 @@ body::before {
 }
 /* Badges DS (statut, éligible) = contrôles niveau 3. */
 .dash .badge { box-shadow: var(--elev-3-shadow); }
+
+/* ===== Lignes de données (un <table> ne porte pas le relief → grille sur des div) ===== */
+.data-list { display: flex; flex-direction: column; gap: 6px; }
+.data-head, .data-row { display: grid; grid-template-columns: var(--cols, 1fr); align-items: center; gap: 12px; padding: 10px 14px; }
+.data-head { color: var(--ink3); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 14px 4px; }
+.data-row { position: relative; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); transition: background .15s; }
+.data-row:hover { background: rgba(255, 255, 255, .06); }
+.data-row > *, .data-head > * { min-width: 0; }
+.data-row a { color: inherit; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.data-row a.num { white-space: nowrap; overflow: visible; }
+.data-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.data-num { font-variant-numeric: tabular-nums; }
+
+/* Liste clé-valeur (ventilations 2 colonnes) — largeur élastique, aucun scroll. */
+.kv-list { display: flex; flex-direction: column; }
+.kv-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 12px; border-radius: var(--r-md); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
+.kv-row + .kv-row { margin-top: 6px; }
+.kv-key { color: var(--ink2); font-size: 13px; min-width: 0; }
+.kv-key .kv-meta { color: var(--ink3); font-size: 11px; }
+.kv-val { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -.2px; white-space: nowrap; }
+
+/* Aucun scroll horizontal dans une carte de la page compte. */
+.dash .table-wrap { overflow-x: visible; background: transparent; border: 0; }
+.dash .acct2-empty { min-height: 0; }
 
 /* ===== Calendrier — quatre traitements distincts ===== */
 /* 1. Conteneur : niveau 1 STANDARD (pas de fond creusé — même registre que les cartes

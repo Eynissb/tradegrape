@@ -190,59 +190,41 @@ export default function HistoryPanel({
             {trades.length === 0 ? 'Aucune entrée. Commence par un P&L rapide dans la console.' : 'Aucune entrée pour ces filtres.'}
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th className="jhist-cbcol">
-                    <input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" />
-                  </th>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th className="num">P&L</th>
-                  <th>Tags</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((t) => {
-                  const pnlNet = t.pnl - t.fees;
-                  const editHref = `/app/accounts/${accountId}/trades/${t.id}`;
-                  return (
-                    <tr key={t.id} className={selected.has(t.id) ? 'is-selected' : undefined}>
-                      <td className="jhist-cbcol">
-                        <input
-                          type="checkbox"
-                          aria-label={`Sélectionner l’entrée du ${t.trade_date}`}
-                          checked={selected.has(t.id)}
-                          onChange={() => toggle(t.id)}
-                          className="jhist-cb"
-                        />
-                      </td>
-                      <td data-label="Date" className="num">
-                        <Link href={editHref} className="jrow-link">{t.trade_date}</Link>
-                      </td>
-                      <td data-label="Type">
-                        <Link href={editHref} className="jrow-link">
-                          {t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}
-                        </Link>
-                      </td>
-                      <td data-label="P&L" className="num" style={{ color: pnlColor(pnlNet) }}>
-                        <Link href={editHref} className="jrow-link" style={{ color: 'inherit' }}>{signed(pnlNet, currency)}</Link>
-                      </td>
-                      <td data-label="Tags">
-                        <div className="jchips">
-                          {t.tags.map((tag) => <span key={tag} className="jchip">{tagLabel(tag)}</span>)}
-                        </div>
-                      </td>
-                      <td className="admin-row-actions">
-                        <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="data-list" role="table" style={{ ['--cols' as string]: '30px auto minmax(0,1fr) auto minmax(0,1.1fr) auto' }}>
+            <div className="data-head" role="row">
+              <span><input type="checkbox" aria-label="Tout sélectionner" checked={allShown} onChange={toggleAll} className="jhist-cb" /></span>
+              <span role="columnheader">Date</span>
+              <span role="columnheader">Type</span>
+              <span role="columnheader" style={{ textAlign: 'right' }}>P&L</span>
+              <span role="columnheader">Tags</span>
+              <span role="columnheader"></span>
+            </div>
+            {filtered.map((t) => {
+              const pnlNet = t.pnl - t.fees;
+              const editHref = `/app/accounts/${accountId}/trades/${t.id}`;
+              return (
+                <div key={t.id} className={`data-row${selected.has(t.id) ? ' is-selected' : ''}`} role="row">
+                  <span>
+                    <input
+                      type="checkbox"
+                      aria-label={`Sélectionner l’entrée du ${t.trade_date}`}
+                      checked={selected.has(t.id)}
+                      onChange={() => toggle(t.id)}
+                      className="jhist-cb"
+                    />
+                  </span>
+                  <Link href={editHref} role="cell" className="num">{t.trade_date}</Link>
+                  <Link href={editHref} role="cell">{t.symbol ? `${t.symbol}${t.direction ? ` · ${t.direction}` : ''}` : 'Journalier'}</Link>
+                  <Link href={editHref} role="cell" className="num" style={{ color: pnlColor(pnlNet), textAlign: 'right' }}>{signed(pnlNet, currency)}</Link>
+                  <span role="cell" className="jchips">
+                    {t.tags.map((tag) => <span key={tag} className="jchip">{tagLabel(tag)}</span>)}
+                  </span>
+                  <span role="cell" className="data-actions">
+                    <Link href={editHref} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
