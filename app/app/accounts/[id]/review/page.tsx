@@ -135,7 +135,9 @@ export default async function WeekReviewPage({
                 sub={review.bestDay?.date}
               />
               <Stat
-                label="Pire jour"
+                // « Pire jour » n'a de sens que s'il y a eu une perte. Sur une
+                // semaine tout en vert, c'est le plus petit GAIN, pas une perte.
+                label={review.worstDay && review.worstDay.pnl < 0 ? 'Pire jour' : 'Plus petit gain'}
                 value={review.worstDay ? signed(review.worstDay.pnl, currency) : '—'}
                 color={review.worstDay ? pnlColor(review.worstDay.pnl) : undefined}
                 sub={review.worstDay?.date}
