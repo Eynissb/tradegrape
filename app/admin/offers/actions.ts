@@ -214,6 +214,53 @@ export async function deletePayoutCap(formData: FormData) {
   redirect(`/admin/offers/${offerId}?saved=cap-del`);
 }
 
+/* ------------------------------------------------ paliers de scaling (funded) */
+
+const SCALING_PHASES = ['funded', 'evaluation'];
+
+export async function addScalingStep(formData: FormData) {
+  const offerId = req(formData, 'offer_id');
+  const back = `/admin/offers/${offerId}`;
+  if (!offerId) backWithError('/admin/firms', 'Offre manquante.');
+
+  const phase = str(formData, 'phase') ?? 'funded';
+  const payload = {
+    offer_id: offerId,
+    profit_from: num(formData, 'profit_from'),
+    profit_to: num(formData, 'profit_to'),
+    max_minis: num(formData, 'max_minis'),
+    max_micros: num(formData, 'max_micros'),
+    phase: SCALING_PHASES.includes(phase) ? phase : 'funded',
+  };
+
+  if (payload.profit_from === null) {
+    backWithError(back, 'Le seuil de profit « à partir de » est obligatoire.');
+  }
+  if (payload.max_minis === null && payload.max_micros === null) {
+    backWithError(back, 'Renseigne au moins un plafond de contrats (minis ou micros).');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('offer_scaling_steps').insert(payload);
+  if (error) backWithError(back, error.message);
+
+  revalidatePath(back);
+  redirect(`${back}?saved=scaling`);
+}
+
+export async function deleteScalingStep(formData: FormData) {
+  const offerId = req(formData, 'offer_id');
+  const id = str(formData, 'id');
+  if (!offerId || !id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('offer_scaling_steps').delete().eq('id', id);
+  if (error) backWithError(`/admin/offers/${offerId}`, error.message);
+
+  revalidatePath(`/admin/offers/${offerId}`);
+  redirect(`/admin/offers/${offerId}?saved=scaling-del`);
+}
+
 export async function deleteOffer(formData: FormData) {
   const id = str(formData, 'id');
   const planId = str(formData, 'plan_id');

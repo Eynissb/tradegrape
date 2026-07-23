@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import OfferForm, { type OfferValues } from '../OfferForm';
 import PayoutCapsEditor, { type PayoutCapRow } from '../PayoutCapsEditor';
+import ScalingStepsEditor, { type ScalingStepRow } from '../ScalingStepsEditor';
 import { deleteOffer, toggleOfferPublish } from '../actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 import Button from '@/components/ui/Button';
@@ -35,6 +36,14 @@ export default async function EditOffer({
     .order('cycle_from', { ascending: true })
     .returns<PayoutCapRow[]>();
   const caps = capsData ?? [];
+
+  const { data: scalingData } = await supabase
+    .from('offer_scaling_steps')
+    .select('id, profit_from, profit_to, max_minis, max_micros, phase')
+    .eq('offer_id', offerId)
+    .order('profit_from', { ascending: true })
+    .returns<ScalingStepRow[]>();
+  const scalingSteps = scalingData ?? [];
 
   const { data: plan } = await supabase
     .from('plans')
@@ -79,6 +88,8 @@ export default async function EditOffer({
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
       {saved === 'cap' ? <div className="notice notice-info mt-4">Plafond ajouté.</div> : null}
       {saved === 'cap-del' ? <div className="notice notice-info mt-4">Plafond supprimé.</div> : null}
+      {saved === 'scaling' ? <div className="notice notice-info mt-4">Palier ajouté.</div> : null}
+      {saved === 'scaling-del' ? <div className="notice notice-info mt-4">Palier supprimé.</div> : null}
 
       {offer.is_published && !offer.reviewed_at ? (
         <div className="notice notice-warn mt-4">
@@ -105,6 +116,10 @@ export default async function EditOffer({
 
       <div className="mt-8">
         <PayoutCapsEditor offerId={offerId} caps={caps} />
+      </div>
+
+      <div className="mt-8">
+        <ScalingStepsEditor offerId={offerId} steps={scalingSteps} />
       </div>
 
       <form action={deleteOffer} className="admin-danger">
