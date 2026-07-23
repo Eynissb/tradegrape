@@ -584,7 +584,8 @@ h1, h2, h3 {
 .jpayout { padding: 22px 24px; }
 .jpayout-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .jpayout-figs { display: flex; gap: 40px; }
-.jmissing { margin-top: 16px; border-top: 1px solid rgba(150, 110, 240, 0.12); padding-top: 14px; }
+/* Plus de séparateur horizontal : aucune autre carte n'en a. */
+.jmissing { margin-top: 14px; }
 .jmissing-t { font-size: 13px; color: var(--ink2); font-weight: 500; }
 .jmissing ul { margin: 8px 0 0; padding-left: 18px; color: var(--amber); font-size: 13.5px; }
 .jmissing li { margin: 3px 0; }
@@ -939,13 +940,17 @@ body::before {
 .ui .card-grad .jsub,
 .ui .card-grad .jcard-l,
 .ui .card-grad .jvalid-lead,
+.ui .card-grad .jvalid-head,
+.ui .card-grad .jvalid-note,
 .ui .card-grad .jmissing-t { color: rgba(255, 255, 255, .82) !important; }
 .ui .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .2); }
 .ui .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
 
-/* Carte de validation — lead et liste de défaut. */
+/* Carte de validation — lead, header de manques, note, liste de défaut. */
 .ui .jvalid-lead { margin: 0; font-size: 14px; line-height: 1.5; }
 .ui .jvalid-lead strong { color: #fff; font-weight: 700; }
+.ui .jvalid-head { margin: 0 0 12px; font-size: 13px; font-weight: 500; }
+.ui .jvalid-note { margin: 12px 0 0; font-size: 13px; line-height: 1.45; }
 .ui .jmissing-list { margin: 14px 0 0; padding-left: 18px; font-size: 13.5px; color: rgba(255, 255, 255, .92); }
 .ui .jmissing-list li { margin: 3px 0; }
 

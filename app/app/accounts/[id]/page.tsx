@@ -494,14 +494,32 @@ export default async function AccountPage({
                   </ul>
                 </>
               ) : (
-                <div className="jmissing">
-                  <span className="jmissing-t">Ce qu’il te manque pour valider :</span>
-                  <ul>
-                    {validation.missing.profit > 0 ? <li>{money(validation.missing.profit, currency)} de profit vers l’objectif</li> : null}
-                    {validation.missing.tradingDays > 0 ? <li>{validation.missing.tradingDays} jour(s) de trading</li> : null}
-                    {validation.missing.consistency ? <li>rééquilibrer la cohérence (un jour pèse trop dans le profit)</li> : null}
-                  </ul>
-                </div>
+                <>
+                  {/* Manques CHIFFRÉS en sous-cartes niveau 2, comme le bloc Retrait :
+                      valeur en gros, libellé en dessous. Une seule → pleine largeur ;
+                      plusieurs → grille (jpayout-figs, enfants flex: 1). */}
+                  <p className="jvalid-head">Ce qu’il te manque pour valider :</p>
+                  <div className="jpayout-figs">
+                    {validation.missing.profit > 0 ? (
+                      <div>
+                        <div className="jcard-k num">{money(validation.missing.profit, currency)}</div>
+                        <div className="jcard-l">de profit vers l’objectif</div>
+                      </div>
+                    ) : null}
+                    {validation.missing.tradingDays > 0 ? (
+                      <div>
+                        <div className="jcard-k num">{validation.missing.tradingDays}</div>
+                        <div className="jcard-l">jour{validation.missing.tradingDays > 1 ? 's' : ''} de trading</div>
+                      </div>
+                    ) : null}
+                  </div>
+                  {/* La cohérence est qualitative (pas un « ajoute X ») : une note,
+                      pas une sous-carte à valeur. Le détail chiffré vit déjà dans
+                      la jauge « Cohérence » juste au-dessus. */}
+                  {validation.missing.consistency ? (
+                    <p className="jvalid-note">La cohérence bloque aussi : un jour pèse trop dans le profit.</p>
+                  ) : null}
+                </>
               )}
             </div>
           ) : null}
