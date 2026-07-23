@@ -31,8 +31,9 @@ export default async function EditOffer({
 
   const { data: capsData } = await supabase
     .from('offer_payout_caps')
-    .select('id, cycle_from, cycle_to, max_amount, max_pct, min_profit, note')
+    .select('id, cycle_from, cycle_to, max_amount, max_pct, min_profit, note, variant, split_pct, consistency_pct, min_profit_days, daily_threshold')
     .eq('offer_id', offerId)
+    .order('variant', { ascending: true, nullsFirst: true })
     .order('cycle_from', { ascending: true })
     .returns<PayoutCapRow[]>();
   const caps = capsData ?? [];

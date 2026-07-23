@@ -24,6 +24,8 @@ export interface OfferRuleRow {
   currency: string | null;
   drawdown_type: OfferRules['drawdownType'];
   drawdown_amount: number;
+  /** Verrou du plancher au capital — false chez Apex sur Tradovate. */
+  drawdown_locks_at_breakeven?: boolean | null;
   profit_target: number | null;
   daily_loss_limit: number | null;
   consistency_pct: number | null;
@@ -91,6 +93,7 @@ export function buildRulesSnapshot(
       // Figées au snapshot : le compte gardera ces variantes même si l'offre change.
       fundedDrawdownType: offer.funded_drawdown_type ?? null,
       fundedDailyLossLimit: n(offer.funded_daily_loss),
+      drawdownLocksAtBreakeven: offer.drawdown_locks_at_breakeven ?? true,
     },
     payout: {
       buffer: n(offer.payout_buffer),

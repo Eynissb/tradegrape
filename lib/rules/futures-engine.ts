@@ -64,6 +64,13 @@ export function computeDrawdownFloor(
 ): { floor: number; highWaterMark: number } {
   const { drawdownType, drawdownAmount } = rules;
 
+  /* Verrou au capital initial. La plupart des firms figent le plancher une fois
+     qu'il atteint le capital de départ, mais pas toutes : Apex ne verrouille
+     jamais sur Tradovate, et le plancher continue alors de suivre le plus haut.
+     Ne pas le modéliser revenait à afficher un plancher trop bas. */
+  const locks = rules.drawdownLocksAtBreakeven ?? true;
+  const capFloor = (raw: number): number => (locks ? Math.min(raw, startingBalance) : raw);
+
   if (drawdownType === 'STATIC') {
     return {
       floor: round2(startingBalance - drawdownAmount),
@@ -80,10 +87,8 @@ export function computeDrawdownFloor(
       equity = round2(equity + netPnl(t));
       if (equity > high) high = equity;
     }
-    // Beaucoup de firms figent le trailing quand le plancher atteint le capital
-    // initial ("lock at breakeven"). C'est le comportement le plus courant.
     const rawFloor = round2(high - drawdownAmount);
-    return { floor: Math.min(rawFloor, startingBalance), highWaterMark: high };
+    return { floor: capFloor(rawFloor), highWaterMark: high };
   }
 
   // EOD : plus haut solde de CLÔTURE journalière
@@ -96,7 +101,7 @@ export function computeDrawdownFloor(
     if (equity > high) high = equity;
   }
   const rawFloor = round2(high - drawdownAmount);
-  return { floor: Math.min(rawFloor, startingBalance), highWaterMark: high };
+  return { floor: capFloor(rawFloor), highWaterMark: high };
 }
 
 /**

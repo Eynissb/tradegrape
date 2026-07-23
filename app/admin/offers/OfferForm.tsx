@@ -18,6 +18,7 @@ export interface OfferValues {
   vat_included?: boolean | null;
   drawdown_type?: string | null;
   drawdown_amount?: number | null;
+  drawdown_locks_at_breakeven?: boolean | null;
   profit_target?: number | null;
   daily_loss_limit?: number | null;
   consistency_pct?: number | null;
@@ -167,6 +168,13 @@ export default function OfferForm({
         <Text name="min_trading_days" label="Jours de trading min" value={offer?.min_trading_days} type="number" />
         <Text name="max_minis" label="Contrats minis max" value={offer?.max_minis} type="number" />
         <Text name="max_micros" label="Contrats micros max" value={offer?.max_micros} type="number" />
+        {/* Décocher UNIQUEMENT si la firm laisse le plancher monter au-dessus du
+            capital (ex : Apex sur Tradovate). Le moteur en dépend. */}
+        <Check
+          name="drawdown_locks_at_breakeven"
+          label="Plancher figé au capital initial"
+          checked={offer?.drawdown_locks_at_breakeven ?? true}
+        />
       </Section>
 
       <Section title="Compte financé">

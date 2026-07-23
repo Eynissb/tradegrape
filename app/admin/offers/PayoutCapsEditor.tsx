@@ -10,9 +10,14 @@ export interface PayoutCapRow {
   max_pct: number | null;
   min_profit: number | null;
   note: string | null;
+  variant: string | null;
+  split_pct: number | null;
+  consistency_pct: number | null;
+  min_profit_days: number | null;
+  daily_threshold: number | null;
 }
 
-const COLS_CAPS = '120px 110px 100px 120px minmax(0,1fr) 80px';
+const COLS_CAPS = '110px 110px 100px 100px 110px 90px 100px minmax(0,1fr) 80px';
 
 function cycleLabel(c: PayoutCapRow): string {
   const from = c.cycle_from ?? 1;
@@ -47,20 +52,30 @@ export default function PayoutCapsEditor({
         <div className="table-scroll">
           <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_CAPS }}>
             <div className="data-head" role="row">
+              <span role="columnheader">Chemin</span>
               <span role="columnheader">Cycle</span>
               <span role="columnheader">Max €</span>
               <span role="columnheader">Max %</span>
               <span role="columnheader">Objectif cycle</span>
+              <span role="columnheader">Split</span>
+              <span role="columnheader">Cohérence</span>
               <span role="columnheader">Note</span>
               <span role="columnheader"></span>
             </div>
             {caps.map((c) => (
               <div key={c.id} className="data-row" role="row">
-                <span role="cell" data-label="Cycle" className="admin-strong">{cycleLabel(c)}</span>
+                <span role="cell" data-label="Chemin" className="admin-strong">{c.variant || 'unique'}</span>
+                <span role="cell" data-label="Cycle" className="num">{cycleLabel(c)}</span>
                 <span role="cell" data-label="Max €" className="num">{fmt(c.max_amount)}</span>
                 <span role="cell" data-label="Max %" className="num">{fmt(c.max_pct, '%')}</span>
                 <span role="cell" data-label="Objectif cycle" className="num">{fmt(c.min_profit)}</span>
-                <span role="cell" data-label="Note" style={{ color: 'var(--ink3)' }}>{c.note || '—'}</span>
+                <span role="cell" data-label="Split" className="num">{fmt(c.split_pct, '%')}</span>
+                <span role="cell" data-label="Cohérence" className="num">{fmt(c.consistency_pct, '%')}</span>
+                <span role="cell" data-label="Note" style={{ color: 'var(--ink3)' }}>
+                  {[c.note, c.min_profit_days != null ? `${c.min_profit_days} j` : null,
+                    c.daily_threshold != null ? `seuil ${fmt(c.daily_threshold)}` : null]
+                    .filter(Boolean).join(' · ') || '—'}
+                </span>
                 <span role="cell" className="data-actions">
                   <form action={deletePayoutCap}>
                     <input type="hidden" name="id" value={c.id} />
@@ -79,11 +94,17 @@ export default function PayoutCapsEditor({
       {/* Ajout d'un plafond */}
       <form action={addPayoutCap} className="cap-add mt-4">
         <input type="hidden" name="offer_id" value={offerId} />
+        <Input name="variant" label="Chemin" placeholder="standard / consistency" width="sm"
+               hint="Vide si l'offre n'a qu'un seul chemin de payout." />
         <Input name="cycle_from" label="Cycle de" type="number" defaultValue={1} width="sm" />
         <Input name="cycle_to" label="à (vide = +)" type="number" placeholder="∞" width="sm" />
         <Input name="max_amount" label="Max €" type="number" step="0.01" width="sm" />
         <Input name="max_pct" label="Max %" type="number" step="0.01" width="sm" />
         <Input name="min_profit" label="Objectif cycle" type="number" step="0.01" width="sm" />
+        <Input name="split_pct" label="Split %" type="number" step="0.01" width="sm" />
+        <Input name="consistency_pct" label="Cohérence %" type="number" step="0.01" width="sm" />
+        <Input name="min_profit_days" label="Jours requis" type="number" width="sm" />
+        <Input name="daily_threshold" label="Seuil jour" type="number" step="0.01" width="sm" />
         <Input name="note" label="Note" placeholder="ex : Standard" />
         <div className="cap-add-btn">
           <Button type="submit" variant="ghost">+ Ajouter le plafond</Button>

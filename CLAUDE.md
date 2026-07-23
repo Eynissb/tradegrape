@@ -108,10 +108,19 @@ inactivité, comptes max, pays restreints.
 
 ## 4. Le moteur de règles (avantage n°1)
 
-Fonctions **pures**, sans réseau ni DB : `lib/rules/futures-engine.ts`. 24 tests.
+Fonctions **pures**, sans réseau ni DB : `lib/rules/futures-engine.ts`.
 
 **`evaluateAccount(rules, startingBalance, trades)`** → daily loss restant, plancher de
 drawdown, progression objectif, cohérence, jours validés, statut global.
+
+> ⚠️ **Toujours résoudre la phase avant d'évaluer.** Le moteur est aveugle à l'état du
+> compte : il évalue le jeu de règles qu'on lui donne. Plusieurs firms **durcissent les
+> règles en compte financé** (TPT, TradeDay QuickPay : EOD → trailing intraday).
+> **Ne jamais passer `snap.rules` brut** — passer `rulesForStatus(snap.rules, account.status)`
+> (`lib/rules/phase.ts`). Les modules qui reçoivent `rules` en paramètre (insights,
+> discipline, analytics, revue) héritent automatiquement si l'appelant a résolu la phase.
+> Oublier cette résolution affiche un plancher **trop bas** : on sous-estime le risque
+> exactement là où il est maximal. C'est le bug corrigé en §12 #1 — ne pas le recréer.
 
 **`evaluatePayout(payoutRules, start, balance, cycleTrades)`** → éligibilité au retrait,
 montant retirable, et surtout **ce qu'il manque** : « il te manque 2 jours de profit et
@@ -534,43 +543,63 @@ Aucun élément natif du navigateur ne doit casser le thème sombre :
 
 ## 12. Corrections de schéma à venir
 
-> **Ne rien coder maintenant — à traiter APRÈS le journal.** Mécanismes réels relevés à la
-> collecte des données de 13 firms (Apex, Topstep, Lucid, Tradeify, Take Profit Trader,
-> Phidias, TradeDay, FFN, Bulenox, My Funded Futures, Alpha Futures, FundedNext, YRM) que le
-> schéma actuel ne modélise pas. Liste tenue pour ne pas se perdre.
+> Mécanismes réels relevés à la collecte des données de 13 firms (Apex, Topstep, Lucid,
+> Tradeify, Take Profit Trader, Phidias, TradeDay, FFN, Bulenox, My Funded Futures,
+> Alpha Futures, FundedNext, YRM) que le schéma initial ne modélisait pas.
+>
+> **État au moment de la saisie des 13 firms** — chaque point porte son statut :
+> **✅ corrigé** · **⚠️ schéma prêt, câblage moteur à faire** · **🅿️ parké avec décision assumée**
+> · sans marque = intact, à traiter.
+>
+> Les points **⚠️** sont saisissables **sans reprise** : les colonnes existent, seule la
+> consommation par le moteur manque. Les points **🅿️** portent leur contournement et la
+> condition de réouverture — ne pas les redécouvrir comme des oublis.
 
 ### Priorité haute — justesse du moteur (1 à 3)
 
-**1. Le drawdown change entre évaluation et compte financé.**
+**1. Le drawdown change entre évaluation et compte financé. — ✅ CORRIGÉ**
 Take Profit Trader : **EOD en Test, trailing intraday en PRO**. TradeDay QuickPay : EOD ou
 intraday au choix en évaluation, mais **toujours trailing intraday une fois financé** — même
-si l'éval a été passée en EOD. Le champ `funded_drawdown_type` existe déjà :
-**vérifier que le moteur l'utilise réellement selon le statut du compte** (`phase`/`status`),
-au lieu d'appliquer partout le drawdown d'évaluation.
+si l'éval a été passée en EOD.
+`funded_drawdown_type` et `funded_daily_loss` étaient **write-only** : écrits par l'admin,
+jamais lus. Corrigé par `lib/rules/phase.ts` (`rulesForPhase` / `rulesForStatus`) : les deux
+variantes sont figées au snapshot et le moteur bascule dessus quand `status = 'funded'`.
+Les points d'appel résolvent la phase au chargement du compte — insights, discipline et
+analytics héritent, ils reçoivent `rules`. Avertissement affiché **avant** le passage.
+**Toute nouvelle lecture du snapshot doit passer par `rulesForStatus`, jamais `snap.rules` brut.**
 
-**2. Le verrouillage du trailing varie selon la PLATEFORME, pas seulement l'offre.**
+**2. Le verrouillage du trailing varie selon la PLATEFORME. — ⚠️ PARTIEL**
 Apex : le trailing se **verrouille au capital initial sur Rithmic et WealthCharts**, mais
-**ne se verrouille jamais sur Tradovate**. Le `drawdown_locks_at_breakeven` doit pouvoir
-varier par (offre × plateforme). Le moteur (`computeDrawdownFloor`, cap `min(rawFloor, start)`)
-devra recevoir ce paramètre au lieu de toujours verrouiller au capital.
+**ne se verrouille jamais sur Tradovate**.
+Le verrou n'était pas modélisé du tout : `computeDrawdownFloor` forçait `min(rawFloor, start)`.
+Colonne `offers.drawdown_locks_at_breakeven` posée (migration 0012, défaut `true`) et **lue par
+le moteur** via `OfferRules.drawdownLocksAtBreakeven`. **Reste à faire** : la variation par
+**(offre × plateforme)** — aujourd'hui une seule valeur par offre, donc le cas Apex/Tradovate
+oblige à choisir le comportement dominant.
 
-**3. Splits par palier (le `profit_split` unique ne suffit pas).**
-TradeDay QuickPay : **50/50 sous 4 000 $ de profit puis 80/20**. Bulenox et Tradeify Growth :
-**100% sur les premiers 10 000–15 000 $ cumulés puis 90/10**. Phidias Premium : **progressif
-de 75% à 100% sur les cinq premiers payouts**. Topstep : 100% sur les premiers 10 000 $ pour
-les comptes d'avant janvier 2026. → **table de paliers de split** (seuil cumulé ou n° de
-payout → pourcentage), pas une valeur scalaire.
+**3. Splits par palier (le `profit_split` unique ne suffit pas). — ⚠️ SCHÉMA PRÊT**
+Voir ci-dessous : la migration 0013 pose `offer_payout_caps.split_pct`. **Le moteur ne
+consomme pas encore le split** (`evaluatePayout` calcule le retirable depuis buffer/plafonds,
+pas depuis le split) : c'est donc de l'**affichage** tant que ce n'est pas câblé.
+
+Détail des cas : TradeDay QuickPay **50/50 sous 4 000 $ puis 80/20** ; Bulenox et Tradeify
+Growth **100% sur les premiers 10 000–15 000 $ cumulés puis 90/10** ; Phidias Premium
+**progressif de 75% à 100% sur les cinq premiers payouts** ; Topstep 100% sur les premiers
+10 000 $ pour les comptes d'avant janvier 2026.
 
 ### Priorité moyenne — comparateur (4 à 10)
 
-**4. Cohérence progressive.** Tradeify Lightning : **20% au 1er payout, 25% au 2e, 30% ensuite**.
-→ paliers de `consistency_pct` indexés sur le n° de payout.
+**4. Cohérence progressive. — ⚠️ SCHÉMA PRÊT** Tradeify Lightning : **20% au 1er payout, 25% au
+2e, 30% ensuite**. Colonne `offer_payout_caps.consistency_pct` posée (0013), indexée par cycle.
+**Reste à câbler** : `evaluatePayout` lit aujourd'hui la cohérence funded scalaire du snapshot.
 
-**5. Deux chemins de payout pour une même offre.** Topstep : **Standard** (5 jours gagnants à
-150 $, plafonds 2000/3000/5000) **ou Consistency** (3 jours, cohérence 40%, plafonds
-3000/4000/6000). Tradeify Select : **Flex ou Daily**, choix permanent, règles complètement
-différentes. → pouvoir **attacher plusieurs variantes de payout** à une offre (le
-`rules_snapshot` du compte fige la variante choisie).
+**5. Deux chemins de payout pour une même offre. — ⚠️ SCHÉMA PRÊT** Topstep : **Standard**
+(5 jours gagnants à 150 $, plafonds 2000/3000/5000) **ou Consistency** (3 jours, cohérence 40%,
+plafonds 3000/4000/6000). Tradeify Select : **Flex ou Daily**, choix permanent.
+Colonnes `variant`, `min_profit_days`, `daily_threshold` sur `offer_payout_caps` (0013) : les
+lignes d'un même chemin partagent la clé `variant`. Impossible par duplication d'offre —
+`offers` porte `unique (plan_id, account_size)`. **Reste à câbler** : choix de la variante à
+l'ajout du compte + figeage dans `rules_snapshot`.
 
 **6. Cohérence calculée différemment + effet du dépassement.** FundedNext calcule le meilleur
 jour **sur l'objectif de profit, pas sur le profit total**. Et un dépassement **augmente
@@ -578,13 +607,29 @@ l'objectif au lieu de faire échouer** — même mécanisme chez Take Profit Tra
 **méthode de calcul de cohérence** (`total` | `objectif`) + champ **effet en cas de
 dépassement** (`fail` | `raise_target`). Impacte directement `evaluateFuturesAccount`.
 
-**7. Phase intermédiaire.** FFN a une phase d'**« exhibition »** entre l'évaluation et le
-financé, avec son propre buffer à construire. Bulenox : **trois étapes — Qualification,
-Master, Funded**. → le modèle `phase` doit accepter plus que `evaluation`/`funded`.
+**7. Phase intermédiaire. — 🅿️ PARKÉ, décision assumée (saisie des 13 firms)**
+FFN a une phase d'**« exhibition »** entre l'évaluation et le financé, avec son propre buffer.
+Bulenox : **trois étapes — Qualification, Master, Funded**.
+**Pourquoi parké** : une firm et demie sur treize, et `journal_accounts.phase` est du **texte
+libre** — il accepte déjà `'exhibition'`, donc le suivi est possible sans migration. Seules les
+*règles* de cette phase n'ont pas de place. `rulesForPhase` ne connaît que
+`evaluation`/`funded` : y ajouter une phase demanderait un jeu de règles par phase sur l'offre.
+**Contournement retenu** : approximer avec les règles funded et le noter sur l'offre.
+**À rouvrir si** : une firm majeure ajoute une phase intermédiaire, ou si des utilisateurs
+signalent des jauges fausses en exhibition.
 
-**8. Options payantes à l'achat.** Topstep : **ajouter un DLL volontaire** donne une remise
-et **double le plafond de payout**. FundedNext Flex : **option payante 80% → 90% de split**.
-→ table d'**options d'offre** (surcoût + effets sur les règles), figées au snapshot du compte.
+**8. Options payantes à l'achat. — 🅿️ PARKÉ, décision assumée (saisie des 13 firms)**
+Topstep : **ajouter un DLL volontaire** donne une remise et **double le plafond de payout**.
+FundedNext Flex : **option payante 80% → 90% de split**.
+**Pourquoi parké** : options minoritaires, et l'effet est mixte (le DLL touche le moteur —
+daily loss et plafond ; l'option de split n'est qu'affichage tant que le split n'est pas câblé).
+**Contournement retenu** : créer un **plan distinct** pour la variante avec option (« Topstep
+50k + DLL ») — la duplication d'offre au sein d'un même plan est **impossible** à cause de
+`unique (plan_id, account_size)`. Coût : un plan de plus dans la liste, la notation vivant au
+niveau du plan.
+**À rouvrir si** : les options se généralisent, ou si le nombre de plans dupliqués devient
+ingérable. La forme visée reste une table d'**options d'offre** (surcoût + effets sur les
+règles), figées au `rules_snapshot` du compte.
 
 **9. Expiration et resets.** Apex : **30 jours calendaires, aucun reset**. Topstep : **aucune
 limite de temps**. Bulenox : **reset à 78 $**. FFN : **reset à 100 $**. → ajouter

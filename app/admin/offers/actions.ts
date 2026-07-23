@@ -21,6 +21,7 @@ function buildOfferPayload(fd: FormData) {
     // évaluation
     drawdown_type: req(fd, 'drawdown_type'),
     drawdown_amount: num(fd, 'drawdown_amount'),
+    drawdown_locks_at_breakeven: bool(fd, 'drawdown_locks_at_breakeven'),
     profit_target: num(fd, 'profit_target'),
     daily_loss_limit: num(fd, 'daily_loss_limit'),
     consistency_pct: num(fd, 'consistency_pct'),
@@ -186,11 +187,26 @@ export async function addPayoutCap(formData: FormData) {
     max_pct: num(formData, 'max_pct'),
     min_profit: num(formData, 'min_profit'),
     note: str(formData, 'note'),
+    // Variantes de chemin + progressions par palier (migration 0013).
+    variant: str(formData, 'variant'),
+    split_pct: num(formData, 'split_pct'),
+    consistency_pct: num(formData, 'consistency_pct'),
+    min_profit_days: num(formData, 'min_profit_days'),
+    daily_threshold: num(formData, 'daily_threshold'),
   };
 
-  // Un plafond vide n'a aucun sens : au moins une contrainte.
-  if (payload.max_amount === null && payload.max_pct === null && payload.min_profit === null) {
-    backWithError(back, 'Renseigne au moins un plafond (montant, % ou objectif de cycle).');
+  // Une ligne vide n'a aucun sens : au moins une contrainte ou un paramètre.
+  const hasContent = [
+    payload.max_amount,
+    payload.max_pct,
+    payload.min_profit,
+    payload.split_pct,
+    payload.consistency_pct,
+    payload.min_profit_days,
+    payload.daily_threshold,
+  ].some((v) => v !== null);
+  if (!hasContent) {
+    backWithError(back, 'Renseigne au moins un plafond, un split, une cohérence ou un seuil.');
   }
 
   const supabase = await createClient();

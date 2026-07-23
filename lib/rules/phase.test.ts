@@ -81,6 +81,49 @@ describe('rulesForPhase', () => {
   });
 });
 
+describe('verrou au breakeven — Apex selon la plateforme', () => {
+  /* Apex 50k trailing 2 500. Le compte monte à +4 000 puis redescend.
+     Sur Rithmic le plancher se fige au capital ; sur Tradovate il continue
+     de suivre le plus haut — bien au-dessus du capital. */
+  const APEX: OfferRules = {
+    marketType: 'futures',
+    accountSize: 50_000,
+    drawdownType: 'TRAIL',
+    drawdownAmount: 2_500,
+    profitTarget: 3_000,
+    dailyLossLimit: null,
+    consistencyPct: 100,
+    minTradingDays: 1,
+  };
+  const trades = [t('2026-04-06', 4_000)];
+
+  it('avec verrou (défaut) : le plancher se fige au capital initial', () => {
+    const { floor } = computeDrawdownFloor({ ...APEX, drawdownLocksAtBreakeven: true }, 50_000, trades);
+    expect(floor).toBe(50_000); // 54 000 - 2 500 = 51 500, plafonné au capital
+  });
+
+  it('sans verrou (Tradovate) : le plancher suit le plus haut, au-dessus du capital', () => {
+    const { floor } = computeDrawdownFloor({ ...APEX, drawdownLocksAtBreakeven: false }, 50_000, trades);
+    expect(floor).toBe(51_500);
+    expect(floor).toBeGreaterThan(50_000);
+  });
+
+  it('champ absent = verrouillé : les snapshots existants ne changent pas de sens', () => {
+    const { floor } = computeDrawdownFloor(APEX, 50_000, trades);
+    expect(floor).toBe(50_000);
+  });
+
+  it('sans verrou, un compte peut être perdu au-dessus de son capital', () => {
+    const withdrawn = [t('2026-04-06', 4_000, '10'), t('2026-04-07', -3_000)];
+    const noLock = evaluateAccount({ ...APEX, drawdownLocksAtBreakeven: false }, 50_000, withdrawn, '2026-04-07');
+    const locked = evaluateAccount({ ...APEX, drawdownLocksAtBreakeven: true }, 50_000, withdrawn, '2026-04-07');
+
+    expect(noLock.balance).toBe(51_000); // encore au-dessus du capital…
+    expect(noLock.drawdown.state).toBe('failed'); // …mais sous le plancher 51 500
+    expect(locked.drawdown.state).not.toBe('failed'); // plancher 50 000 : vivant
+  });
+});
+
 describe('impact réel sur le plancher — le bug corrigé', () => {
   /* Journée qui monte à +1500 intraday puis retombe à +200 en clôture.
      EOD ne retient que la clôture (+200) ; TRAIL retient le pic (+1500).

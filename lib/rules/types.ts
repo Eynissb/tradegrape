@@ -36,6 +36,14 @@ export interface OfferRules {
   fundedDrawdownType?: DrawdownType | null;
   /** Perte journalière max en compte financé, si elle diffère de l'évaluation. */
   fundedDailyLossLimit?: number | null;
+
+  /**
+   * Le plancher se fige-t-il au capital initial une fois atteint ?
+   * Comportement le plus courant, mais pas universel : Apex ne verrouille
+   * JAMAIS sur Tradovate — le plancher continue alors de suivre le plus haut,
+   * bien au-dessus du capital. `undefined` = true (défaut historique).
+   */
+  drawdownLocksAtBreakeven?: boolean;
 }
 
 /** Règles de retrait en compte financé. */
