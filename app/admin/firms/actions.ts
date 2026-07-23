@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { arr, backWithError, bool, num, req, str } from '@/lib/admin/form';
+import { STYLE_RULE_KEYS, STANCES } from '@/lib/catalog/style-rules';
 
 function buildFirmPayload(fd: FormData) {
   return {
@@ -62,6 +63,61 @@ export async function saveFirm(formData: FormData) {
 
   revalidatePath('/admin/firms');
   redirect('/admin/firms');
+}
+
+/**
+ * Enregistre les règles de style d'une firm en une passe : upsert des positions
+ * spécifiées, suppression de celles repassées à « — non spécifié ».
+ */
+export async function saveStyleRules(formData: FormData) {
+  const firmId = req(formData, 'firm_id');
+  const back = `/admin/firms/${firmId}`;
+  if (!firmId) backWithError('/admin/firms', 'Firm manquante.');
+
+  const validStances = new Set(STANCES.map((s) => s.value));
+  const toUpsert: {
+    firm_id: string;
+    rule_key: string;
+    stance: string;
+    threshold_note: string | null;
+    detail: string | null;
+  }[] = [];
+  const toClear: string[] = [];
+
+  for (const { key } of STYLE_RULE_KEYS) {
+    const stance = str(formData, `stance__${key}`);
+    if (stance && validStances.has(stance)) {
+      toUpsert.push({
+        firm_id: firmId,
+        rule_key: key,
+        stance,
+        threshold_note: str(formData, `threshold__${key}`),
+        detail: str(formData, `detail__${key}`),
+      });
+    } else {
+      toClear.push(key);
+    }
+  }
+
+  const supabase = await createClient();
+
+  if (toUpsert.length > 0) {
+    const { error } = await supabase
+      .from('firm_style_rules')
+      .upsert(toUpsert, { onConflict: 'firm_id,rule_key' });
+    if (error) backWithError(back, error.message);
+  }
+  if (toClear.length > 0) {
+    const { error } = await supabase
+      .from('firm_style_rules')
+      .delete()
+      .eq('firm_id', firmId)
+      .in('rule_key', toClear);
+    if (error) backWithError(back, error.message);
+  }
+
+  revalidatePath(back);
+  redirect(`${back}?saved=style`);
 }
 
 export async function toggleFirmPublish(formData: FormData) {

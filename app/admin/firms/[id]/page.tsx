@@ -5,6 +5,7 @@ import PublishToggle from '@/app/admin/_components/PublishToggle';
 import { togglePlanPublish } from '@/app/admin/plans/actions';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import FirmForm, { type FirmValues } from '../FirmForm';
+import StyleRulesForm, { type StyleRuleRow } from '../StyleRulesForm';
 import { deleteFirm, toggleFirmPublish } from '../actions';
 
 export const metadata = { title: 'Éditer une firm — Admin Tradegrape' };
@@ -26,10 +27,10 @@ export default async function EditFirm({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, saved } = await searchParams;
 
   const supabase = await createClient();
   const { data: firm } = await supabase
@@ -50,6 +51,13 @@ export default async function EditFirm({
 
   const plans = plansData ?? [];
 
+  const { data: styleData } = await supabase
+    .from('firm_style_rules')
+    .select('rule_key, stance, threshold_note, detail')
+    .eq('firm_id', id)
+    .returns<StyleRuleRow[]>();
+  const styleRules = styleData ?? [];
+
   return (
     <div className="admin-page">
       <nav className="admin-crumb">
@@ -69,6 +77,9 @@ export default async function EditFirm({
       </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
+      {saved === 'style' ? (
+        <div className="notice notice-info mt-4">Règles de style enregistrées.</div>
+      ) : null}
 
       {!firm.is_published ? (
         <div className="notice notice-warn mt-4">
@@ -79,6 +90,11 @@ export default async function EditFirm({
 
       <div className="mt-6">
         <FirmForm firm={firm} />
+      </div>
+
+      {/* Règles de style — filtre comparateur */}
+      <div className="mt-10">
+        <StyleRulesForm firmId={id} rules={styleRules} />
       </div>
 
       {/* Plans de la firm */}
