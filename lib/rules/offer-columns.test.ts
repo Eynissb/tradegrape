@@ -20,6 +20,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { OFFER_COLUMNS } from '../admin/offer-csv';
 
 const ROOT = process.cwd();
 const MIGRATIONS = join(ROOT, 'supabase', 'migrations');
@@ -271,6 +272,33 @@ describe('offers — aucune colonne écrite sans être lue', () => {
       const text = readFileSync(join(ROOT, entry.readIn!), 'utf8');
       expect(mentions(text, col), `\`${col}\` absente de ${entry.readIn}`).toBe(true);
     }
+  });
+
+  /* Le schéma CSV (import/export admin) doit suivre le schéma DB. Il avait
+     silencieusement dérivé : `drawdown_locks_at_breakeven` et `reviewed_at`
+     manquaient, donc un import écrasait le verrou Apex/Tradovate et la date de
+     vérification à la source — même famille que les colonnes mortes. */
+  const CSV_EXEMPT: Record<string, string> = {
+    id: 'Clé technique, jamais importée.',
+    plan_id: 'Vient du contexte d’import (?plan=), pas du fichier.',
+    created_at: 'Horodatage serveur.',
+    updated_at: 'Horodatage serveur.',
+  };
+
+  it('le schéma CSV couvre toutes les colonnes importables', () => {
+    const csvKeys = new Set(OFFER_COLUMNS.map((c) => c.key));
+    const missing = columns.filter((c) => !csvKeys.has(c) && !(c in CSV_EXEMPT));
+    expect(
+      missing,
+      `Colonnes de \`offers\` absentes de OFFER_COLUMNS : ${missing.join(', ')}.\n` +
+        'Un import/export les perdrait en silence. Ajoute-les au schéma CSV, ou ' +
+        'classe-les dans CSV_EXEMPT avec leur raison.',
+    ).toEqual([]);
+  });
+
+  it('aucune colonne CSV fantôme (absente du schéma DB)', () => {
+    const ghosts = OFFER_COLUMNS.map((c) => c.key).filter((k) => !columns.includes(k));
+    expect(ghosts, `Colonnes CSV inexistantes en base : ${ghosts.join(', ')}`).toEqual([]);
   });
 
   it('toute colonne non consommée assume sa raison', () => {

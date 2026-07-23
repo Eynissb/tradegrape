@@ -3,7 +3,7 @@
  * Une seule source de vérité pour l'ordre et le typage des colonnes.
  */
 
-type ColKind = 'num' | 'bool' | 'str' | 'enum' | 'arr';
+type ColKind = 'num' | 'bool' | 'str' | 'enum' | 'arr' | 'date';
 
 interface Col {
   key: string;
@@ -31,6 +31,9 @@ export const OFFER_COLUMNS: readonly Col[] = [
   { key: 'vat_included', kind: 'bool' },
   { key: 'drawdown_type', kind: 'enum', required: true, enum: DRAWDOWN },
   { key: 'drawdown_amount', kind: 'num', required: true },
+  // Le verrou du plancher au capital : false chez Apex sur Tradovate. Le moteur
+  // le lit, l'import doit donc pouvoir le porter (cf. lib/rules/offer-columns.test.ts).
+  { key: 'drawdown_locks_at_breakeven', kind: 'bool' },
   { key: 'profit_target', kind: 'num' },
   { key: 'daily_loss_limit', kind: 'num' },
   { key: 'consistency_pct', kind: 'num' },
@@ -51,6 +54,9 @@ export const OFFER_COLUMNS: readonly Col[] = [
   { key: 'payout_daily_threshold', kind: 'num' },
   { key: 'payout_method', kind: 'str' },
   { key: 'platforms', kind: 'arr' },
+  // Date de vérification à la source (§8). Sans elle, un import écraserait la
+  // traçabilité de l'honnêteté des données.
+  { key: 'reviewed_at', kind: 'date' },
   { key: 'is_published', kind: 'bool' },
 ];
 
@@ -137,6 +143,13 @@ function parseCell(col: Col, raw: string): { value: unknown; error?: string } {
   const s = raw.trim();
   if (s === '') {
     if (col.required) return { value: null, error: `${col.key} requis` };
+    /* `undefined` = « non spécifié » : la colonne n'est pas écrite du tout, on
+       garde la valeur en base (ou le défaut à la création).
+       - bool : ces colonnes sont `not null default` en base ; écrire `null`
+         ferait échouer l'import entier.
+       - date : `reviewed_at` trace la vérification à la source (§8) ; une
+         cellule vide ne doit pas effacer silencieusement cette traçabilité. */
+    if (col.kind === 'bool' || col.kind === 'date') return { value: undefined };
     return { value: col.kind === 'arr' ? [] : null };
   }
   switch (col.kind) {
@@ -152,6 +165,13 @@ function parseCell(col: Col, raw: string): { value: unknown; error?: string } {
     case 'enum':
       if (col.enum && !col.enum.includes(s)) {
         return { value: null, error: `${col.key} : « ${s} » hors ${col.enum.join('/')}` };
+      }
+      return { value: s };
+    case 'date':
+      // Format ISO strict : une date ambiguë (03/04/2026) fausserait la
+      // traçabilité de vérification sans jamais lever d'erreur en base.
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        return { value: null, error: `${col.key} : date attendue AAAA-MM-JJ, reçu « ${s} »` };
       }
       return { value: s };
     default:
@@ -184,8 +204,12 @@ export function csvRowsToOffers(rows: string[][]): { offers: ParsedOffer[]; head
       const raw = pos === undefined ? '' : (cells[pos] ?? '');
       const { value, error } = parseCell(col, raw);
       if (error) errors.push(`Ligne ${r + 1} — ${error}`);
-      // On n'écrit une colonne absente de l'en-tête que si elle est requise (sinon on laisse la valeur DB).
-      if (pos !== undefined || col.required) payload[col.key] = value;
+      // On n'écrit une colonne absente de l'en-tête que si elle est requise
+      // (sinon on laisse la valeur DB). `undefined` = cellule vide « non
+      // spécifiée » : on ne l'écrit pas non plus (cf. parseCell).
+      if ((pos !== undefined || col.required) && value !== undefined) {
+        payload[col.key] = value;
+      }
     }
 
     offers.push({ payload, errors });
