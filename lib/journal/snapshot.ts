@@ -40,12 +40,41 @@ export interface OfferRuleRow {
 const n = (v: number | null | undefined): number | null =>
   v === null || v === undefined ? null : Number(v);
 
+/** Ligne de `offer_payout_caps` — plafonds de retrait pour une plage de cycles. */
+export interface PayoutCapRow {
+  cycle_from: number | null;
+  cycle_to: number | null;
+  max_amount: number | null;
+  max_pct: number | null;
+  min_profit: number | null;
+}
+
+/**
+ * Plafond applicable au 1er cycle de payout (ce que rencontre un compte financé
+ * neuf). `evaluatePayout` ne modélise qu'un cycle : on fige donc les valeurs du
+ * cycle qui couvre le payout n°1. La progression par cycle (cap qui change au 3e,
+ * 5e payout) reste un enrichissement §12 — les autres caps sont saisis et servent
+ * l'affichage comparateur « plafonds par cycle », pas encore le moteur.
+ */
+export function pickFirstCycleCap(caps: PayoutCapRow[]): PayoutCapRow | null {
+  if (caps.length === 0) return null;
+  const covering = caps.filter(
+    (c) => (c.cycle_from ?? 1) <= 1 && (c.cycle_to == null || c.cycle_to >= 1),
+  );
+  const pool = covering.length > 0 ? covering : caps;
+  return pool.reduce((best, c) =>
+    (c.cycle_from ?? 1) < (best.cycle_from ?? 1) ? c : best,
+  );
+}
+
 export function buildRulesSnapshot(
   offer: OfferRuleRow,
   marketType: OfferRules['marketType'],
   firm: { name: string; slug: string },
   plan: { name: string; slug: string },
+  caps: PayoutCapRow[] = [],
 ): RulesSnapshot {
+  const cap = pickFirstCycleCap(caps);
   return {
     rules: {
       marketType,
@@ -63,10 +92,10 @@ export function buildRulesSnapshot(
       minProfitDays: n(offer.payout_min_days),
       dailyThreshold: n(offer.payout_daily_threshold),
       consistencyPct: n(offer.funded_consistency_pct),
-      // Les plafonds de cycle vivent dans offer_payout_caps — intégrés plus tard.
-      minCycleProfit: null,
-      maxAmount: null,
-      maxPct: null,
+      // Plafonds du 1er cycle, lus depuis offer_payout_caps (cf. pickFirstCycleCap).
+      minCycleProfit: cap ? n(cap.min_profit) : null,
+      maxAmount: cap ? n(cap.max_amount) : null,
+      maxPct: cap ? n(cap.max_pct) : null,
     },
     display: {
       firmName: firm.name,

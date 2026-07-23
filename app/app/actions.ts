@@ -10,6 +10,7 @@ import {
   buildManualSnapshot,
   buildRulesSnapshot,
   type OfferRuleRow,
+  type PayoutCapRow,
   type RulesSnapshot,
 } from '@/lib/journal/snapshot';
 import type { DrawdownType, OfferRules } from '@/lib/rules/types';
@@ -83,7 +84,14 @@ export async function createAccount(formData: FormData) {
     .single<{ name: string; slug: string; market_type: OfferRules['marketType'] }>();
   if (!firm) backWithError('/app/accounts/new', 'Firm introuvable.');
 
-  const snapshot = buildRulesSnapshot(offer, firm.market_type, firm, plan);
+  // Plafonds de retrait par cycle → figés au snapshot (1er cycle lu par le moteur).
+  const { data: caps } = await supabase
+    .from('offer_payout_caps')
+    .select('cycle_from, cycle_to, max_amount, max_pct, min_profit')
+    .eq('offer_id', offerId)
+    .returns<PayoutCapRow[]>();
+
+  const snapshot = buildRulesSnapshot(offer, firm.market_type, firm, plan, caps ?? []);
   const size = Number(offer.account_size);
 
   const { data: account, error } = await supabase

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import OfferForm, { type OfferValues } from '../OfferForm';
+import PayoutCapsEditor, { type PayoutCapRow } from '../PayoutCapsEditor';
 import { deleteOffer, toggleOfferPublish } from '../actions';
 import PublishToggle from '@/app/admin/_components/PublishToggle';
 import Button from '@/components/ui/Button';
@@ -13,10 +14,10 @@ export default async function EditOffer({
   searchParams,
 }: {
   params: Promise<{ offerId: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string }>;
 }) {
   const { offerId } = await params;
-  const { error } = await searchParams;
+  const { error, saved } = await searchParams;
 
   const supabase = await createClient();
   const { data: offer } = await supabase
@@ -26,6 +27,14 @@ export default async function EditOffer({
     .single<OfferValues & { plan_id: string }>();
 
   if (!offer) notFound();
+
+  const { data: capsData } = await supabase
+    .from('offer_payout_caps')
+    .select('id, cycle_from, cycle_to, max_amount, max_pct, min_profit, note')
+    .eq('offer_id', offerId)
+    .order('cycle_from', { ascending: true })
+    .returns<PayoutCapRow[]>();
+  const caps = capsData ?? [];
 
   const { data: plan } = await supabase
     .from('plans')
@@ -68,6 +77,8 @@ export default async function EditOffer({
       </div>
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
+      {saved === 'cap' ? <div className="notice notice-info mt-4">Plafond ajouté.</div> : null}
+      {saved === 'cap-del' ? <div className="notice notice-info mt-4">Plafond supprimé.</div> : null}
 
       {offer.is_published && !offer.reviewed_at ? (
         <div className="notice notice-warn mt-4">
@@ -90,6 +101,10 @@ export default async function EditOffer({
 
       <div className="mt-6">
         <OfferForm offer={offer} />
+      </div>
+
+      <div className="mt-8">
+        <PayoutCapsEditor offerId={offerId} caps={caps} />
       </div>
 
       <form action={deleteOffer} className="admin-danger">

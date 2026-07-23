@@ -171,6 +171,49 @@ export async function toggleOfferPublish(formData: FormData) {
   redirect(back);
 }
 
+/* ---------------------------------------------- plafonds de payout par cycle */
+
+export async function addPayoutCap(formData: FormData) {
+  const offerId = req(formData, 'offer_id');
+  const back = `/admin/offers/${offerId}`;
+  if (!offerId) backWithError('/admin/firms', 'Offre manquante.');
+
+  const payload = {
+    offer_id: offerId,
+    cycle_from: num(formData, 'cycle_from') ?? 1,
+    cycle_to: num(formData, 'cycle_to'),
+    max_amount: num(formData, 'max_amount'),
+    max_pct: num(formData, 'max_pct'),
+    min_profit: num(formData, 'min_profit'),
+    note: str(formData, 'note'),
+  };
+
+  // Un plafond vide n'a aucun sens : au moins une contrainte.
+  if (payload.max_amount === null && payload.max_pct === null && payload.min_profit === null) {
+    backWithError(back, 'Renseigne au moins un plafond (montant, % ou objectif de cycle).');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('offer_payout_caps').insert(payload);
+  if (error) backWithError(back, error.message);
+
+  revalidatePath(back);
+  redirect(`${back}?saved=cap`);
+}
+
+export async function deletePayoutCap(formData: FormData) {
+  const offerId = req(formData, 'offer_id');
+  const id = str(formData, 'id');
+  if (!offerId || !id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('offer_payout_caps').delete().eq('id', id);
+  if (error) backWithError(`/admin/offers/${offerId}`, error.message);
+
+  revalidatePath(`/admin/offers/${offerId}`);
+  redirect(`/admin/offers/${offerId}?saved=cap-del`);
+}
+
 export async function deleteOffer(formData: FormData) {
   const id = str(formData, 'id');
   const planId = str(formData, 'plan_id');

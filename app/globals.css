@@ -333,6 +333,12 @@ h1, h2, h3 {
   .stylerule-name { padding-top: 0; }
 }
 
+/* Ajout d'un plafond de payout : champs en ligne, bouton qui passe à la ligne. */
+.cap-add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.cap-add .field { flex: 0 0 auto; }
+.cap-add .field:has(input[name="note"]) { flex: 1 1 200px; }
+.cap-add-btn { flex: 1 0 100%; }
+
 /* Groupes de cases admin : empilées, ou en colonnes pour les listes de plans. */
 .admin-checks { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .admin-checks-cols { flex-flow: row wrap; gap: 10px 24px; }
