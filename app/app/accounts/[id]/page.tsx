@@ -25,6 +25,7 @@ import {
 import { buildMonthView, monthKey, parseMonth } from '@/lib/journal/calendar';
 import { buildInsights, consistencyBreakerDay } from '@/lib/journal/insights';
 import { riskBudget } from '@/lib/journal/instruments';
+import { buildValidationSummary } from '@/lib/journal/validation';
 import { tagLabel } from '@/lib/journal/tags';
 import type { RuleState } from '@/lib/rules/types';
 import {
@@ -152,6 +153,12 @@ export default async function AccountPage({
   const engineTrades = trades.map(toEngineTrade);
   const ev = evaluateAccount(snap.rules, start, engineTrades, today);
   const payout = evaluatePayout(snap.payout, start, ev.balance, engineTrades);
+
+  // La carte accentuée reflète la PHASE : retrait sur un compte financé,
+  // trajectoire de validation en évaluation. Le champ DB décide, le moteur
+  // fournit le contenu. (Mono-étape : cf. buildValidationSummary.)
+  const isFunded = account.status === 'funded';
+  const validation = isFunded ? null : buildValidationSummary(ev);
 
   // ---------- Données du calendrier ----------
   const dayPnl = pnlByDay(engineTrades);
@@ -406,8 +413,10 @@ export default async function AccountPage({
             </div>
           </div>
 
-          {/* Payout — bloc en dégradé, notre signature produit */}
-          <div className="card card-grad acct2-payout">
+          {/* Carte accentuée — signature produit « ce qu'il te manque ». Reflète
+              la phase : retrait en financé, validation en évaluation. */}
+          {isFunded ? (
+            <div className="card card-grad acct2-payout">
               <CardTitle
                 icon={Banknote}
                 right={
@@ -452,6 +461,50 @@ export default async function AccountPage({
                 </div>
               ) : null}
             </div>
+          ) : validation ? (
+            <div className={`card card-grad acct2-payout${validation.state === 'failed' ? ' is-failed' : ''}`}>
+              <CardTitle
+                icon={validation.state === 'validated' ? CircleCheck : validation.state === 'failed' ? TriangleAlert : Target}
+                right={
+                  <Badge
+                    variant={validation.state === 'validated' ? 'ok' : validation.state === 'failed' ? 'danger' : 'warn'}
+                    icon={validation.state === 'failed' ? TriangleAlert : validation.state === 'validated' ? CircleCheck : undefined}
+                  >
+                    {validation.state === 'validated' ? 'Validé' : validation.state === 'failed' ? 'Compte perdu' : 'En cours'}
+                  </Badge>
+                }
+              >
+                Validation du challenge
+              </CardTitle>
+
+              {validation.state === 'validated' ? (
+                <p className="jvalid-lead">
+                  Objectif atteint et jours minimum validés. Le challenge est <strong>réussi</strong> — en attente
+                  de passage en compte financé.
+                </p>
+              ) : validation.state === 'failed' ? (
+                <>
+                  <p className="jvalid-lead">
+                    Une règle qui fait perdre le compte a été enfreinte. Il n’y a plus de trajectoire de validation.
+                  </p>
+                  <ul className="jmissing-list">
+                    {validation.failedReasons.map((r) => (
+                      <li key={r}>{REASON_LABELS[r] ?? r}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div className="jmissing">
+                  <span className="jmissing-t">Ce qu’il te manque pour valider :</span>
+                  <ul>
+                    {validation.missing.profit > 0 ? <li>{money(validation.missing.profit, currency)} de profit vers l’objectif</li> : null}
+                    {validation.missing.tradingDays > 0 ? <li>{validation.missing.tradingDays} jour(s) de trading</li> : null}
+                    {validation.missing.consistency ? <li>rééquilibrer la cohérence (un jour pèse trop dans le profit)</li> : null}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {/* Calculateur de risque avant trade — dimensionne la position sur le
               budget réel (min du daily loss restant et de la marge au plancher). */}

@@ -938,9 +938,24 @@ body::before {
 .ui .card-grad .ctitle-h { color: #fff !important; }
 .ui .card-grad .jsub,
 .ui .card-grad .jcard-l,
-.ui .card-grad .jmissing-t { color: rgba(255, 255, 255, .78) !important; }
+.ui .card-grad .jvalid-lead,
+.ui .card-grad .jmissing-t { color: rgba(255, 255, 255, .82) !important; }
 .ui .card-grad .jmissing { border-top-color: rgba(255, 255, 255, .2); }
 .ui .card-grad .jmissing ul { color: rgba(255, 255, 255, .92); }
+
+/* Carte de validation — lead et liste de défaut. */
+.ui .jvalid-lead { margin: 0; font-size: 14px; line-height: 1.5; }
+.ui .jvalid-lead strong { color: #fff; font-weight: 700; }
+.ui .jmissing-list { margin: 14px 0 0; padding-left: 18px; font-size: 13.5px; color: rgba(255, 255, 255, .92); }
+.ui .jmissing-list li { margin: 3px 0; }
+
+/* Compte perdu : le dégradé passe au rouge — un compte en défaut ne doit pas
+   arborer le violet célébratoire de la signature. L'état prime sur l'esthétique. */
+.ui .card-grad.is-failed {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 77, 94, .38), transparent 62%),
+    var(--elev-1-bg);
+}
 .ui .card-grad .ctitle-ic { background: rgba(255, 255, 255, .2); color: #fff; }
 /* badge d'état neutralisé sur fond dégradé */
 /* Sur fond accentué, le badge était le point le plus clair de la carte et
