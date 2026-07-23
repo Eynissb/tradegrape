@@ -551,6 +551,8 @@
 .ui .notice-ok::after,
 .ui .notice-info::after  { background: var(--win); }
 .ui .notice-error, .ui .notice-warn, .ui .notice-ok, .ui .notice-info { color: var(--ink); }
+/* Pile d'insights : plusieurs messages empilés se lisent comme une liste. */
+.ui .jinsights { display: flex; flex-direction: column; gap: 8px; }
 
 /* Texte réservé aux lecteurs d'écran (annonce d'un état de chargement). */
 .sr-only {

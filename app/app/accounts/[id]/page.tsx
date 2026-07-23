@@ -23,6 +23,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { buildMonthView, monthKey, parseMonth } from '@/lib/journal/calendar';
+import { buildInsights, consistencyBreakerDay } from '@/lib/journal/insights';
 import { tagLabel } from '@/lib/journal/tags';
 import type { RuleState } from '@/lib/rules/types';
 import {
@@ -49,6 +50,15 @@ import { CalendarDays, TrendingDown, Hash, Percent, Flame } from 'lucide-react';
 type AccountView = 'calendrier' | 'analytics' | 'historique';
 
 const PERIODS: PeriodPreset[] = ['month', 'quarter', 'all', 'custom'];
+
+/** Ton d'insight → variante de `.notice`. `info` n'a pas de variante : son
+ *  filet reste neutre, une information n'est ni un succès ni une alerte. */
+const INSIGHT_VARIANT: Record<string, string> = {
+  danger: ' notice-error',
+  warn: ' notice-warn',
+  ok: ' notice-ok',
+  info: '',
+};
 
 export const metadata = { title: 'Compte — Tradegrape' };
 
@@ -148,25 +158,24 @@ export default async function AccountPage({
     countByDay.set(t.trade_date, (countByDay.get(t.trade_date) ?? 0) + 1);
   }
 
-  // Jour responsable de la rupture de cohérence : le jour gagnant le plus lourd.
-  let breakerDay: string | null = null;
-  let consistencyInfo: { date: string; sharePct: number; limitPct: number } | null = null;
-  if (ev.consistency && ev.consistency.state === 'warning') {
-    let best = 0;
-    for (const [d, pnl] of dayPnl) {
-      if (pnl > best) {
-        best = pnl;
-        breakerDay = d;
-      }
-    }
-    if (breakerDay) {
-      consistencyInfo = {
-        date: breakerDay,
-        sharePct: ev.consistency.value,
-        limitPct: ev.consistency.limit,
-      };
-    }
-  }
+  // Jour responsable de la rupture de cohérence — définition partagée avec les
+  // insights (elle vivait ici en double).
+  const breakerDay = consistencyBreakerDay(dayPnl, ev.consistency?.state);
+  const consistencyInfo =
+    breakerDay && ev.consistency
+      ? { date: breakerDay, sharePct: ev.consistency.value, limitPct: ev.consistency.limit }
+      : null;
+
+  // Insights de la saisie qui vient d'avoir lieu (paramètre `highlight`).
+  const insights = highlightParam
+    ? buildInsights({
+        rules: snap.rules,
+        startingBalance: start,
+        allTrades: engineTrades,
+        day: highlightParam,
+        currency,
+      })
+    : [];
 
   const latestDay = trades[0]?.trade_date ?? today;
   const { year, month } = parseMonth(monthParam, {
@@ -303,6 +312,21 @@ export default async function AccountPage({
           Les commissions ne sont pas prises en compte sur ce compte ({importedCount} trade(s) importé(s)) :
           le P&L et la progression vers l’objectif sont <strong>surestimés</strong>.{' '}
           <Link href={`/app/accounts/${account.id}/settings#commissions`} className="link-accent">Renseigner les commissions</Link>
+        </div>
+      ) : null}
+
+      {/* Insights de la saisie qui vient d'avoir lieu — le journal ne se contente
+          pas d'enregistrer, il réagit. Tout vient du moteur (cf. insights.ts). */}
+      {insights.length > 0 ? (
+        <div className="jinsights mt-4" role="status" aria-live="polite">
+          {insights.map((i) => (
+            // `info` reste sur le filet neutre : `notice-info` porte déjà le
+            // sens « succès » ailleurs (« Enregistré »), et un message de simple
+            // information ne doit pas se lire comme une bonne nouvelle.
+            <div key={i.key} className={`notice${INSIGHT_VARIANT[i.tone] ?? ''}`}>
+              {i.message}
+            </div>
+          ))}
         </div>
       ) : null}
 
