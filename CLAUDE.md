@@ -237,6 +237,17 @@ la signature du partenariat affilié.
 - Chaque donnée de règle affichée doit être **vérifiée à la source** et datée
   (`reviewed_at`). Les prop firms changent souvent : une donnée fausse détruit le
   positionnement honnêteté.
+- **Aucune colonne d'`offers` écrite sans être lue.** Trois colonnes mortes ont été
+  trouvées d'un coup (`funded_drawdown_type`, `funded_daily_loss`, et le verrou au
+  breakeven qui n'existait pas) : l'admin les saisissait, le moteur les ignorait —
+  on croyait une règle appliquée alors qu'elle ne l'était pas.
+  `lib/rules/offer-columns.test.ts` impose une **intention déclarée par colonne** et
+  vérifie que les colonnes `engine` sont réellement lues (`offer.x` dans
+  `buildRulesSnapshot`) **et** ramenées par `OFFER_COLS` — une colonne lue mais
+  absente du `SELECT` arrive `undefined`, et la règle est ignorée en silence.
+  Ajouter une colonne sans la classer **casse le test** : c'est voulu.
+  ⚠️ Attention : être présent dans le **formulaire admin ne compte pas** comme
+  consommation — c'est exactement ce qui avait masqué le bug.
 
 ---
 
