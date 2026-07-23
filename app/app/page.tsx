@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { LineChart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { evaluateAccount } from '@/lib/rules/futures-engine';
+import { rulesForStatus } from '@/lib/rules/phase';
 import {
   toEngineTrade,
   type DbTradeRow,
@@ -79,7 +80,12 @@ export default async function JournalHome() {
           {accounts.map((a) => {
             const snap = a.rules_snapshot;
             const trades = (tradesByAccount.get(a.id) ?? []).map(toEngineTrade);
-            const evalr = evaluateAccount(snap.rules, Number(a.starting_balance), trades);
+            // Règles effectives : un compte financé peut avoir un drawdown durci.
+            const evalr = evaluateAccount(
+              rulesForStatus(snap.rules, a.status),
+              Number(a.starting_balance),
+              trades,
+            );
             const currency = snap.display?.currency ?? 'USD';
 
             return (

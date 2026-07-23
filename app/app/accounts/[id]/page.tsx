@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { evaluateAccount, evaluatePayout, pnlByDay } from '@/lib/rules/futures-engine';
+import { fundedRulesDiffer, rulesForStatus } from '@/lib/rules/phase';
 import {
   BLOCKER_LABELS,
   REASON_LABELS,
@@ -152,7 +153,13 @@ export default async function AccountPage({
   const start = Number(account.starting_balance);
 
   const engineTrades = trades.map(toEngineTrade);
-  const ev = evaluateAccount(snap.rules, start, engineTrades, today);
+
+  /* Règles EFFECTIVES pour la phase du compte. Plusieurs firms durcissent le
+     drawdown au passage en financé (TPT, TradeDay QuickPay) : évaluer un compte
+     financé avec les règles d'évaluation afficherait un plancher trop bas. */
+  const rules = rulesForStatus(snap.rules, account.status);
+
+  const ev = evaluateAccount(rules, start, engineTrades, today);
   const payout = evaluatePayout(snap.payout, start, ev.balance, engineTrades);
 
   // La carte accentuée reflète la PHASE : retrait sur un compte financé,
@@ -179,7 +186,7 @@ export default async function AccountPage({
   // Insights de la saisie qui vient d'avoir lieu (paramètre `highlight`).
   const insights = highlightParam
     ? buildInsights({
-        rules: snap.rules,
+        rules,
         startingBalance: start,
         allTrades: engineTrades,
         day: highlightParam,
@@ -197,7 +204,7 @@ export default async function AccountPage({
     month,
     pnlByDay: dayPnl,
     countByDay,
-    dailyLossLimit: snap.rules.dailyLossLimit,
+    dailyLossLimit: rules.dailyLossLimit,
     breakerDay,
   });
 
@@ -284,7 +291,7 @@ export default async function AccountPage({
   const range = resolveRange(preset, today, analyticsTrades, fromParam, toParam);
   const analytics =
     view === 'analytics'
-      ? buildAnalytics({ rules: snap.rules, startingBalance: start, allTrades: analyticsTrades, range })
+      ? buildAnalytics({ rules, startingBalance: start, allTrades: analyticsTrades, range })
       : null;
 
   return (
@@ -357,9 +364,30 @@ export default async function AccountPage({
             </div>
           </div>
 
+          {/* Le durcissement des règles en financé est le piège n°1 : on prévient
+              AVANT le passage, pas après. */}
+          {!isFunded && fundedRulesDiffer(snap.rules) ? (
+            <div className="notice notice-warn">
+              <span>
+                <strong>Attention au passage en financé.</strong> Cette offre durcit ses règles
+                une fois le compte financé
+                {snap.rules.fundedDrawdownType && snap.rules.fundedDrawdownType !== snap.rules.drawdownType
+                  ? ` : drawdown ${snap.rules.drawdownType} → ${snap.rules.fundedDrawdownType}`
+                  : ''}
+                {snap.rules.fundedDailyLossLimit != null &&
+                snap.rules.fundedDailyLossLimit !== snap.rules.dailyLossLimit
+                  ? `, perte journalière max ${money(snap.rules.fundedDailyLossLimit, currency)}`
+                  : ''}
+                . Tes jauges basculeront automatiquement.
+              </span>
+            </div>
+          ) : null}
+
           {/* Règles en temps réel — façon Goal Overview (colonnes requis / actuel) */}
           <div className="card">
-            <CardTitle icon={Gauge}>Règles en temps réel</CardTitle>
+            <CardTitle icon={Gauge}>
+              Règles en temps réel{isFunded && fundedRulesDiffer(snap.rules) ? ' · règles financé' : ''}
+            </CardTitle>
             <div className="rule-blocks">
               {ev.dailyLoss ? (
                 <RuleBlock

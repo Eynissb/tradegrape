@@ -24,6 +24,18 @@ export interface OfferRules {
   /** Aucun jour ne doit dépasser ce % du profit total. 100 = aucune contrainte. */
   consistencyPct: number | null;
   minTradingDays: number;
+
+  /* ---- Variantes appliquées UNE FOIS LE COMPTE FINANCÉ ----
+     Plusieurs firms durcissent les règles au passage en funded : Take Profit
+     Trader passe d'EOD à trailing intraday, TradeDay QuickPay force le trailing
+     même si l'évaluation a été passée en EOD. C'est le mécanisme qui fait perdre
+     le plus de comptes financés — il doit être appliqué, pas seulement stocké.
+     `null`/absent = identique à l'évaluation. Résolution : `rulesForPhase`. */
+
+  /** Type de drawdown en compte financé, s'il diffère de l'évaluation. */
+  fundedDrawdownType?: DrawdownType | null;
+  /** Perte journalière max en compte financé, si elle diffère de l'évaluation. */
+  fundedDailyLossLimit?: number | null;
 }
 
 /** Règles de retrait en compte financé. */

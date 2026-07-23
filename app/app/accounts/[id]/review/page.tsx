@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, CalendarRange } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { toEngineTrade, type DbTradeRow, type RulesSnapshot } from '@/lib/journal/snapshot';
 import { buildWeekReview, mondayOf } from '@/lib/journal/week-review';
+import { rulesForStatus } from '@/lib/rules/phase';
 import { money, pnlColor, signed } from '@/app/app/_components/journal-ui';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
@@ -15,6 +16,7 @@ interface AccountRow {
   id: string;
   label: string | null;
   starting_balance: number;
+  status: string;
   rules_snapshot: RulesSnapshot;
 }
 interface TradeRow extends DbTradeRow {
@@ -42,7 +44,7 @@ export default async function WeekReviewPage({
   const supabase = await createClient();
   const { data: account } = await supabase
     .from('journal_accounts')
-    .select('id, label, starting_balance, rules_snapshot')
+    .select('id, label, starting_balance, status, rules_snapshot')
     .eq('id', id)
     .single<AccountRow>();
   if (!account) notFound();
@@ -64,7 +66,13 @@ export default async function WeekReviewPage({
   }));
 
   const week = mondayOf(weekParam ?? today);
-  const review = buildWeekReview(snap.rules, start, analyticsTrades, week);
+  // Règles effectives : la revue d'un compte financé doit lire le drawdown durci.
+  const review = buildWeekReview(
+    rulesForStatus(snap.rules, account.status),
+    start,
+    analyticsTrades,
+    week,
+  );
 
   // Réponses déjà enregistrées. La table peut ne pas encore exister (migration
   // 0008 non appliquée) : on dégrade proprement en formulaire vierge.

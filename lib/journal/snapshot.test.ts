@@ -10,6 +10,8 @@ const OFFER: OfferRuleRow = {
   daily_loss_limit: 1_000,
   consistency_pct: 50,
   min_trading_days: 5,
+  funded_drawdown_type: null,
+  funded_daily_loss: null,
   funded_consistency_pct: 20,
   payout_buffer: 100,
   payout_min_amount: 0,
