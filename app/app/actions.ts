@@ -561,3 +561,72 @@ export async function saveReview(formData: FormData) {
   revalidatePath(base);
   redirect(`${base}&saved=1`);
 }
+
+/* ------------------------------------------------------------------ notebook */
+
+export async function createNote(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app/notebook');
+
+  const title = (str(formData, 'title') ?? '').slice(0, 200);
+  const body = (str(formData, 'body') ?? '').slice(0, 20000);
+  if (!title && !body) backWithError('/app/notebook', 'Une note vide n’est pas enregistrée.');
+
+  const { data, error } = await supabase
+    .from('journal_notes')
+    .insert({ user_id: user.id, title, body })
+    .select('id')
+    .single<{ id: string }>();
+  if (error) backWithError('/app/notebook', error.message);
+
+  revalidatePath('/app/notebook');
+  redirect(`/app/notebook/${data!.id}`);
+}
+
+export async function updateNote(formData: FormData) {
+  const id = str(formData, 'id');
+  if (!id) redirect('/app/notebook');
+  const base = `/app/notebook/${id}`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app/notebook');
+
+  // RLS « notes owner » borne déjà l'écriture ; le filtre user_id est une ceinture.
+  const { error } = await supabase
+    .from('journal_notes')
+    .update({
+      title: (str(formData, 'title') ?? '').slice(0, 200),
+      body: (str(formData, 'body') ?? '').slice(0, 20000),
+      pinned: str(formData, 'pinned') === 'on',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('user_id', user.id);
+  if (error) backWithError(base, error.message);
+
+  revalidatePath('/app/notebook');
+  redirect(`${base}?saved=1`);
+}
+
+export async function deleteNote(formData: FormData) {
+  const id = str(formData, 'id');
+  if (!id) redirect('/app/notebook');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app/notebook');
+
+  const { error } = await supabase.from('journal_notes').delete().eq('id', id).eq('user_id', user.id);
+  if (error) backWithError('/app/notebook', error.message);
+
+  revalidatePath('/app/notebook');
+  redirect('/app/notebook');
+}

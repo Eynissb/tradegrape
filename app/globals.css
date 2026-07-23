@@ -520,6 +520,14 @@ h1, h2, h3 {
 .jh2 { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.4px; }
 .jsub { color: var(--ink2); font-size: 14px; }
 
+/* Notebook. */
+.ui .jnote-new { max-width: 720px; }
+.ui .jnote-title { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 500; }
+.jnote-pin { width: 14px; height: 14px; flex-shrink: 0; color: var(--ink3); }
+.jnote-untitled { color: var(--ink3); font-style: italic; }
+.ui .jnote-pin-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink2); cursor: pointer; }
+.jnote-delete { display: flex; }
+
 /* Revue hebdomadaire. */
 .acct2-top-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .jreview-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
