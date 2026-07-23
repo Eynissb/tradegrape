@@ -23,7 +23,8 @@ const PAYOUT_MODELS = [
 
 export const OFFER_COLUMNS: readonly Col[] = [
   { key: 'account_size', kind: 'num', required: true },
-  { key: 'price', kind: 'num', required: true },
+  // Non requis : « prix inconnu » (NULL) est un état légitime, distinct de 0.
+  { key: 'price', kind: 'num' },
   { key: 'price_regular', kind: 'num' },
   { key: 'activation_fee', kind: 'num' },
   { key: 'is_recurring', kind: 'bool' },

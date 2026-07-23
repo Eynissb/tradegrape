@@ -59,8 +59,9 @@ export async function saveOffer(formData: FormData) {
     : `/admin/offers/new?plan=${payload.plan_id}`;
 
   if (!payload.plan_id) backWithError('/admin/firms', 'Plan parent manquant.');
-  if (payload.account_size === null || payload.price === null) {
-    backWithError(failPath, 'La taille de compte et le prix sont obligatoires.');
+  // Le prix peut rester inconnu (NULL) : mieux vaut l'absence qu'un faux 0.
+  if (payload.account_size === null) {
+    backWithError(failPath, 'La taille de compte est obligatoire.');
   }
   if (!payload.drawdown_type || payload.drawdown_amount === null) {
     backWithError(failPath, 'Le type et le montant de drawdown sont obligatoires.');

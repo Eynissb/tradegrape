@@ -151,7 +151,7 @@ export default function OfferForm({
 
       <Section title="Taille & prix">
         <Text name="account_size" label="Taille de compte" value={offer?.account_size} type="number" step="0.01" required placeholder="50000" />
-        <Text name="price" label="Prix" value={offer?.price} type="number" step="0.01" required placeholder="165" />
+        <Text name="price" label="Prix (vide = inconnu)" value={offer?.price} type="number" step="0.01" placeholder="165" />
         <Text name="price_regular" label="Prix barré" value={offer?.price_regular} type="number" step="0.01" />
         <Text name="activation_fee" label="Frais d'activation" value={offer?.activation_fee} type="number" step="0.01" />
         <Text name="currency" label="Devise" value={offer?.currency ?? 'USD'} placeholder="USD" />
