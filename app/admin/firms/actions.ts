@@ -120,6 +120,64 @@ export async function saveStyleRules(formData: FormData) {
   redirect(`${back}?saved=style`);
 }
 
+/* ------------------------------------------------------------- codes promo */
+
+function buildPromoPayload(fd: FormData, firmId: string) {
+  return {
+    firm_id: firmId,
+    code: req(fd, 'code'),
+    is_exclusive: bool(fd, 'is_exclusive'),
+    discount_pct: num(fd, 'discount_pct'),
+    discount_note: str(fd, 'discount_note'),
+    // Cases multiples même nom → getAll ; les uuid vides sont écartés.
+    applies_to_plans: fd.getAll('applies_to_plans').map(String).filter(Boolean),
+    excludes_resets: bool(fd, 'excludes_resets'),
+    bonus_note: str(fd, 'bonus_note'),
+    starts_at: str(fd, 'starts_at'),
+    ends_at: str(fd, 'ends_at'),
+    last_tested_at: str(fd, 'last_tested_at'),
+    is_active: bool(fd, 'is_active'),
+    sort_order: num(fd, 'sort_order') ?? 0,
+  };
+}
+
+export async function savePromo(formData: FormData) {
+  const firmId = req(formData, 'firm_id');
+  const id = str(formData, 'id');
+  if (!firmId) backWithError('/admin/firms', 'Firm manquante.');
+  const failPath = id
+    ? `/admin/firms/${firmId}/promos/${id}`
+    : `/admin/firms/${firmId}/promos/new`;
+
+  const payload = buildPromoPayload(formData, firmId);
+  if (!payload.code) backWithError(failPath, 'Le code est obligatoire.');
+
+  const supabase = await createClient();
+  if (id) {
+    const { error } = await supabase.from('promo_codes').update(payload).eq('id', id);
+    if (error) backWithError(failPath, error.message);
+  } else {
+    const { error } = await supabase.from('promo_codes').insert(payload);
+    if (error) backWithError(failPath, error.message);
+  }
+
+  revalidatePath(`/admin/firms/${firmId}`);
+  redirect(`/admin/firms/${firmId}?saved=promo`);
+}
+
+export async function deletePromo(formData: FormData) {
+  const firmId = req(formData, 'firm_id');
+  const id = str(formData, 'id');
+  if (!firmId || !id) redirect('/admin/firms');
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('promo_codes').delete().eq('id', id);
+  if (error) backWithError(`/admin/firms/${firmId}`, error.message);
+
+  revalidatePath(`/admin/firms/${firmId}`);
+  redirect(`/admin/firms/${firmId}?saved=promo-del`);
+}
+
 export async function toggleFirmPublish(formData: FormData) {
   const id = str(formData, 'id');
   const back = str(formData, 'back') ?? '/admin/firms';

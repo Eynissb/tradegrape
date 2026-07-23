@@ -12,6 +12,7 @@ export const metadata = { title: 'Éditer une firm — Admin Tradegrape' };
 
 /* Colonnes déterministes : en-tête et lignes sont deux grilles distinctes. */
 const COLS_PLANS = 'minmax(0,1.2fr) minmax(0,1fr) 120px 80px 116px 88px';
+const COLS_PROMOS = 'minmax(0,160px) minmax(0,1fr) 96px 96px 80px';
 
 interface PlanRow {
   id: string;
@@ -20,6 +21,22 @@ interface PlanRow {
   account_kind: string;
   rating: number | null;
   is_published: boolean;
+}
+
+interface PromoRow {
+  id: string;
+  code: string;
+  discount_note: string | null;
+  discount_pct: number | null;
+  is_exclusive: boolean;
+  is_active: boolean;
+  ends_at: string | null;
+}
+
+function promoDiscount(p: PromoRow): string {
+  if (p.discount_note) return p.discount_note;
+  if (p.discount_pct != null) return `-${p.discount_pct}%`;
+  return '—';
 }
 
 export default async function EditFirm({
@@ -58,6 +75,15 @@ export default async function EditFirm({
     .returns<StyleRuleRow[]>();
   const styleRules = styleData ?? [];
 
+  const { data: promoData } = await supabase
+    .from('promo_codes')
+    .select('id, code, discount_note, discount_pct, is_exclusive, is_active, ends_at')
+    .eq('firm_id', id)
+    .order('sort_order', { ascending: true })
+    .order('code', { ascending: true })
+    .returns<PromoRow[]>();
+  const promos = promoData ?? [];
+
   return (
     <div className="admin-page">
       <nav className="admin-crumb">
@@ -79,6 +105,12 @@ export default async function EditFirm({
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
       {saved === 'style' ? (
         <div className="notice notice-info mt-4">Règles de style enregistrées.</div>
+      ) : null}
+      {saved === 'promo' ? (
+        <div className="notice notice-info mt-4">Code promo enregistré.</div>
+      ) : null}
+      {saved === 'promo-del' ? (
+        <div className="notice notice-info mt-4">Code promo supprimé.</div>
       ) : null}
 
       {!firm.is_published ? (
@@ -145,6 +177,59 @@ export default async function EditFirm({
                 </span>
                 <span role="cell" className="data-actions">
                   <Link href={`/admin/plans/${p.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Codes promo de la firm */}
+      <div className="admin-page-head mt-12">
+        <div>
+          <h2 className="admin-h2">Codes promo</h2>
+          <p className="admin-sub">{promos.length} code(s) — liés à l’affiliation.</p>
+        </div>
+        <Link href={`/admin/firms/${id}/promos/new`} className={buttonClasses()}>
+          + Nouveau code
+        </Link>
+      </div>
+
+      {promos.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', color: 'var(--ink3)' }}>
+          Aucun code promo.{' '}
+          <Link href={`/admin/firms/${id}/promos/new`} className="link-accent">
+            Ajouter le premier
+          </Link>
+          .
+        </div>
+      ) : (
+        <div className="table-scroll">
+          <div className="data-list" role="table" style={{ ['--cols' as string]: COLS_PROMOS }}>
+            <div className="data-head" role="row">
+              <span role="columnheader">Code</span>
+              <span role="columnheader">Remise</span>
+              <span role="columnheader">Statut</span>
+              <span role="columnheader">Fin</span>
+              <span role="columnheader"></span>
+            </div>
+            {promos.map((p) => (
+              <div key={p.id} className="data-row" role="row">
+                <span role="cell" data-label="Code" className="mono admin-strong">
+                  {p.code}
+                  {p.is_exclusive ? <span className="badge badge-magenta" style={{ marginLeft: 8 }}>exclusif</span> : null}
+                </span>
+                <span role="cell" data-label="Remise">{promoDiscount(p)}</span>
+                <span role="cell" data-label="Statut">
+                  {p.is_active
+                    ? <span className="badge badge-ok">actif</span>
+                    : <span className="badge">inactif</span>}
+                </span>
+                <span role="cell" data-label="Fin" className="num" style={{ color: 'var(--ink3)' }}>
+                  {p.ends_at ? p.ends_at.slice(0, 10) : '—'}
+                </span>
+                <span role="cell" className="data-actions">
+                  <Link href={`/admin/firms/${id}/promos/${p.id}`} className={buttonClasses({ variant: 'ghost', size: 'sm' })}>Éditer</Link>
                 </span>
               </div>
             ))}

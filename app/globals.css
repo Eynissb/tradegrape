@@ -333,6 +333,10 @@ h1, h2, h3 {
   .stylerule-name { padding-top: 0; }
 }
 
+/* Groupes de cases admin : empilées, ou en colonnes pour les listes de plans. */
+.admin-checks { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.admin-checks-cols { flex-flow: row wrap; gap: 10px 24px; }
+
 /* Champ date admin : le picker + ses raccourcis alignés sous le libellé. */
 .admin-datefield { display: flex; flex-direction: column; gap: 6px; }
 .admin-datefield-quick { display: flex; gap: 6px; }
