@@ -1,5 +1,5 @@
 import type { Analytics } from '@/lib/journal/analytics';
-import { Breakdown, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
+import { Breakdown, DisciplineCard, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
 import EquityChart from './EquityChart';
 import AnalyticsControls from './AnalyticsControls';
 
@@ -28,6 +28,8 @@ export default function AnalyticsPanel({
         <div className="card acct2-empty">Aucune entrée sur cette période. Change de période ou saisis un P&L.</div>
       ) : (
         <>
+          <DisciplineCard discipline={analytics.discipline} />
+
           <div className="card">
             <h3 className="acct-rules-title">Métriques · {analytics.rangeEntries} entrée(s)</h3>
             <MetricsGrid metrics={analytics.metrics} currency={currency} maxDrawdown={analytics.maxDrawdown} />

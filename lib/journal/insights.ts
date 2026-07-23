@@ -1,4 +1,5 @@
 import { evaluateAccount, pnlByDay } from '../rules/futures-engine';
+import { dailyLossFlag } from './calendar';
 import type { OfferRules, RuleState, Trade } from '../rules/types';
 
 /**
@@ -93,22 +94,23 @@ export function buildInsights(params: {
     });
   }
 
-  /* — Perte journalière : le jour lui-même, pas l'état courant du compte. — */
+  /* — Perte journalière : le jour lui-même, pas l'état courant du compte.
+       Seuil « approché » partagé avec le calendrier (cf. dailyLossFlag). — */
   const dailyLimit = rules.dailyLossLimit;
-  if (dailyLimit && dailyLimit > 0 && pnl < 0) {
+  const flag = dailyLossFlag(pnl, dailyLimit ?? null);
+  if (dailyLimit && flag !== 'none') {
     const used = Math.abs(pnl);
-    const ratio = used / dailyLimit;
-    if (ratio >= 1) {
+    if (flag === 'breached') {
       out.push({
         key: 'daily-loss-breached',
         tone: 'danger',
         message: `Ce jour a dépassé ta perte journalière maximale : ${fmt(used, currency)} pour une limite de ${fmt(dailyLimit, currency)}.`,
       });
-    } else if (ratio >= 0.8) {
+    } else {
       out.push({
         key: 'daily-loss-approached',
         tone: 'warn',
-        message: `Ce jour a approché ta perte journalière maximale : ${fmt(used, currency)} sur ${fmt(dailyLimit, currency)}, soit ${Math.round(ratio * 100)} %.`,
+        message: `Ce jour a approché ta perte journalière maximale : ${fmt(used, currency)} sur ${fmt(dailyLimit, currency)}, soit ${Math.round((used / dailyLimit) * 100)} %.`,
       });
     }
   }

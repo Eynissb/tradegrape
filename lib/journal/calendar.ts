@@ -10,6 +10,20 @@ const MONTHS_FR = [
 
 export type DailyLossFlag = 'none' | 'approached' | 'breached';
 
+/** Fraction du daily loss à partir de laquelle un jour est « approché ».
+ *  Définition UNIQUE partagée par le calendrier, les insights et le score de
+ *  discipline — auparavant divergente (0,75 ici, 0,8 dans les insights). */
+export const DAILY_LOSS_APPROACH_RATIO = 0.8;
+
+/** État du daily loss pour UN jour, d'après son P&L et la limite de l'offre. */
+export function dailyLossFlag(pnl: number | null, limit: number | null): DailyLossFlag {
+  if (!limit || limit <= 0 || pnl === null || pnl >= 0) return 'none';
+  const loss = Math.abs(pnl);
+  if (loss >= limit) return 'breached';
+  if (loss >= DAILY_LOSS_APPROACH_RATIO * limit) return 'approached';
+  return 'none';
+}
+
 export interface DayCell {
   date: string; // YYYY-MM-DD
   day: number;
@@ -88,12 +102,7 @@ export function buildMonthView(input: MonthInput): MonthView {
     const pnl = pnlByDay.has(date) ? (pnlByDay.get(date) as number) : null;
     const trades = countByDay.get(date) ?? 0;
 
-    let dailyLoss: DailyLossFlag = 'none';
-    if (dailyLossLimit && dailyLossLimit > 0 && pnl !== null && pnl < 0) {
-      const loss = Math.abs(pnl);
-      if (loss >= dailyLossLimit) dailyLoss = 'breached';
-      else if (loss >= 0.75 * dailyLossLimit) dailyLoss = 'approached';
-    }
+    const dailyLoss = dailyLossFlag(pnl, dailyLossLimit);
 
     if (inMonth && pnl !== null) maxAbs = Math.max(maxAbs, Math.abs(pnl));
 

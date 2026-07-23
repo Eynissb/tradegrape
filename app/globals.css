@@ -520,6 +520,13 @@ h1, h2, h3 {
 .jh2 { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.4px; }
 .jsub { color: var(--ink2); font-size: 14px; }
 
+/* Score de discipline — carte en tête de l'onglet Analytics. */
+.jdisc-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.jdisc-score { display: flex; align-items: baseline; gap: 2px; flex: none; }
+.ui .jdisc-k { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 3rem; line-height: 1; letter-spacing: -1.5px; }
+.ui .jdisc-unit { font-size: 1.4rem; font-weight: 700; color: var(--ink3); }
+.jdisc-detail { flex: 1; min-width: 220px; margin: 0; }
+
 /* Calculateur de risque avant trade — console de saisie. */
 .ui .jrisk-budget { margin-bottom: 1rem; }
 .ui .jrisk-budget strong { color: var(--ink); font-family: var(--font-body); font-variant-numeric: tabular-nums; letter-spacing: -.2px; }

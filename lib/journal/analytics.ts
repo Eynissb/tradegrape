@@ -12,6 +12,7 @@
 
 import type { OfferRules, Trade } from '../rules/types';
 import { computeDrawdownFloor } from '../rules/futures-engine';
+import { computeDiscipline, type Discipline } from './discipline';
 import { tagLabel } from './tags';
 
 export interface AnalyticsTrade extends Trade {
@@ -329,6 +330,8 @@ export interface Analytics {
   equity: EquityPoint[];
   /** Plus grand repli subi SUR LA PÉRIODE affichée (cf. `computeMaxDrawdown`). */
   maxDrawdown: MaxDrawdown;
+  /** Score de discipline sur la période (cf. `computeDiscipline`). */
+  discipline: Discipline;
 }
 
 function famKeys(t: AnalyticsTrade, family: 'setup' | 'emotion'): string[] | null {
@@ -386,6 +389,7 @@ export function buildAnalytics(params: {
     byEmotion,
     distribution: buildDistribution(windowed),
     equity: windowedEquity,
+    discipline: computeDiscipline(rules, startingBalance, windowed),
   };
 }
 

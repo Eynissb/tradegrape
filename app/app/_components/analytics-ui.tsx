@@ -79,6 +79,40 @@ export function DistributionBars({ bins }: { bins: DistributionBin[] }) {
   );
 }
 
+/**
+ * Score de discipline — % de jours tradés sans entorse (daily loss approché/
+ * dépassé, ou jour cassant la cohérence). Lié aux règles réelles, pas une note
+ * fourre-tout : le nombre a un sens littéral et se décompose en faits.
+ */
+export function DisciplineCard({ discipline }: { discipline: import('@/lib/journal/discipline').Discipline }) {
+  const d = discipline;
+  if (d.score === null) return null;
+
+  // Ton du score : lime au-dessus de 80, ambre entre 50 et 80, rouge en dessous.
+  const color = d.score >= 80 ? 'var(--win)' : d.score >= 50 ? 'var(--warn)' : 'var(--loss)';
+
+  const faults: string[] = [];
+  if (d.breached) faults.push(`${d.breached} jour${d.breached > 1 ? 's' : ''} au-delà du daily loss`);
+  if (d.approached) faults.push(`${d.approached} l’a approché`);
+  if (d.overSized) faults.push('1 jour casse la cohérence');
+
+  return (
+    <div className="card jdisc">
+      <h3 className="acct-rules-title">Discipline</h3>
+      <div className="jdisc-row">
+        <div className="jdisc-score">
+          <span className="jdisc-k num" style={{ color }}>{d.score}</span>
+          <span className="jdisc-unit">%</span>
+        </div>
+        <p className="jsub jdisc-detail">
+          {d.disciplinedDays} de tes {d.tradingDays} jours tradés respectent tes limites.
+          {faults.length ? <> {faults.join(' · ')}.</> : ' Aucune entorse sur la période.'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /** Grille de métriques communes (win rate, expectancy, R, profit factor…). */
 export function MetricsGrid({
   metrics,
