@@ -69,6 +69,13 @@ export default async function EditOffer({
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
 
+      {offer.is_published && !offer.reviewed_at ? (
+        <div className="notice notice-warn mt-4">
+          Offre <strong>publiée mais jamais vérifiée à la source</strong>. Renseigne la date de
+          vérification ci-dessous — l’honnêteté des données est le cœur du positionnement (§8).
+        </div>
+      ) : null}
+
       {offer.is_published && parentDraft ? (
         <div className="notice notice-warn mt-4">
           Cette offre est publiée mais <strong>masquée en public</strong> :{' '}

@@ -311,6 +311,10 @@ h1, h2, h3 {
 /* (`.admin-check` supprimé : aucune référence JSX. Les cases de l'admin
    passent par le composant `Checkbox`, déjà au système.) */
 
+/* Champ date admin : le picker + ses raccourcis alignés sous le libellé. */
+.admin-datefield { display: flex; flex-direction: column; gap: 6px; }
+.admin-datefield-quick { display: flex; gap: 6px; }
+
 .admin-dup { margin-top: 40px; padding: 22px 24px; }
 .admin-dup-form {
   display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 14px; align-items: end; margin-top: 16px;

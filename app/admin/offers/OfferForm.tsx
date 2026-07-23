@@ -3,6 +3,7 @@ import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Checkbox from '@/components/ui/Checkbox';
 import UISelect from '@/components/ui/Select';
+import AdminDateField from '@/app/admin/_components/AdminDateField';
 import { saveOffer } from './actions';
 
 export interface OfferValues {
@@ -21,6 +22,7 @@ export interface OfferValues {
   daily_loss_limit?: number | null;
   consistency_pct?: number | null;
   min_trading_days?: number | null;
+  reviewed_at?: string | null;
   max_minis?: number | null;
   max_micros?: number | null;
   funded_drawdown_type?: string | null;
@@ -186,8 +188,14 @@ export default function OfferForm({
         <Text name="payout_method" label="Méthode de paiement" value={offer?.payout_method} placeholder="Rise, Workmarket…" />
       </Section>
 
-      <Section title="Plateformes & publication">
+      <Section title="Plateformes, vérification & publication">
         <Text name="platforms" label="Plateformes (slugs, séparés par virgule)" value={offer?.platforms?.join(', ')} placeholder="tradovate, ninjatrader" />
+        <AdminDateField
+          name="reviewed_at"
+          label="Vérifié à la source le"
+          defaultValue={offer?.reviewed_at}
+          hint="Date de dernière vérification des règles auprès de la firm."
+        />
         <Check name="is_published" label="Publiée (visible public)" checked={offer?.is_published} />
       </Section>
 

@@ -44,6 +44,7 @@ function buildOfferPayload(fd: FormData) {
     payout_method: str(fd, 'payout_method'),
 
     platforms: arr(fd, 'platforms'),
+    reviewed_at: str(fd, 'reviewed_at'),
     is_published: bool(fd, 'is_published'),
   };
 }
@@ -134,7 +135,8 @@ export async function duplicateOffers(formData: FormData) {
 
   const rows = uniqueSizes
     .filter((size) => !existing.has(size))
-    .map((size) => ({ ...clone, account_size: size, is_published: false }));
+    // La date de vérif ne s'hérite pas : chaque taille se re-vérifie à la source.
+    .map((size) => ({ ...clone, account_size: size, is_published: false, reviewed_at: null }));
 
   const skipped = uniqueSizes.length - rows.length;
 
