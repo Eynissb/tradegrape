@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { num, str } from '@/lib/admin/form';
 import { feesForTrade } from '@/lib/journal/commissions';
+import { isSetupKey } from '@/lib/journal/tags';
 import {
   buildManualSnapshot,
   buildRulesSnapshot,
@@ -629,4 +630,58 @@ export async function deleteNote(formData: FormData) {
 
   revalidatePath('/app/notebook');
   redirect('/app/notebook');
+}
+
+/* ------------------------------------------------------------------ playbook */
+
+/** Enregistre (upsert) la définition d'un setup. La clé nue vient de l'URL. */
+export async function saveSetup(formData: FormData) {
+  const setup = str(formData, 'setup') ?? '';
+  if (!isSetupKey(setup)) redirect('/app/playbook');
+  const base = `/app/playbook/${setup}`;
+  const tagKey = `setup:${setup}`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app/playbook');
+
+  const { error } = await supabase.from('journal_setups').upsert(
+    {
+      user_id: user.id,
+      tag_key: tagKey,
+      entry: (str(formData, 'entry') ?? '').slice(0, 4000),
+      management: (str(formData, 'management') ?? '').slice(0, 4000),
+      invalidation: (str(formData, 'invalidation') ?? '').slice(0, 4000),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id,tag_key' },
+  );
+  if (error) backWithError(base, error.message);
+
+  revalidatePath('/app/playbook');
+  redirect(`${base}?saved=1`);
+}
+
+/** Efface la définition d'un setup (le tag et ses trades restent intacts). */
+export async function deleteSetup(formData: FormData) {
+  const setup = str(formData, 'setup') ?? '';
+  if (!isSetupKey(setup)) redirect('/app/playbook');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app/playbook');
+
+  const { error } = await supabase
+    .from('journal_setups')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('tag_key', `setup:${setup}`);
+  if (error) backWithError('/app/playbook', error.message);
+
+  revalidatePath('/app/playbook');
+  redirect('/app/playbook');
 }

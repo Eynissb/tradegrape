@@ -65,3 +65,22 @@ const TAG_LABELS = new Map<string, string>(
 export function tagLabel(value: string): string {
   return TAG_LABELS.get(value) ?? value;
 }
+
+/**
+ * Catalogue des setups prédéfinis (famille 'setup'). Le playbook (B8) documente
+ * ces setups et rien d'autre : une définition référence toujours l'un d'eux par
+ * `tagKey`, ce qui garantit le lien vers la ventilation « Par setup ».
+ * - `key`    : clé nue, ex "breakout" (utilisée dans l'URL /app/playbook/[setup])
+ * - `tagKey` : clé de tag complète, ex "setup:breakout" (clé des buckets bySetup)
+ */
+export const SETUP_TAGS: readonly { key: string; label: string; tagKey: string }[] =
+  (TAG_FAMILIES.find((f) => f.key === 'setup')?.tags ?? []).map((t) => ({
+    key: t.key,
+    label: t.label,
+    tagKey: `setup:${t.key}`,
+  }));
+
+/** Vrai si `key` (nue) désigne un setup prédéfini. */
+export function isSetupKey(key: string): boolean {
+  return SETUP_TAGS.some((t) => t.key === key);
+}

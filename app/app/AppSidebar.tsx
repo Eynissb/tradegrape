@@ -5,6 +5,7 @@ import {
   LineChart,
   Scale,
   NotebookPen,
+  BookMarked,
   GitCompare,
   CalendarClock,
   Settings,
@@ -20,6 +21,7 @@ export default function AppSidebar({ staff }: { staff: boolean }) {
     { href: '/app/analytics', label: 'Analytics', icon: LineChart, match: (p) => p.startsWith('/app/analytics') },
     { href: '/app/balance', label: 'Bilan financier', icon: Scale, match: (p) => p.startsWith('/app/balance') },
     { href: '/app/notebook', label: 'Notebook', icon: NotebookPen, match: (p) => p.startsWith('/app/notebook') },
+    { href: '/app/playbook', label: 'Playbook', icon: BookMarked, match: (p) => p.startsWith('/app/playbook') },
   ];
   const tools: SideNavItem[] = [
     { label: 'Comparateur', icon: GitCompare, disabled: true, note: 'Bientôt' },
