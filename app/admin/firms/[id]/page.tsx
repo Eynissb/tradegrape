@@ -6,6 +6,8 @@ import { togglePlanPublish } from '@/app/admin/plans/actions';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import FirmForm, { type FirmValues } from '../FirmForm';
 import StyleRulesForm, { type StyleRuleRow } from '../StyleRulesForm';
+import CommissionsForm, { type CommissionRow } from '../CommissionsForm';
+import FirmPlatformsForm, { type PlatformOption, type FirmPlatformRow } from '../FirmPlatformsForm';
 import { deleteFirm, toggleFirmPublish } from '../actions';
 
 export const metadata = { title: 'Éditer une firm — Admin Tradegrape' };
@@ -84,6 +86,20 @@ export default async function EditFirm({
     .returns<PromoRow[]>();
   const promos = promoData ?? [];
 
+  const { data: commData } = await supabase
+    .from('firm_commissions')
+    .select('asset_class, round_turn, symbols, note')
+    .eq('firm_id', id)
+    .returns<CommissionRow[]>();
+  const commissions = commData ?? [];
+
+  const [{ data: platformsData }, { data: firmPlatformsData }] = await Promise.all([
+    supabase.from('platforms').select('id, name, is_datafeed').order('name', { ascending: true }).returns<PlatformOption[]>(),
+    supabase.from('firm_platforms').select('platform_id, is_free, extra_cost, note').eq('firm_id', id).returns<FirmPlatformRow[]>(),
+  ]);
+  const platforms = platformsData ?? [];
+  const firmPlatforms = firmPlatformsData ?? [];
+
   return (
     <div className="admin-page">
       <nav className="admin-crumb">
@@ -112,6 +128,12 @@ export default async function EditFirm({
       {saved === 'promo-del' ? (
         <div className="notice notice-info mt-4">Code promo supprimé.</div>
       ) : null}
+      {saved === 'commissions' ? (
+        <div className="notice notice-info mt-4">Commissions enregistrées.</div>
+      ) : null}
+      {saved === 'platforms' ? (
+        <div className="notice notice-info mt-4">Plateformes enregistrées.</div>
+      ) : null}
 
       {!firm.is_published ? (
         <div className="notice notice-warn mt-4">
@@ -127,6 +149,16 @@ export default async function EditFirm({
       {/* Règles de style — filtre comparateur */}
       <div className="mt-10">
         <StyleRulesForm firmId={id} rules={styleRules} />
+      </div>
+
+      {/* Commissions par classe d'actif */}
+      <div className="mt-10">
+        <CommissionsForm firmId={id} rows={commissions} />
+      </div>
+
+      {/* Plateformes & licences */}
+      <div className="mt-10">
+        <FirmPlatformsForm firmId={id} platforms={platforms} attached={firmPlatforms} />
       </div>
 
       {/* Plans de la firm */}

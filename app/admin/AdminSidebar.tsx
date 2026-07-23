@@ -7,6 +7,7 @@ import {
   Tags,
   FileUp,
   Inbox,
+  MonitorSmartphone,
   ArrowLeft,
 } from 'lucide-react';
 import SideNav, { type SideNavItem } from '@/components/ui/SideNav';
@@ -24,6 +25,7 @@ export default function AdminSidebar() {
     { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
     { href: '/admin/firms', label: 'Firms', icon: Building2, match: (p) => p.startsWith('/admin/firms') },
     { href: '/admin/requested-firms', label: 'Firms demandées', icon: Inbox, match: (p) => p.startsWith('/admin/requested-firms') },
+    { href: '/admin/platforms', label: 'Plateformes', icon: MonitorSmartphone, match: (p) => p.startsWith('/admin/platforms') },
   ];
   const catalogue: SideNavItem[] = [
     { label: 'Plans', icon: Layers, disabled: true, note: 'Bientôt' },

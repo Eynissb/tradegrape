@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { arr, backWithError, bool, num, req, str } from '@/lib/admin/form';
 import { STYLE_RULE_KEYS, STANCES } from '@/lib/catalog/style-rules';
+import { ASSET_CLASSES } from '@/lib/catalog/asset-classes';
 
 function buildFirmPayload(fd: FormData) {
   return {
@@ -176,6 +177,113 @@ export async function deletePromo(formData: FormData) {
 
   revalidatePath(`/admin/firms/${firmId}`);
   redirect(`/admin/firms/${firmId}?saved=promo-del`);
+}
+
+/**
+ * Commissions par classe d'actif, en une passe : upsert des classes avec un
+ * round turn, suppression de celles vidées.
+ */
+export async function saveCommissions(formData: FormData) {
+  const firmId = req(formData, 'firm_id');
+  const back = `/admin/firms/${firmId}`;
+  if (!firmId) backWithError('/admin/firms', 'Firm manquante.');
+
+  const toUpsert: {
+    firm_id: string;
+    asset_class: string;
+    round_turn: number;
+    symbols: string[];
+    note: string | null;
+  }[] = [];
+  const toClear: string[] = [];
+
+  for (const { key } of ASSET_CLASSES) {
+    const rt = num(formData, `rt__${key}`);
+    if (rt !== null) {
+      toUpsert.push({
+        firm_id: firmId,
+        asset_class: key,
+        round_turn: rt,
+        symbols: arr(formData, `sym__${key}`, { upper: true }),
+        note: str(formData, `note__${key}`),
+      });
+    } else {
+      toClear.push(key);
+    }
+  }
+
+  const supabase = await createClient();
+  if (toUpsert.length > 0) {
+    const { error } = await supabase
+      .from('firm_commissions')
+      .upsert(toUpsert, { onConflict: 'firm_id,asset_class' });
+    if (error) backWithError(back, error.message);
+  }
+  if (toClear.length > 0) {
+    const { error } = await supabase
+      .from('firm_commissions')
+      .delete()
+      .eq('firm_id', firmId)
+      .in('asset_class', toClear);
+    if (error) backWithError(back, error.message);
+  }
+
+  revalidatePath(back);
+  redirect(`${back}?saved=commissions`);
+}
+
+/**
+ * Rattachement des plateformes à une firm : upsert des cochées (licence,
+ * surcoût, note), suppression des décochées. La liste des plateformes candidates
+ * vient d'un champ caché pour savoir lesquelles inspecter.
+ */
+export async function saveFirmPlatforms(formData: FormData) {
+  const firmId = req(formData, 'firm_id');
+  const back = `/admin/firms/${firmId}`;
+  if (!firmId) backWithError('/admin/firms', 'Firm manquante.');
+
+  const ids = arr(formData, 'platform_ids');
+  const toUpsert: {
+    firm_id: string;
+    platform_id: string;
+    is_free: boolean;
+    extra_cost: number | null;
+    note: string | null;
+  }[] = [];
+  const toClear: string[] = [];
+
+  for (const id of ids) {
+    if (bool(formData, `on__${id}`)) {
+      toUpsert.push({
+        firm_id: firmId,
+        platform_id: id,
+        is_free: bool(formData, `free__${id}`),
+        extra_cost: num(formData, `cost__${id}`),
+        note: str(formData, `note__${id}`),
+      });
+    } else {
+      toClear.push(id);
+    }
+  }
+
+  const supabase = await createClient();
+  if (toUpsert.length > 0) {
+    const { error } = await supabase
+      .from('firm_platforms')
+      .upsert(toUpsert, { onConflict: 'firm_id,platform_id' });
+    if (error) backWithError(back, error.message);
+  }
+  if (toClear.length > 0) {
+    const { error } = await supabase
+      .from('firm_platforms')
+      .delete()
+      .eq('firm_id', firmId)
+      .in('platform_id', toClear);
+    if (error) backWithError(back, error.message);
+  }
+
+  revalidatePath(back);
+  redirect(`${back}?saved=platforms`);
 }
 
 export async function toggleFirmPublish(formData: FormData) {
