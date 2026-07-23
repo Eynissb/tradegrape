@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { buildMonthView, monthKey, parseMonth } from '@/lib/journal/calendar';
 import { buildInsights, consistencyBreakerDay } from '@/lib/journal/insights';
+import { riskBudget } from '@/lib/journal/instruments';
 import { tagLabel } from '@/lib/journal/tags';
 import type { RuleState } from '@/lib/rules/types';
 import {
@@ -40,6 +41,7 @@ import RuleBlock, { type RuleTone } from '@/components/ui/RuleBlock';
 import { deleteTrade } from '@/app/app/actions';
 import { buildAnalytics, resolveRange, type AnalyticsTrade, type PeriodPreset } from '@/lib/journal/analytics';
 import EntryForms from './EntryForms';
+import RiskCalculator from './RiskCalculator';
 import MonthCalendar from './MonthCalendar';
 import AccountViewTabs from './AccountViewTabs';
 import AnalyticsPanel from './AnalyticsPanel';
@@ -450,6 +452,10 @@ export default async function AccountPage({
                 </div>
               ) : null}
             </div>
+
+          {/* Calculateur de risque avant trade — dimensionne la position sur le
+              budget réel (min du daily loss restant et de la marge au plancher). */}
+          {ev.status !== 'failed' ? <RiskCalculator budget={riskBudget(ev)} currency={currency} /> : null}
 
           {/* Saisie — toujours à l'écran (repliée par défaut) */}
           <EntryForms accountId={account.id} currency={currency} today={today} title="Ajouter une entrée" />
