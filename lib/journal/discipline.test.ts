@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { computeDiscipline } from './discipline';
+import { evaluateAccount } from '../rules/futures-engine';
 import type { OfferRules, Trade } from '../rules/types';
 
 const RULES: OfferRules = {
@@ -70,5 +71,37 @@ describe('computeDiscipline', () => {
   it('renvoie le détail trié par date', () => {
     const d = computeDiscipline(RULES, 50_000, [t('2026-01-03', 300), t('2026-01-01', 300)]);
     expect(d.days.map((x) => x.date)).toEqual(['2026-01-01', '2026-01-03']);
+  });
+
+  it('compte une entorse au daily loss sur un jour PASSÉ, pas seulement aujourd’hui', () => {
+    // Toutes les dates sont en 2020 : aucune n'est « aujourd'hui ». Si le score
+    // lisait l'état courant du daily loss (évalué sur today par le moteur), il
+    // ne verrait AUCUNE brèche. On rejoue donc bien chaque jour avec son P&L.
+    const trades = [t('2020-01-01', 500), t('2020-01-02', 500), t('2020-01-03', -1_200)];
+
+    // Contrôle : le moteur, lui, ne voit rien aujourd'hui (aucun trade ce jour).
+    expect(evaluateAccount(RULES, 50_000, trades).dailyLoss?.state).toBe('ok');
+
+    // Mais la discipline compte bien la brèche du 3 janvier 2020.
+    const d = computeDiscipline(RULES, 50_000, trades);
+    expect(d.breached).toBe(1);
+    expect(d.days.find((x) => x.date === '2020-01-03')?.dailyLoss).toBe('breached');
+  });
+
+  it('compte plusieurs brèches sur des jours distincts de l’historique', () => {
+    // Cohérence désactivée (100 %) pour isoler le signal daily loss : sinon
+    // l'unique jour gagnant serait flaggé sur-sizing et fausserait le compte
+    // de jours disciplinés.
+    const rules = { ...RULES, consistencyPct: 100 };
+    const trades = [
+      t('2020-01-01', -1_100), // brèche
+      t('2020-02-01', 500), // propre
+      t('2020-03-01', -1_300), // brèche
+      t('2020-04-01', -850), // approché
+    ];
+    const d = computeDiscipline(rules, 50_000, trades);
+    expect(d.breached).toBe(2);
+    expect(d.approached).toBe(1);
+    expect(d.disciplinedDays).toBe(1); // seul le jour à +500
   });
 });
