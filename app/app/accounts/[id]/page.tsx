@@ -12,6 +12,7 @@ import {
 import {
   Banknote,
   CalendarCheck,
+  CalendarRange,
   CircleCheck,
   Gauge,
   Settings,
@@ -298,9 +299,14 @@ export default async function AccountPage({
       <div className="acct2-top">
         <div className="acct2-top-row">
           <h1 className="jh1">{account.label ?? 'Compte'}</h1>
-          <Link href={`/app/accounts/${account.id}/settings`} className="jsettings-link">
-            <Settings aria-hidden="true" /> Réglages du compte
-          </Link>
+          <div className="acct2-top-actions">
+            <Link href={`/app/accounts/${account.id}/review`} className="jsettings-link">
+              <CalendarRange aria-hidden="true" /> Revue de la semaine
+            </Link>
+            <Link href={`/app/accounts/${account.id}/settings`} className="jsettings-link">
+              <Settings aria-hidden="true" /> Réglages du compte
+            </Link>
+          </div>
         </div>
         <p className="jsub">
           {snap.display?.firmName} · {snap.display?.planName} ·{' '}

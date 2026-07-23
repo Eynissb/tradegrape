@@ -525,3 +525,39 @@ export async function deleteAccount(formData: FormData) {
   revalidatePath('/app');
   redirect('/app');
 }
+
+/** Enregistre (upsert) la synthèse guidée d'une revue hebdomadaire. */
+export async function saveReview(formData: FormData) {
+  const accountId = str(formData, 'account_id');
+  const weekStart = str(formData, 'week_start');
+  if (!accountId || !weekStart) redirect('/app');
+  const base = `/app/accounts/${accountId}/review?week=${weekStart}`;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login?redirect=/app');
+
+  // Réponses libres — on ne garde que les champs connus, valeurs élaguées.
+  const answers: Record<string, string> = {};
+  for (const key of ['went_well', 'what_cost', 'next_focus']) {
+    const v = str(formData, key);
+    if (v) answers[key] = v.slice(0, 4000);
+  }
+
+  const { error } = await supabase.from('journal_reviews').upsert(
+    {
+      user_id: user.id,
+      account_id: accountId,
+      week_start: weekStart,
+      answers,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'account_id,week_start' },
+  );
+  if (error) backWithError(base, error.message);
+
+  revalidatePath(base);
+  redirect(`${base}&saved=1`);
+}

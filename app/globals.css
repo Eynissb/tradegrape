@@ -520,6 +520,14 @@ h1, h2, h3 {
 .jh2 { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.4px; }
 .jsub { color: var(--ink2); font-size: 14px; }
 
+/* Revue hebdomadaire. */
+.acct2-top-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.jreview-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.jreview-nav { display: flex; gap: 8px; flex: none; }
+.ui .jreview-form { max-width: 720px; }
+.ui .jreview-form .field { margin-top: 14px; }
+.jreview-form .field:first-of-type { margin-top: 0; }
+
 /* Score de discipline — carte en tête de l'onglet Analytics. */
 .jdisc-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .jdisc-score { display: flex; align-items: baseline; gap: 2px; flex: none; }
