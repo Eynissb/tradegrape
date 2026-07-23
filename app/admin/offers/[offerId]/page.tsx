@@ -15,10 +15,10 @@ export default async function EditOffer({
   searchParams,
 }: {
   params: Promise<{ offerId: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; edit_cap?: string }>;
 }) {
   const { offerId } = await params;
-  const { error, saved } = await searchParams;
+  const { error, saved, edit_cap: editCap } = await searchParams;
 
   const supabase = await createClient();
   const { data: offer } = await supabase
@@ -88,6 +88,7 @@ export default async function EditOffer({
 
       {error ? <div className="notice notice-error mt-4">{error}</div> : null}
       {saved === 'cap' ? <div className="notice notice-info mt-4">Plafond ajouté.</div> : null}
+      {saved === 'cap-edit' ? <div className="notice notice-info mt-4">Plafond modifié.</div> : null}
       {saved === 'cap-del' ? <div className="notice notice-info mt-4">Plafond supprimé.</div> : null}
       {saved === 'scaling' ? <div className="notice notice-info mt-4">Palier ajouté.</div> : null}
       {saved === 'scaling-del' ? <div className="notice notice-info mt-4">Palier supprimé.</div> : null}
@@ -116,7 +117,7 @@ export default async function EditOffer({
       </div>
 
       <div className="mt-8">
-        <PayoutCapsEditor offerId={offerId} caps={caps} />
+        <PayoutCapsEditor offerId={offerId} caps={caps} editingId={editCap} />
       </div>
 
       <div className="mt-8">

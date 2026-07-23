@@ -179,33 +179,8 @@ export async function addPayoutCap(formData: FormData) {
   const back = `/admin/offers/${offerId}`;
   if (!offerId) backWithError('/admin/firms', 'Offre manquante.');
 
-  const payload = {
-    offer_id: offerId,
-    cycle_from: num(formData, 'cycle_from') ?? 1,
-    cycle_to: num(formData, 'cycle_to'),
-    max_amount: num(formData, 'max_amount'),
-    max_pct: num(formData, 'max_pct'),
-    min_profit: num(formData, 'min_profit'),
-    note: str(formData, 'note'),
-    // Variantes de chemin + progressions par palier (migration 0013).
-    variant: str(formData, 'variant'),
-    split_pct: num(formData, 'split_pct'),
-    consistency_pct: num(formData, 'consistency_pct'),
-    min_profit_days: num(formData, 'min_profit_days'),
-    daily_threshold: num(formData, 'daily_threshold'),
-  };
-
-  // Une ligne vide n'a aucun sens : au moins une contrainte ou un paramètre.
-  const hasContent = [
-    payload.max_amount,
-    payload.max_pct,
-    payload.min_profit,
-    payload.split_pct,
-    payload.consistency_pct,
-    payload.min_profit_days,
-    payload.daily_threshold,
-  ].some((v) => v !== null);
-  if (!hasContent) {
+  const payload = { offer_id: offerId, ...capPayload(formData) };
+  if (!capHasContent(payload)) {
     backWithError(back, 'Renseigne au moins un plafond, un split, une cohérence ou un seuil.');
   }
 
@@ -215,6 +190,54 @@ export async function addPayoutCap(formData: FormData) {
 
   revalidatePath(back);
   redirect(`${back}?saved=cap`);
+}
+
+/** Champs d'un plafond, partagés par l'ajout et la mise à jour. */
+function capPayload(fd: FormData) {
+  return {
+    cycle_from: num(fd, 'cycle_from') ?? 1,
+    cycle_to: num(fd, 'cycle_to'),
+    max_amount: num(fd, 'max_amount'),
+    max_pct: num(fd, 'max_pct'),
+    min_profit: num(fd, 'min_profit'),
+    note: str(fd, 'note'),
+    variant: str(fd, 'variant'),
+    split_pct: num(fd, 'split_pct'),
+    consistency_pct: num(fd, 'consistency_pct'),
+    min_profit_days: num(fd, 'min_profit_days'),
+    daily_threshold: num(fd, 'daily_threshold'),
+  };
+}
+
+/** Au moins une contrainte : une ligne entièrement vide n'a aucun sens. */
+function capHasContent(p: ReturnType<typeof capPayload>): boolean {
+  return [
+    p.max_amount, p.max_pct, p.min_profit,
+    p.split_pct, p.consistency_pct, p.min_profit_days, p.daily_threshold,
+  ].some((v) => v !== null);
+}
+
+export async function updatePayoutCap(formData: FormData) {
+  const offerId = req(formData, 'offer_id');
+  const id = str(formData, 'id');
+  const back = `/admin/offers/${offerId}`;
+  if (!offerId || !id) redirect('/admin/firms');
+
+  const payload = capPayload(formData);
+  if (!capHasContent(payload)) {
+    backWithError(`${back}?edit_cap=${id}`, 'Renseigne au moins un plafond, un split, une cohérence ou un seuil.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('offer_payout_caps')
+    .update(payload)
+    .eq('id', id)
+    .eq('offer_id', offerId);
+  if (error) backWithError(`${back}?edit_cap=${id}`, error.message);
+
+  revalidatePath(back);
+  redirect(`${back}?saved=cap-edit`);
 }
 
 export async function deletePayoutCap(formData: FormData) {

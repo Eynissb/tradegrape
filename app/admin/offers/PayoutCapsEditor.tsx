@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import Button, { buttonClasses } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { addPayoutCap, deletePayoutCap } from './actions';
+import { addPayoutCap, updatePayoutCap, deletePayoutCap } from './actions';
 
 export interface PayoutCapRow {
   id: string;
@@ -36,10 +37,16 @@ const fmt = (v: number | null, suffix = '') => (v == null ? '—' : `${v.toLocal
 export default function PayoutCapsEditor({
   offerId,
   caps,
+  editingId,
 }: {
   offerId: string;
   caps: PayoutCapRow[];
+  /** Ligne en cours de modification (paramètre `edit_cap` de l'URL). */
+  editingId?: string;
 }) {
+  const editing = editingId ? caps.find((c) => c.id === editingId) ?? null : null;
+  const v = (x: number | string | null | undefined) => (x === null || x === undefined ? '' : String(x));
+
   return (
     <fieldset className="admin-section">
       <legend>Plafonds de payout par cycle</legend>
@@ -63,7 +70,11 @@ export default function PayoutCapsEditor({
               <span role="columnheader"></span>
             </div>
             {caps.map((c) => (
-              <div key={c.id} className="data-row" role="row">
+              <div
+                key={c.id}
+                className={`data-row${c.id === editingId ? ' is-editing' : ''}`}
+                role="row"
+              >
                 <span role="cell" data-label="Chemin" className="admin-strong">{c.variant || 'unique'}</span>
                 <span role="cell" data-label="Cycle" className="num">{cycleLabel(c)}</span>
                 <span role="cell" data-label="Max €" className="num">{fmt(c.max_amount)}</span>
@@ -77,6 +88,12 @@ export default function PayoutCapsEditor({
                     .filter(Boolean).join(' · ') || '—'}
                 </span>
                 <span role="cell" className="data-actions">
+                  <Link
+                    href={`/admin/offers/${offerId}?edit_cap=${c.id}#caps`}
+                    className={buttonClasses({ variant: 'ghost', size: 'sm' })}
+                  >
+                    Éditer
+                  </Link>
                   <form action={deletePayoutCap}>
                     <input type="hidden" name="id" value={c.id} />
                     <input type="hidden" name="offer_id" value={offerId} />
@@ -92,22 +109,52 @@ export default function PayoutCapsEditor({
       )}
 
       {/* Ajout d'un plafond */}
-      <form action={addPayoutCap} className="cap-add mt-4">
+      {/* Un seul formulaire, deux modes : ajout, ou modification d'une ligne
+          existante (pré-remplie). `key` force React à re-monter les champs quand
+          on passe d'une ligne à l'autre — sinon les valeurs précédentes restent. */}
+      <form
+        key={editing?.id ?? 'new'}
+        action={editing ? updatePayoutCap : addPayoutCap}
+        className="cap-add mt-4"
+        id="caps"
+      >
         <input type="hidden" name="offer_id" value={offerId} />
+        {editing ? <input type="hidden" name="id" value={editing.id} /> : null}
         <Input name="variant" label="Chemin" placeholder="standard / consistency" width="sm"
+               defaultValue={v(editing?.variant)}
                hint="Vide si l'offre n'a qu'un seul chemin de payout." />
-        <Input name="cycle_from" label="Cycle de" type="number" defaultValue={1} width="sm" />
-        <Input name="cycle_to" label="à (vide = +)" type="number" placeholder="∞" width="sm" />
-        <Input name="max_amount" label="Max €" type="number" step="0.01" width="sm" />
-        <Input name="max_pct" label="Max %" type="number" step="0.01" width="sm" />
-        <Input name="min_profit" label="Objectif cycle" type="number" step="0.01" width="sm" />
-        <Input name="split_pct" label="Split %" type="number" step="0.01" width="sm" />
-        <Input name="consistency_pct" label="Cohérence %" type="number" step="0.01" width="sm" />
-        <Input name="min_profit_days" label="Jours requis" type="number" width="sm" />
-        <Input name="daily_threshold" label="Seuil jour" type="number" step="0.01" width="sm" />
-        <Input name="note" label="Note" placeholder="ex : Standard" />
+        <Input name="cycle_from" label="Cycle de" type="number" width="sm"
+               defaultValue={editing ? v(editing.cycle_from) : 1} />
+        <Input name="cycle_to" label="à (vide = +)" type="number" placeholder="∞" width="sm"
+               defaultValue={v(editing?.cycle_to)} />
+        <Input name="max_amount" label="Max €" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.max_amount)} />
+        <Input name="max_pct" label="Max %" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.max_pct)} />
+        <Input name="min_profit" label="Objectif cycle" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.min_profit)} />
+        <Input name="split_pct" label="Split %" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.split_pct)} />
+        <Input name="consistency_pct" label="Cohérence %" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.consistency_pct)} />
+        <Input name="min_profit_days" label="Jours requis" type="number" width="sm"
+               defaultValue={v(editing?.min_profit_days)} />
+        <Input name="daily_threshold" label="Seuil jour" type="number" step="0.01" width="sm"
+               defaultValue={v(editing?.daily_threshold)} />
+        <Input name="note" label="Note" placeholder="ex : Standard" defaultValue={v(editing?.note)} />
         <div className="cap-add-btn">
-          <Button type="submit" variant="ghost">+ Ajouter le plafond</Button>
+          <Button type="submit" variant={editing ? 'primary' : 'ghost'}>
+            {editing ? 'Enregistrer le plafond' : '+ Ajouter le plafond'}
+          </Button>
+          {editing ? (
+            <Link
+              href={`/admin/offers/${offerId}#caps`}
+              className={buttonClasses({ variant: 'ghost' })}
+              style={{ marginLeft: 10 }}
+            >
+              Annuler
+            </Link>
+          ) : null}
         </div>
       </form>
     </fieldset>

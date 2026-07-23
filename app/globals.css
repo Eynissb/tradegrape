@@ -345,6 +345,13 @@ h1, h2, h3 {
   .stylerule-name { padding-top: 0; }
 }
 
+/* Ligne en cours d'édition : repère discret, jamais un aplat de marque. */
+.ui .data-row.is-editing { position: relative; background: rgba(255, 255, 255, .05); }
+.ui .data-row.is-editing::before {
+  content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--ink2);
+}
+
 /* Ajout d'un plafond de payout : champs en ligne, bouton qui passe à la ligne. */
 .cap-add { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .cap-add .field { flex: 0 0 auto; }
