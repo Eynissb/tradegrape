@@ -103,12 +103,12 @@ async function main() {
   for (const f of FIRMS) {
     for (const p of f.plans) {
       nOffers += p.offers.length;
-      nCaps += p.payoutCaps?.length ?? 0;
-      nSteps += p.scalingSteps?.length ?? 0;
+      nSteps += (p.scalingSteps?.length ?? 0) * p.offers.length;
       for (const raw of p.offers) {
         const o = resolveOffer(p, raw);
         if (reviewedAtFor(f, o)) nVerified++;
         if (o.price == null) nNoPrice++;
+        nCaps += (o.payoutCaps ?? p.payoutCaps ?? []).length;
       }
     }
   }
@@ -205,29 +205,41 @@ async function main() {
 
       const rows = plan.offers.map((o) => offerRow(firm, planId, plan, o));
       const { data: offerRows, error: oErr } = await db
-        .from('offers').upsert(rows, { onConflict: 'plan_id,account_size' }).select('id');
+        .from('offers')
+        .upsert(rows, { onConflict: 'plan_id,account_size' })
+        .select('id, account_size');
       if (oErr) throw new Error(`offres ${firm.slug}/${plan.slug} : ${oErr.message}`);
       offerCount += rows.length;
 
-      /* Plafonds et paliers : pas de clé naturelle stable → on remplace ceux du
-         plan pour rester idempotent, sans jamais toucher une autre offre. */
-      const ids = (offerRows ?? []).map((r) => r.id);
-      if (ids.length && (plan.payoutCaps?.length || plan.scalingSteps?.length)) {
-        if (plan.payoutCaps?.length) {
-          await db.from('offer_payout_caps').delete().in('offer_id', ids);
-          const caps = ids.flatMap((offerId) =>
-            plan.payoutCaps!.map((c) => ({
-              offer_id: offerId, variant: n(c.variant), cycle_from: c.cycle_from ?? 1,
-              cycle_to: n(c.cycle_to), max_amount: n(c.max_amount), max_pct: n(c.max_pct),
-              min_profit: n(c.min_profit), split_pct: n(c.split_pct),
-              consistency_pct: n(c.consistency_pct), min_profit_days: n(c.min_profit_days),
-              daily_threshold: n(c.daily_threshold), note: n(c.note),
-            })));
+      const idBySize = new Map((offerRows ?? []).map((r) => [Number(r.account_size), r.id]));
+      const ids = [...idBySize.values()];
+
+      /* Plafonds et paliers : pas de clé naturelle stable → on remplace ceux des
+         offres de CE plan pour rester idempotent, sans toucher une autre offre. */
+      if (ids.length) {
+        await db.from('offer_payout_caps').delete().in('offer_id', ids);
+        await db.from('offer_scaling_steps').delete().in('offer_id', ids);
+
+        const caps = plan.offers.flatMap((raw) => {
+          const o = resolveOffer(plan, raw);
+          // Les plafonds de l'offre priment sur ceux du plan (Apex, MFF, FundedNext).
+          const list = o.payoutCaps ?? plan.payoutCaps ?? [];
+          const offerId = idBySize.get(o.account_size);
+          if (!offerId) return [];
+          return list.map((c) => ({
+            offer_id: offerId, variant: n(c.variant), cycle_from: c.cycle_from ?? 1,
+            cycle_to: n(c.cycle_to), max_amount: n(c.max_amount), max_pct: n(c.max_pct),
+            min_profit: n(c.min_profit), split_pct: n(c.split_pct),
+            consistency_pct: n(c.consistency_pct), min_profit_days: n(c.min_profit_days),
+            daily_threshold: n(c.daily_threshold), note: n(c.note),
+          }));
+        });
+        if (caps.length) {
           const { error } = await db.from('offer_payout_caps').insert(caps);
           if (error) throw new Error(`caps ${firm.slug}/${plan.slug} : ${error.message}`);
         }
+
         if (plan.scalingSteps?.length) {
-          await db.from('offer_scaling_steps').delete().in('offer_id', ids);
           const steps = ids.flatMap((offerId) =>
             plan.scalingSteps!.map((s) => ({
               offer_id: offerId, profit_from: s.profit_from, profit_to: n(s.profit_to),

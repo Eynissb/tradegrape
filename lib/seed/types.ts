@@ -59,6 +59,12 @@ export interface OfferSeed {
   /** Slugs du catalogue plateformes (cf. data/catalog/platforms.ts). */
   platforms?: string[];
 
+  /**
+   * Plafonds propres à CETTE taille. Chez Apex, MFF et FundedNext les plafonds
+   * varient par taille de compte : ils priment alors sur ceux du plan.
+   */
+  payoutCaps?: PayoutCapSeed[];
+
   /** Confiance de CETTE offre. Pilote `reviewed_at`. */
   confidence: Confidence;
   /** Champs précis à revérifier, même sur une offre globalement fiable. */
