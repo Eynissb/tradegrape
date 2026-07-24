@@ -1355,27 +1355,122 @@ body::before {
 .home-stat-note { color: var(--ink3); }
 
 /* ---- Sections ---- */
-.home-section { margin-top: 64px; }
+.home-section { margin-top: 72px; }
 .ui .home-h2 {
   font-family: var(--font-title); font-weight: 800; font-size: clamp(1.5rem, 3vw, 2rem);
   letter-spacing: -.5px; color: var(--ink);
 }
-
-/* Squelette temporaire — un repère visible, jamais confondu avec du contenu. */
-.home-skel {
-  padding: 28px; border-radius: var(--r-lg);
-  border: 1px dashed var(--card-brd); background: rgba(150, 110, 240, .03);
+.ui .home-section-sub {
+  margin-top: 12px; max-width: 640px; font-size: 15px; line-height: 1.6; color: var(--ink2);
 }
-.home-skel-note {
-  margin-top: 10px; font-size: 12.5px; font-weight: 600; letter-spacing: .5px;
-  text-transform: uppercase; color: var(--ink3);
+.home-section-cta { margin-top: 22px; }
+.home-muted { color: var(--ink3); font-size: 14px; }
+
+/* ---- 1. Aperçu comparateur (mini-tableau réel, mécanisme .data-list) ---- */
+/* Réutilise .data-list : grille via --cols, empilement mobile en fiches via
+   data-label. Seules les colonnes changent. */
+.home-preview { --cols: minmax(120px,1.3fr) minmax(110px,1fr) 74px 118px minmax(140px,1.1fr) 104px; }
+.home-preview { margin-top: 20px; }
+.ui .home-tfirm { font-weight: 700; color: var(--ink); }
+.ui .home-tprice { font-weight: 700; color: var(--ink); }
+.home-treviewed { font-size: 12px; color: var(--ink3); }
+.home-tbadge {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--r-pill);
+  font-size: 10.5px; font-weight: 600;
+}
+.home-tbadge-bad { color: var(--red); background: rgba(255, 77, 94, .12); }
+.home-tbadge-warn { color: var(--amber); background: rgba(255, 180, 59, .12); }
+
+/* ---- 2. Firms ---- */
+.home-firms {
+  list-style: none; margin: 24px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+}
+.home-firm {
+  display: flex; flex-direction: column; gap: 4px; padding: 18px 20px;
+  border-radius: var(--r-lg); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+}
+.ui .home-firm-name { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+.home-firm-price { font-size: 15px; color: var(--ink); font-weight: 600; }
+.home-firm-from { font-size: 12px; font-weight: 400; color: var(--ink3); }
+.home-firm-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); }
+.home-firm-promo {
+  padding: 1px 8px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700;
+  color: var(--amber); background: rgba(255, 180, 59, .12);
 }
 
+/* ---- 3. Journal (riche : texte + aperçu dashboard) ---- */
+.home-journal { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: start; }
+.home-steps { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.home-step { display: flex; gap: 14px; }
+.ui .home-step-n {
+  flex: none; width: 32px; height: 32px; display: grid; place-items: center;
+  border-radius: 50%; font-weight: 800; color: #fff; background: var(--grad);
+}
+.home-step-body { display: flex; flex-direction: column; gap: 3px; }
+.ui .home-step-t { font-weight: 700; color: var(--ink); }
+.home-step-b { font-size: 14px; line-height: 1.55; color: var(--ink2); }
+
+/* Aperçu du dashboard — surface solide, chiffres tabulaires, étiqueté « exemple ». */
+.home-dash {
+  margin: 0; padding: 20px; border-radius: var(--r-lg);
+  background: var(--card); border: 1px solid var(--card-brd);
+}
+.home-dash-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.ui .home-dash-account { font-weight: 700; font-size: 13px; color: var(--ink); }
+.home-dash-ex {
+  padding: 1px 8px; border-radius: var(--r-pill); font-size: 10.5px; font-weight: 600;
+  color: var(--ink3); background: rgba(255,255,255,.05);
+}
+.home-dash-gauges { display: flex; flex-direction: column; gap: 14px; }
+.home-dash-gauge { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: baseline; }
+.home-dash-glabel { font-size: 12.5px; color: var(--ink2); }
+.ui .home-dash-gval { font-weight: 700; color: var(--ink); }
+.home-dash-bar {
+  grid-column: 1 / -1; height: 6px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,.06); overflow: hidden;
+}
+.home-dash-bar > span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--grad); }
+/* Bloc payout : le seul dégradé de la carte, notre signature. */
+.home-dash-payout {
+  margin-top: 18px; padding: 14px 16px; border-radius: var(--r-md);
+  background: var(--grad); color: #fff;
+}
+.home-dash-plabel { display: block; font-size: 12px; opacity: .9; }
+.home-dash-pval { display: block; margin-top: 3px; font-family: var(--font-title); font-weight: 800; font-size: 1.15rem; }
+.home-dash-cap { margin-top: 12px; font-size: 11.5px; color: var(--ink3); text-align: right; }
+
+/* ---- 4. Honnêteté ---- */
+.home-facts {
+  margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;
+}
+.home-fact { padding: 22px; border-radius: var(--r-lg); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); }
+.ui .home-fact-t { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; color: var(--ink); }
+.home-fact-b { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--ink2); }
+
+/* ---- 5. FAQ ---- */
+.home-faq { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.home-faq-item {
+  padding: 4px 20px; border-radius: var(--r-md);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+}
+.ui .home-faq-q {
+  padding: 14px 0; font-weight: 700; font-size: 15px; color: var(--ink); cursor: pointer;
+  list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.home-faq-q::-webkit-details-marker { display: none; }
+.home-faq-q::after { content: '+'; color: var(--ink3); font-weight: 400; font-size: 20px; }
+.home-faq-item[open] .home-faq-q::after { content: '−'; }
+.home-faq-a { margin: 0 0 16px; font-size: 14px; line-height: 1.65; color: var(--ink2); max-width: 72ch; }
+
+@media (max-width: 760px) {
+  .home-journal { grid-template-columns: 1fr; gap: 28px; }
+}
 @media (max-width: 520px) {
   .home-hero { padding: 24px 0 8px; }
   .home-cta .btn { width: 100%; }
   .home-stat { flex-basis: 100%; }
-  .home-section { margin-top: 44px; }
+  .home-section { margin-top: 52px; }
 }
 
 /* ---- Onglets de lecture (Éval / Financé) ---- */
