@@ -19,18 +19,30 @@ const BASE: Partial<OfferInput> = {
   payout_frequency_days: 7, // payouts le mercredi
   payout_min_days: 10, // 10 jours de trading avant le premier retrait
   platforms: ['rithmic', 'ninjatrader', 'quantower', 'tigertrade', 'atas'],
-  price: null,
-  confidence: 'unverified',
-  unverifiedFields: ['drawdown_amount', 'price'],
-  note: 'Drawdowns et frais d’activation repris du comparateur concurrent.',
+  /* Drawdowns, objectifs, contrats et abonnement vérifiés à la source le
+     2026-07-24. Restent les frais d'ACTIVATION au passage (143 à 898 $), qui
+     ne figurent pas sur la page publique — champ commercial, il ne bloque pas
+     la vérification des règles. */
+  confidence: 'verified',
+  unverifiedFields: ['activation_fee'],
+  note: 'Règles et abonnement vérifiés sur bulenox.com le 2026-07-24. Frais d’activation au passage non publiés (valeurs du concurrent conservées).',
 };
 
+/**
+ * Vérifié sur bulenox.com le 2026-07-24 : drawdowns, objectifs, contrats max et
+ * abonnement mensuel. Le site confirme aussi « First $10,000 100% » (le premier
+ * palier de split) et la structure « Opt 1 : No Scaling / Opt 2 : EOD ».
+ *
+ * `price` = abonnement de BASE. Deux tailles seulement portent un coupon
+ * ($50OFF sur le 50k, $60OFF sur le 100k) : les remises vivent dans promo_codes.
+ * Les frais d'activation au passage ne figurent PAS sur la page publique.
+ */
 const SIZES = [
-  { account_size: 25_000, drawdown_amount: 1_500, profit_target: 1_500, activation_fee: 143 },
-  { account_size: 50_000, drawdown_amount: 2_500, profit_target: 3_000, activation_fee: 148 },
-  { account_size: 100_000, drawdown_amount: 3_000, profit_target: 6_000, activation_fee: 248 },
-  { account_size: 150_000, drawdown_amount: 4_500, profit_target: 9_000, activation_fee: 498 },
-  { account_size: 250_000, drawdown_amount: 5_500, profit_target: 15_000, activation_fee: 898 },
+  { account_size: 25_000, drawdown_amount: 1_500, profit_target: 1_500, activation_fee: 143, price: 145, max_minis: 3 },
+  { account_size: 50_000, drawdown_amount: 2_500, profit_target: 3_000, activation_fee: 148, price: 175, max_minis: 7 },
+  { account_size: 100_000, drawdown_amount: 3_000, profit_target: 6_000, activation_fee: 248, price: 215, max_minis: 12 },
+  { account_size: 150_000, drawdown_amount: 4_500, profit_target: 9_000, activation_fee: 498, price: 325, max_minis: 15 },
+  { account_size: 250_000, drawdown_amount: 5_500, profit_target: 15_000, activation_fee: 898, price: 535, max_minis: 25 },
 ];
 
 const offers = (withDll: boolean): OfferInput[] =>
@@ -39,7 +51,7 @@ const offers = (withDll: boolean): OfferInput[] =>
     // DLL confirmé sur le 50k d'Option 2 uniquement.
     daily_loss_limit: withDll && s.account_size === 50_000 ? 1_100 : null,
     funded_daily_loss: withDll && s.account_size === 50_000 ? 1_100 : null,
-    confidence: 'unverified' as const,
+    confidence: 'verified' as const,
   }));
 
 export const bulenox: FirmSeed = {
@@ -87,5 +99,6 @@ export const bulenox: FirmSeed = {
   ],
   riskFlags: [
     'La règle de cohérence 40 % est décrite comme « la plainte canonique » de Bulenox (Trustpilot et X, 2025-2026) et la raison la plus fréquente de refus du PREMIER payout. À intégrer au health score.',
+    'Coupons PARTIELS relevés le 2026-07-24 : « $50OFF » sur le 50k et « $60OFF » sur le 100k uniquement, sans date de fin. Les trois autres tailles sont au tarif plein. Prix catalogue = tarif de base.',
   ],
 };

@@ -86,10 +86,15 @@ export const myFundedFutures: FirmSeed = {
       slug: 'rapid',
       name: 'MFF Rapid',
       account_kind: 'evaluation',
-      description: 'Trailing intraday, split 90 % depuis le 2026-01-12, retraits quotidiens, aucun plafond.',
+      description: '⚠️ Drawdown DURCI au passage en financé : EOD Trailing en évaluation, INTRADAY une fois financé. Split 90 %, retraits quotidiens, aucune cohérence.',
       offerDefaults: {
         ...BASE,
-        drawdown_type: 'TRAIL', funded_drawdown_type: 'TRAIL',
+        /* CORRECTION 2026-07-24 : la page officielle affiche « Drawdown Mode :
+           EOD Trailing » en évaluation et « Intraday » en financé. Le fichier
+           indiquait TRAIL dans les deux phases — l'évaluation était donc
+           décrite plus strictement que la réalité, et le durcissement invisible.
+           Même famille que TPT et TradeDay QuickPay. */
+        drawdown_type: 'EOD', funded_drawdown_type: 'TRAIL',
         consistency_pct: 100,
         funded_consistency_pct: 100,
         min_trading_days: 2,
@@ -142,5 +147,8 @@ export const myFundedFutures: FirmSeed = {
   ],
   riskFlags: [
     'Existence et paramètres du plan « Core » non établis ; la cohérence par plan est le point le plus contradictoire de toute la collecte.',
+    '⚠️ LE PLAN « FLEX » N’EXISTE PLUS au sélecteur public (relevé 2026-07-24) : le site ne propose que Builder, Rapid et Pro. Les 4 offres Flex du catalogue ne sont probablement plus vendues — à retirer ou archiver après confirmation.',
+    'Promotion « 50% OFF » avec le code 300K, mention « Based on current promotions », sans date de fin (2026-07-24).',
+    'Prix par taille NON relevés : le sélecteur de taille ne re-rend pas les cartes de façon fiable. Les tarifs vus (Builder ~105, Rapid ~109, Pro ~344 en base) n’ont pas pu être attribués à une taille avec certitude — non saisis plutôt que devinés.',
   ],
 };
