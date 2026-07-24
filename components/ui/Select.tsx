@@ -28,6 +28,11 @@ export interface SelectProps {
   name?: string;
   /** Largeur du champ selon la nature de la donnée (défaut : pleine colonne). */
   width?: 'sm' | 'md' | 'lg';
+  /**
+   * Nom accessible quand le libellé est rendu à l'extérieur (barre d'outils en
+   * ligne, par exemple). Sans `label` ni `ariaLabel`, le combobox est anonyme.
+   */
+  ariaLabel?: string;
 }
 
 /** Select custom DS (liste glass). Jamais le <select> natif. */
@@ -44,6 +49,7 @@ export default function Select({
   required,
   name,
   width,
+  ariaLabel,
 }: SelectProps) {
   const controlled = value !== undefined;
   const [internal, setInternal] = useState<string | null>(defaultValue ?? null);
@@ -112,6 +118,7 @@ export default function Select({
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-labelledby={label ? `${labelId}-label` : undefined}
+          aria-label={!label ? ariaLabel : undefined}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           disabled={disabled}

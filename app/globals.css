@@ -1326,7 +1326,11 @@ body::before {
 }
 /* Onglet actif : l'accent marque un CONTRÔLE, pas une donnée. */
 .ui .cmp-tab.is-on { color: #fff; background: var(--grad); box-shadow: none; }
+.ui .cmp-tab { border: 0; font-family: inherit; cursor: pointer; }
+.ui .cmp-tab:not(.is-on):hover { color: var(--ink); }
 .ui .cmp-tab.is-soon { opacity: .45; cursor: not-allowed; }
+/* Avertissement de phase : du texte, pas une alerte — rien n'est anormal ici. */
+.cmp-phase-note { margin: -8px 0 16px; font-size: 13px; color: var(--ink2); max-width: 74ch; }
 
 /* ---- Pilules de filtre ---- */
 .cmp-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -1363,18 +1367,25 @@ body::before {
 /* Compteur d'offres masquées faute de prix : une information, pas une alerte. */
 .cmp-hidden { color: var(--ink3); }
 .cmp-bar-right { display: flex; align-items: center; gap: 12px; }
-.cmp-sort { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); }
-.ui .cmp-select {
-  appearance: none; padding: 7px 12px; border: 0; border-radius: var(--r-pill);
-  font-family: inherit; font-size: 12.5px; color: var(--ink);
-  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow); cursor: pointer;
-}
+.cmp-sort { display: flex; align-items: center; gap: 10px; }
+.cmp-sort-label { font-size: 12.5px; color: var(--ink3); white-space: nowrap; }
+/* Le Select du DS porte déjà sa marge de champ ; ici il est en ligne. */
+.cmp-sort .field { margin: 0; }
 
 /* ---- Tableau des offres ---- */
+/* Première colonne : la case de sélection pour comparaison, largeur fixe. */
 .cmp-list {
-  --cols: minmax(150px,1.1fr) minmax(120px,1fr) 86px minmax(120px,1fr)
+  --cols: 40px minmax(150px,1.1fr) minmax(120px,1fr) 86px minmax(120px,1fr)
           minmax(140px,1fr) 100px minmax(130px,1fr) minmax(150px,1fr) 92px 62px 104px;
 }
+.cmp-list-funded {
+  --cols: 40px minmax(150px,1.1fr) minmax(120px,1fr) 86px 116px
+          minmax(150px,1fr) minmax(110px,1fr) minmax(130px,1fr) 128px 104px 104px;
+}
+.cmp-pick, .cmp-pick-h { display: flex; align-items: center; justify-content: center; }
+.cmp-pick .check { gap: 0; margin: 0; font-size: 0; }
+/* Ligne retenue pour comparaison : liseré d'accent, la donnée reste intacte. */
+.ui .data-row.is-picked { box-shadow: inset 2px 0 0 var(--c2), var(--elev-2-shadow); }
 .cmp-firm { display: flex; align-items: center; gap: 8px; }
 .ui .cmp-firm-name { font-weight: 600; color: var(--ink); }
 /* Health score : chiffre neutre en élévation, jamais l'accent de marque. */
@@ -1404,6 +1415,64 @@ body::before {
 .ui .cmp-reviewed { font-size: 12px; color: var(--ink3); }
 .cmp-plats { font-size: 12px; color: var(--ink2); }
 
+/* Valeurs sémantiques : lime/amber/red, jamais l'accent de marque (§ Identité).
+   La lisibilité du risque prime sur l'esthétique. */
+.ui .cmp-okv   { color: var(--lime); }
+.ui .cmp-warnv { color: var(--amber); }
+.ui .cmp-badv  { color: var(--red); font-weight: 600; }
+/* « à partir de » : le total d'un abonnement n'est qu'un plancher. */
+.cmp-from { font-weight: 400; font-size: 11px; color: var(--ink3); }
+
+/* ---- Barre de sélection pour comparaison ---- */
+.cmp-selbar {
+  position: sticky; bottom: 16px; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-top: 18px; padding: 12px 18px; border-radius: var(--r-pill);
+  background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow), 0 12px 32px rgba(0,0,0,.45);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+.cmp-selbar-count { font-size: 13px; color: var(--ink2); }
+.ui .cmp-selbar-count strong { font-size: 16px; color: var(--ink); }
+.cmp-selbar-hint { color: var(--ink3); }
+.cmp-selbar-actions { display: flex; gap: 8px; }
+.ui .cmp-selbar-actions .cmp-chip:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---- Comparatif côte à côte ---- */
+.cmp-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.cmp-modal-scrim { position: absolute; inset: 0; background: rgba(4, 2, 12, .72); }
+.cmp-modal-body {
+  position: relative; display: flex; flex-direction: column;
+  width: min(1200px, 96vw); max-height: 88vh; border-radius: var(--r-lg); overflow: hidden;
+}
+.cmp-modal-head {
+  display: flex; align-items: center; gap: 18px;
+  padding: 18px 22px; border-bottom: 1px solid var(--card-brd);
+}
+.ui .cmp-modal-t { flex: 1; font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+.cmp-modal-scroll { overflow: auto; padding: 6px 22px 22px; }
+
+.cmp-cmp { min-width: 640px; }
+.cmp-cmp-head, .cmp-cmp-row {
+  display: grid; grid-template-columns: minmax(180px, 1.1fr) repeat(var(--n), minmax(120px, 1fr)); gap: 14px;
+}
+.cmp-cmp-head { position: sticky; top: 0; z-index: 2; padding: 14px 0; background: var(--bg2); }
+.cmp-cmp-col { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.ui .cmp-cmp-col strong { color: var(--ink); font-weight: 700; }
+.cmp-cmp-plan { font-size: 11.5px; color: var(--ink2); }
+.cmp-cmp-size { font-size: 11.5px; color: var(--ink3); }
+.cmp-cmp-group { margin-top: 14px; }
+.ui .cmp-cmp-gt {
+  margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ink3);
+}
+.cmp-cmp-row { padding: 8px 0; font-size: 13px; color: var(--ink2); border-top: 1px solid rgba(150,110,240,.08); }
+.cmp-cmp-label { color: var(--ink3); }
+.ui .cmp-cmp-cell { color: var(--ink); font-variant-numeric: tabular-nums; }
+/* Une ligne qui diverge est la seule information utile d'un comparatif. */
+.cmp-cmp-row.is-diff .cmp-cmp-label { color: var(--ink2); }
+.cmp-cmp-row.is-diff { background: rgba(150,110,240,.05); }
+.cmp-cmp-none { padding: 28px 0; text-align: center; }
+
 /* ---- États vides ---- */
 .cmp-empty { padding: 44px 28px; text-align: center; }
 .ui .cmp-empty-t { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: var(--ink); }
@@ -1414,4 +1483,7 @@ body::before {
   .ui .pub-h1 { font-size: 1.85rem; }
   .cmp-bar { flex-direction: column; align-items: stretch; }
   .cmp-bar-right { justify-content: space-between; }
+  .cmp-modal { padding: 0; }
+  .cmp-modal-body { width: 100vw; max-height: 100vh; border-radius: 0; }
+  .cmp-selbar { flex-direction: column; align-items: stretch; gap: 10px; border-radius: var(--r-lg); }
 }

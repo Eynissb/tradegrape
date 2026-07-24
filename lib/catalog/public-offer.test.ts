@@ -7,38 +7,8 @@ import {
   buildFacets,
   valueOf,
   presetByKey,
-  type PublicOfferRow,
 } from './public-offer';
-
-function row(over: Partial<PublicOfferRow> = {}): PublicOfferRow {
-  return {
-    id: over.id ?? 'o1',
-    account_size: 50_000,
-    currency: 'USD',
-    price: 170,
-    price_regular: null,
-    activation_fee: 130,
-    is_recurring: true,
-    drawdown_type: 'EOD',
-    drawdown_amount: 2_000,
-    drawdown_locks_at_breakeven: true,
-    profit_target: 3_000,
-    daily_loss_limit: null,
-    consistency_pct: null,
-    min_trading_days: 5,
-    funded_drawdown_type: null,
-    funded_drawdown_amount: null,
-    funded_daily_loss: null,
-    funded_consistency_pct: null,
-    profit_split: 80,
-    payout_min_days: null,
-    reviewed_at: '2026-07-21',
-    plan: { slug: 'test-pro', name: 'TPT Test → PRO', account_kind: 'evaluation', rating: null },
-    firm: { slug: 'take-profit-trader', name: 'Take Profit Trader', health_score: 70 },
-    promo: null,
-    ...over,
-  };
-}
+import { row } from './offer-row.fixture';
 
 describe('prix — l’inconnu n’est jamais zéro', () => {
   it('un prix renseigné donne un total = prix + activation', () => {

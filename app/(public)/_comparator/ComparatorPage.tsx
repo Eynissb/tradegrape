@@ -80,16 +80,8 @@ export default async function ComparatorPage({ locale }: { locale: Locale }) {
         <p className="pub-sub">{d.intro}</p>
       </div>
 
-      {/* Onglets de lecture. « Compte financé » arrive ensuite : le lien est
-          désactivé plutôt qu'absent, pour annoncer la bascule. */}
-      <div className="cmp-tabs" role="tablist" aria-label={d.title}>
-        <span className="cmp-tab is-on" role="tab" aria-selected="true">{d.tabEval}</span>
-        <span className="cmp-tab is-soon" role="tab" aria-selected="false" aria-disabled="true">
-          {d.tabFunded}
-        </span>
-      </div>
-
-      <ComparatorView offers={offers} platformNames={platformNames} d={d} />
+      {/* Les onglets de phase sont interactifs : ils vivent dans la vue cliente. */}
+      <ComparatorView offers={offers} platformNames={platformNames} d={d} locale={locale} />
 
       <footer className="pub-foot">
         <span>

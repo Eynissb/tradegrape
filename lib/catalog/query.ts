@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
-import { toPublicOffer, type PublicOffer, type PublicOfferRow } from './public-offer';
+import {
+  toPublicOffer,
+  type PublicOffer,
+  type PublicOfferRow,
+  type RuleStance,
+} from './public-offer';
 
 /**
  * Lecture publique du catalogue pour le comparateur.
@@ -16,8 +21,13 @@ const OFFER_SELECT = `
   drawdown_type, drawdown_amount, drawdown_locks_at_breakeven,
   profit_target, daily_loss_limit, consistency_pct, min_trading_days,
   funded_drawdown_type, funded_drawdown_amount, funded_daily_loss, funded_consistency_pct,
-  profit_split, payout_min_days, platforms, reviewed_at,
-  plan:plans!inner ( slug, name, account_kind, rating, firm:firms!inner ( slug, name, health_score ) )
+  profit_split, payout_model, payout_buffer, payout_min_amount,
+  payout_frequency_days, payout_min_days, payout_method,
+  platforms, reviewed_at,
+  plan:plans!inner ( slug, name, account_kind, rating, firm:firms!inner ( slug, name, health_score ) ),
+  payout_caps:offer_payout_caps (
+    cycle_from, cycle_to, max_amount, max_pct, variant, split_pct, consistency_pct, min_profit_days
+  )
 `;
 
 /** PostgREST rend les relations imbriquées tantôt en objet, tantôt en tableau. */
@@ -42,7 +52,8 @@ export interface CatalogSnapshot {
 export async function loadPublicCatalog(): Promise<CatalogSnapshot> {
   const supabase = await createClient();
 
-  const [{ data: offerRows }, { data: platformRows }, { data: promoRows }] = await Promise.all([
+  const [{ data: offerRows }, { data: platformRows }, { data: promoRows }, { data: newsRows }] =
+    await Promise.all([
     supabase.from('offers').select(OFFER_SELECT).eq('is_published', true).returns<RawOffer[]>(),
     supabase.from('platforms').select('slug, name').returns<{ slug: string; name: string }[]>(),
     /* Une seule promo par firm : la plus avantageuse. `is_active` est déjà filtré
@@ -53,7 +64,21 @@ export async function loadPublicCatalog(): Promise<CatalogSnapshot> {
       .eq('is_active', true)
       .order('discount_pct', { ascending: false, nullsFirst: false })
       .returns<{ code: string; discount_pct: number | null; ends_at: string | null; firm: unknown }[]>(),
+    /* Posture « news » de chaque firm, pour la colonne du même nom en phase
+       financée. Une seule règle nous intéresse ici : le reste des styles vit
+       dans les guides. */
+    supabase
+      .from('firm_style_rules')
+      .select('stance, threshold_note, detail, firm:firms!inner ( slug )')
+      .eq('rule_key', 'news')
+      .returns<{ stance: RuleStance; threshold_note: string | null; detail: string | null; firm: unknown }[]>(),
   ]);
+
+  const newsByFirm = new Map<string, { stance: RuleStance; note: string | null }>();
+  for (const r of newsRows ?? []) {
+    const firm = one<{ slug: string }>(r.firm as never);
+    if (firm) newsByFirm.set(firm.slug, { stance: r.stance, note: r.threshold_note ?? r.detail });
+  }
 
   const promoByFirm = new Map<string, { code: string; discount_pct: number | null; ends_at: string | null }>();
   for (const p of promoRows ?? []) {
@@ -79,6 +104,8 @@ export async function loadPublicCatalog(): Promise<CatalogSnapshot> {
       plan: { slug: plan.slug, name: plan.name, account_kind: plan.account_kind, rating: plan.rating },
       firm: { slug: firm.slug, name: firm.name, health_score: firm.health_score },
       promo: promoByFirm.get(firm.slug) ?? null,
+      news_stance: newsByFirm.get(firm.slug)?.stance ?? null,
+      news_note: newsByFirm.get(firm.slug)?.note ?? null,
     } satisfies PublicOfferRow;
 
     offers.push(toPublicOffer(row));
