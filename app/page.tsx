@@ -1,42 +1,19 @@
-import Link from "next/link";
-import { buttonClasses } from "@/components/ui/Button";
+import { redirect } from 'next/navigation';
 
-export default function Home() {
-  return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-24">
-      {/* Glows ambiants (classes définies dans globals.css) */}
-      <div className="glow glow-a" style={{ top: "-8%", left: "-6%" }} />
-      <div className="glow glow-b" style={{ bottom: "-12%", right: "-8%" }} />
-      <div className="glow glow-c" style={{ top: "30%", left: "40%" }} />
-
-      <section
-        className="lg-glass relative z-10 w-full max-w-xl px-10 py-12 text-center"
-        style={{ borderRadius: "var(--r-xl)" }}
-      >
-        <span
-          className="text-xs font-semibold uppercase tracking-[0.2em]"
-          style={{ color: "var(--text-3)" }}
-        >
-          Comparateur · Journal · Futures
-        </span>
-
-        <h1 className="mt-4 text-5xl font-extrabold leading-tight">
-          <span className="grad-text">Tradegrape</span>
-        </h1>
-
-        <p className="mt-5 text-lg" style={{ color: "var(--text-2)" }}>
-          « Ne choisis pas ta prop firm. Teste-la d'abord. »
-        </p>
-
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/signup" className={buttonClasses({ size: "lg" })}>
-            Ouvrir mon journal gratuit
-          </Link>
-          <Link href="/login" className={buttonClasses({ variant: "secondary", size: "lg" })}>
-            Se connecter
-          </Link>
-        </div>
-      </section>
-    </main>
-  );
+/**
+ * Racine du site → home publique française.
+ *
+ * `/` n'est pas une page en soi : la vitrine SEO vit sur `/fr` et `/en`
+ * (canonical + hreflang y sont posés). On redirige ici plutôt que de dupliquer
+ * la home à la racine, ce qui créerait du contenu dupliqué.
+ *
+ * Redirection temporaire (307), pas permanente : elle laisse la porte ouverte à
+ * une détection de langue (`Accept-Language`) plus tard sans avoir à défaire un
+ * 308 mis en cache par les navigateurs.
+ *
+ * N'affecte PAS le retour de login : l'action `login` redirige explicitement
+ * vers `/app` (ou son paramètre `redirect`), jamais vers `/`.
+ */
+export default function RootPage() {
+  redirect('/fr');
 }

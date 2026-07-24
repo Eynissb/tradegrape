@@ -20,6 +20,8 @@ const fr = {
     'Compare les offres sur leur prix TTC réel et leurs règles vérifiées, journalise tes comptes, et découvre si tu aurais validé ailleurs. Gratuit.',
   ctaCompare: 'Comparer les prop firms',
   ctaJournal: 'Ouvrir le journal gratuit',
+  /* Session active : le CTA d'inscription devient un accès direct au journal. */
+  ctaJournalSignedIn: 'Ouvrir mon journal',
 
   /* Libellés des trois chiffres du hero — les valeurs viennent de la base. */
   statFirms: 'prop firms comparées',
@@ -53,6 +55,7 @@ const en: Dict = {
     'Compare offers on real total price and verified rules, journal your accounts, and find out whether you’d have passed elsewhere. Free.',
   ctaCompare: 'Compare prop firms',
   ctaJournal: 'Open the free journal',
+  ctaJournalSignedIn: 'Open my journal',
 
   statFirms: 'prop firms compared',
   statOffers: 'accounts compared',

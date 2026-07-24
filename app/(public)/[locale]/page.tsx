@@ -5,6 +5,7 @@ import { buildHomeStats } from '@/lib/catalog/home-stats';
 import { HOME_DICTS } from '@/lib/i18n/home';
 import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
+import JournalCta from '@/app/(public)/_home/JournalCta';
 
 /**
  * Page d'accueil publique, une par langue (`/fr`, `/en`). Porte d'entrée SEO :
@@ -91,10 +92,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <Link href={comparatorHref(l)} className={buttonClasses({ size: 'lg' })}>
             {d.ctaCompare}
           </Link>
-          {/* Le journal mène à l'inscription GRATUITE, pas à un mur de login. */}
-          <Link href="/signup" className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
-            {d.ctaJournal}
-          </Link>
+          {/* Déconnecté : inscription GRATUITE (/signup), jamais un mur de login.
+              Connecté : accès direct au journal (/app). Bascule côté client pour
+              garder la page statique. */}
+          <JournalCta signedOutLabel={d.ctaJournal} signedInLabel={d.ctaJournalSignedIn} />
         </div>
 
         {/* Trois chiffres réels tirés de la base publiée. */}
