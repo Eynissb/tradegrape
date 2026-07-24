@@ -27,6 +27,7 @@ export interface OfferValues {
   max_minis?: number | null;
   max_micros?: number | null;
   funded_drawdown_type?: string | null;
+  funded_drawdown_amount?: number | null;
   funded_daily_loss?: number | null;
   funded_consistency_pct?: number | null;
   funded_max_minis?: number | null;
@@ -179,6 +180,9 @@ export default function OfferForm({
 
       <Section title="Compte financé">
         <Select name="funded_drawdown_type" label="Drawdown funded" value={offer?.funded_drawdown_type} options={DRAWDOWN} allowEmpty />
+        {/* Vide = même montant qu'en évaluation. Renseigner uniquement si la
+            firm change le MONTANT au passage (ex : Phidias Express 500 → 800). */}
+        <Text name="funded_drawdown_amount" label="Montant drawdown funded (vide = idem)" value={offer?.funded_drawdown_amount} type="number" step="0.01" />
         <Text name="funded_daily_loss" label="Perte journalière funded" value={offer?.funded_daily_loss} type="number" step="0.01" />
         <Text name="funded_consistency_pct" label="Cohérence funded (%)" value={offer?.funded_consistency_pct} type="number" step="0.01" />
         <Text name="funded_max_minis" label="Minis max (funded)" value={offer?.funded_max_minis} type="number" />

@@ -32,6 +32,7 @@ export interface OfferRuleRow {
   min_trading_days: number | null;
   /* Règles durcies en financé — lues par `rulesForPhase`, pas seulement stockées. */
   funded_drawdown_type: OfferRules['drawdownType'] | null;
+  funded_drawdown_amount?: number | null;
   funded_daily_loss: number | null;
   funded_consistency_pct: number | null;
   payout_buffer: number | null;
@@ -92,6 +93,7 @@ export function buildRulesSnapshot(
       minTradingDays: Number(offer.min_trading_days ?? 1),
       // Figées au snapshot : le compte gardera ces variantes même si l'offre change.
       fundedDrawdownType: offer.funded_drawdown_type ?? null,
+      fundedDrawdownAmount: n(offer.funded_drawdown_amount),
       fundedDailyLossLimit: n(offer.funded_daily_loss),
       drawdownLocksAtBreakeven: offer.drawdown_locks_at_breakeven ?? true,
     },

@@ -19,7 +19,7 @@ const DRAWDOWN_TYPES: DrawdownType[] = ['EOD', 'TRAIL', 'STATIC'];
 const JOURNAL_STATUSES = ['evaluation', 'funded', 'passed', 'failed', 'archived'] as const;
 
 const OFFER_COLS =
-  'account_size, currency, drawdown_type, drawdown_amount, drawdown_locks_at_breakeven, profit_target, daily_loss_limit, consistency_pct, min_trading_days, funded_drawdown_type, funded_daily_loss, funded_consistency_pct, payout_buffer, payout_min_amount, payout_min_days, payout_daily_threshold, profit_split, payout_model, plan_id';
+  'account_size, currency, drawdown_type, drawdown_amount, drawdown_locks_at_breakeven, profit_target, daily_loss_limit, consistency_pct, min_trading_days, funded_drawdown_type, funded_drawdown_amount, funded_daily_loss, funded_consistency_pct, payout_buffer, payout_min_amount, payout_min_days, payout_daily_threshold, profit_split, payout_model, plan_id';
 
 function backWithError(path: string, message: string): never {
   const sep = path.includes('?') ? '&' : '?';

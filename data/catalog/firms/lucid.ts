@@ -121,7 +121,7 @@ export const lucid: FirmSeed = {
     'Frais de reset relevés (60 à 280 $ selon plan et taille) : aucune colonne `reset_fee` au schéma (§12 #9).',
   ],
   riskFlags: [
-    'PROMO PERMANENTE ? Chaque carte affiche un prix barré puis « W/ COUPON AT CHECKOUT » avec le code VAULT (~-40 %), sans date de fin (relevé 2026-07-24). Prix catalogue = tarif de base.',
+    '[PROMO] Remise permanente affichée : prix barré puis « W/ COUPON AT CHECKOUT », code VAULT (~-40 %) sur chaque carte (relevé 2026-07-24). AUCUNE date de fin. Prix catalogue = tarif de base.',
     'LucidMaxx (payouts quotidiens) et LucidLive (étape 3 du parcours officiel, retraits quotidiens, capital réel) ne sont pas collectés.',
     'LucidBlack fermé aux nouvelles inscriptions, fonctionnalités reversées dans Pro et Maxx.',
   ],

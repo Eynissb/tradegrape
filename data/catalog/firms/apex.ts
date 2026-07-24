@@ -120,7 +120,7 @@ export const apex: FirmSeed = {
   ],
   riskFlags: [
     'Métaux SUSPENDUS depuis le 2026-03-14 (GC, SI, QI, QO, MGC, HG, PL, PA), sans date de retour annoncée.',
-    'PROMO PERMANENTE ? Le site affiche « ANY SIZE EVALS UP TO 90% OFF », code SAVENOW, avec un compte à rebours « Ends in: 5j » (relevé 2026-07-24, soit une fin annoncée vers le 2026-07-29). Le prix catalogue retenu est le tarif de BASE, sans coupon : un remisé à -90 % en permanence n’est pas un prix normal. À revoir après la date annoncée pour savoir si le compte à rebours se réinitialise.',
+    '[PROMO] Remise permanente affichée : « ANY SIZE EVALS UP TO 90% OFF », code SAVENOW. Compte à rebours « Ends in: 5j » relevé le 2026-07-24, soit une fin annoncée vers le 2026-07-29 — SEULE firm à afficher une échéance. Prix catalogue = tarif de base. À revoir après cette date : si le compte à rebours se réinitialise, c’est une fausse urgence (§9).',
     'ANOMALIE DE PRIX : le 100k « No Activation Fee » Intraday est à 590 $, MOINS cher que le 50k (790 $). Relu deux fois sur la page. Peut être une erreur du site — à confirmer avant publication.',
     'Le financé affiche « Daily Loss Limit : YES » sur les formules INTRADAY aussi, alors que la collecte le réservait à l’EOD. Montant non publié — non saisi.',
   ],

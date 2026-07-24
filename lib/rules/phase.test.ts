@@ -81,6 +81,69 @@ describe('rulesForPhase', () => {
   });
 });
 
+describe('montant du drawdown durci en financé — cas Phidias', () => {
+  /* Phidias 25K Express to Live : drawdown STATIQUE de 500 $ en évaluation,
+     800 $ une fois financé. Le TYPE ne change pas, seul le MONTANT. */
+  const PHIDIAS: OfferRules = {
+    marketType: 'futures',
+    accountSize: 25_000,
+    drawdownType: 'STATIC',
+    drawdownAmount: 500,
+    profitTarget: 1_500,
+    dailyLossLimit: null,
+    consistencyPct: 100,
+    minTradingDays: 0,
+    fundedDrawdownAmount: 800,
+  };
+
+  it('en évaluation, le montant d’origine s’applique', () => {
+    expect(rulesForPhase(PHIDIAS, 'evaluation').drawdownAmount).toBe(500);
+  });
+
+  it('en financé, le montant durci s’applique', () => {
+    const f = rulesForPhase(PHIDIAS, 'funded');
+    expect(f.drawdownAmount).toBe(800);
+    expect(f.drawdownType).toBe('STATIC'); // le type, lui, ne change pas
+  });
+
+  it('le PLANCHER descend : ignorer ce champ le surestimait', () => {
+    const evalFloor = computeDrawdownFloor(rulesForPhase(PHIDIAS, 'evaluation'), 25_000, []).floor;
+    const fundedFloor = computeDrawdownFloor(rulesForPhase(PHIDIAS, 'funded'), 25_000, []).floor;
+
+    expect(evalFloor).toBe(24_500); // 25 000 - 500
+    expect(fundedFloor).toBe(24_200); // 25 000 - 800
+    expect(fundedFloor).toBeLessThan(evalFloor);
+  });
+
+  it('la marge affichée en financé est PLUS GRANDE de l’écart de montant', () => {
+    const trades = [t('2026-05-04', -200)];
+    const asEval = evaluateAccount(rulesForPhase(PHIDIAS, 'evaluation'), 25_000, trades, '2026-05-04');
+    const asFunded = evaluateAccount(rulesForPhase(PHIDIAS, 'funded'), 25_000, trades, '2026-05-04');
+
+    expect(asEval.drawdown.value).toBe(300); // 24 800 - 24 500
+    expect(asFunded.drawdown.value).toBe(600); // 24 800 - 24 200
+  });
+
+  it('sans le champ, le montant d’évaluation resterait appliqué', () => {
+    const sansChamp: OfferRules = { ...PHIDIAS, fundedDrawdownAmount: null };
+    expect(rulesForPhase(sansChamp, 'funded').drawdownAmount).toBe(500);
+    expect(rulesForPhase(sansChamp, 'funded')).toBe(sansChamp); // même référence
+  });
+
+  it('se combine avec les autres durcissements sans les écraser', () => {
+    const combo: OfferRules = {
+      ...PHIDIAS,
+      dailyLossLimit: 1_000,
+      fundedDrawdownType: 'TRAIL',
+      fundedDailyLossLimit: 600,
+    };
+    const f = rulesForPhase(combo, 'funded');
+    expect(f.drawdownType).toBe('TRAIL');
+    expect(f.drawdownAmount).toBe(800);
+    expect(f.dailyLossLimit).toBe(600);
+  });
+});
+
 describe('verrou au breakeven — Apex selon la plateforme', () => {
   /* Apex 50k trailing 2 500. Le compte monte à +4 000 puis redescend.
      Sur Rithmic le plancher se fige au capital ; sur Tradovate il continue

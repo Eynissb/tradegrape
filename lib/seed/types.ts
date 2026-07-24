@@ -42,6 +42,8 @@ export interface OfferSeed {
   max_micros?: number | null;
 
   funded_drawdown_type?: 'EOD' | 'TRAIL' | 'STATIC' | null;
+  /** Montant du drawdown en financé s'il diffère (Phidias Express : 500 → 800). */
+  funded_drawdown_amount?: number | null;
   funded_daily_loss?: number | null;
   funded_consistency_pct?: number | null;
   funded_max_minis?: number | null;

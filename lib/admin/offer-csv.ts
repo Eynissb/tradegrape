@@ -42,6 +42,7 @@ export const OFFER_COLUMNS: readonly Col[] = [
   { key: 'max_minis', kind: 'num' },
   { key: 'max_micros', kind: 'num' },
   { key: 'funded_drawdown_type', kind: 'enum', enum: DRAWDOWN },
+  { key: 'funded_drawdown_amount', kind: 'num' },
   { key: 'funded_daily_loss', kind: 'num' },
   { key: 'funded_consistency_pct', kind: 'num' },
   { key: 'funded_max_minis', kind: 'num' },

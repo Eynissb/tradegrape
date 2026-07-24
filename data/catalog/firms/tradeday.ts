@@ -115,5 +115,6 @@ export const tradeday: FirmSeed = {
   ],
   riskFlags: [
     'Le code promo « ANT » (-30 % → -50 %) est négocié en affiliation par le comparateur CONCURRENT : à NE PAS saisir. Cible de négociation pour un code exclusif Tradegrape.',
+    '[PROMO] Remise permanente affichée : « Now 50% OFF! », prix barré 125/230/350 → 62/115/175, code TDNEW mis en avant « for best pricing » (relevé 2026-07-24). AUCUNE date de fin. Ambiguïté non levée : impossible de dire depuis la page si le code est NÉCESSAIRE pour obtenir le tarif remisé ou s’il donne davantage. Ici `price` porte le tarif AFFICHÉ et `price_regular` le barré — traitement différent des autres firms, où le remisé exige explicitement un code.',
   ],
 };

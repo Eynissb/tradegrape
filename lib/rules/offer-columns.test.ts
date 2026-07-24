@@ -69,6 +69,7 @@ const REGISTRY: Record<string, Entry> = {
   consistency_pct: { consumer: 'engine' },
   min_trading_days: { consumer: 'engine' },
   funded_drawdown_type: { consumer: 'engine' },
+  funded_drawdown_amount: { consumer: 'engine' },
   funded_daily_loss: { consumer: 'engine' },
   funded_consistency_pct: { consumer: 'engine' },
   payout_buffer: { consumer: 'engine' },

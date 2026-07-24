@@ -99,6 +99,6 @@ export const bulenox: FirmSeed = {
   ],
   riskFlags: [
     'La règle de cohérence 40 % est décrite comme « la plainte canonique » de Bulenox (Trustpilot et X, 2025-2026) et la raison la plus fréquente de refus du PREMIER payout. À intégrer au health score.',
-    'Coupons PARTIELS relevés le 2026-07-24 : « $50OFF » sur le 50k et « $60OFF » sur le 100k uniquement, sans date de fin. Les trois autres tailles sont au tarif plein. Prix catalogue = tarif de base.',
+    '[PROMO] Remise PARTIELLE : coupons « $50OFF » (50k) et « $60OFF » (100k) uniquement, les trois autres tailles au tarif plein (relevé 2026-07-24). AUCUNE date de fin. Prix catalogue = tarif de base.',
   ],
 };

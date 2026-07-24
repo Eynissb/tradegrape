@@ -151,7 +151,7 @@ export const tradeify: FirmSeed = {
     'Split possiblement à 100 % sur les 15 000 premiers dollars cumulés chez Growth — non confirmé sur la page publique, non saisi.',
   ],
   riskFlags: [
-    'PROMO PERMANENTE ? Bandeau « 40% OFF » et « Save $X with code JULY » sur toutes les cartes (relevé 2026-07-24). Aucune date de fin affichée, contrairement à Apex. Le prix catalogue retenu est le tarif de BASE : un remisé permanent n’est pas un prix normal.',
+    '[PROMO] Remise permanente affichée : « 40% OFF » et « Save $X with code JULY » sur toutes les cartes (relevé 2026-07-24). AUCUNE date de fin. Prix catalogue = tarif de base.',
     'Un « Advanced Challenge » figure au contrat officiel mais n’apparaît pas dans le sélecteur public — non collecté.',
   ],
 };

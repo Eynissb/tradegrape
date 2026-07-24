@@ -34,6 +34,13 @@ export interface OfferRules {
 
   /** Type de drawdown en compte financé, s'il diffère de l'évaluation. */
   fundedDrawdownType?: DrawdownType | null;
+  /**
+   * MONTANT du drawdown en compte financé, s'il diffère de l'évaluation.
+   * Distinct du type : Phidias Express passe de 500 $ à 800 $ en gardant un
+   * drawdown statique. Sans ce champ, le moteur garderait le montant
+   * d'évaluation et afficherait un plancher trop haut.
+   */
+  fundedDrawdownAmount?: number | null;
   /** Perte journalière max en compte financé, si elle diffère de l'évaluation. */
   fundedDailyLossLimit?: number | null;
 

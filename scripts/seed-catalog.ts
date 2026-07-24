@@ -63,6 +63,7 @@ function offerRow(firm: FirmSeed, planId: string, plan: FirmSeed['plans'][number
     max_minis: n(o.max_minis),
     max_micros: n(o.max_micros),
     funded_drawdown_type: n(o.funded_drawdown_type),
+    funded_drawdown_amount: n(o.funded_drawdown_amount),
     funded_daily_loss: n(o.funded_daily_loss),
     funded_consistency_pct: n(o.funded_consistency_pct),
     funded_max_minis: n(o.funded_max_minis),
@@ -99,6 +100,7 @@ async function preflight(db: Db): Promise<void> {
     { table: 'offers', cols: 'reviewed_at', migration: '0011_offer_reviewed_at' },
     { table: 'offers', cols: 'drawdown_locks_at_breakeven', migration: '0012_drawdown_lock' },
     { table: 'offer_payout_caps', cols: 'variant, split_pct, consistency_pct, min_profit_days, daily_threshold', migration: '0013_payout_variants' },
+    { table: 'offers', cols: 'funded_drawdown_amount', migration: '0015_funded_drawdown_amount' },
   ];
   const missing: string[] = [];
 

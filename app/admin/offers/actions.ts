@@ -31,6 +31,7 @@ function buildOfferPayload(fd: FormData) {
 
     // funded
     funded_drawdown_type: str(fd, 'funded_drawdown_type'),
+    funded_drawdown_amount: num(fd, 'funded_drawdown_amount'),
     funded_daily_loss: num(fd, 'funded_daily_loss'),
     funded_consistency_pct: num(fd, 'funded_consistency_pct'),
     funded_max_minis: num(fd, 'funded_max_minis'),

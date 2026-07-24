@@ -35,16 +35,22 @@ export function rulesForPhase(rules: OfferRules, phase: AccountPhase): OfferRule
   if (phase !== 'funded') return rules;
 
   const drawdownType = rules.fundedDrawdownType ?? rules.drawdownType;
+  const drawdownAmount =
+    rules.fundedDrawdownAmount != null ? rules.fundedDrawdownAmount : rules.drawdownAmount;
   const dailyLossLimit =
     rules.fundedDailyLossLimit != null ? rules.fundedDailyLossLimit : rules.dailyLossLimit;
 
   // Rien ne change : on renvoie l'objet d'origine (évite une allocation et
   // garde l'égalité référentielle pour les comparaisons côté appelant).
-  if (drawdownType === rules.drawdownType && dailyLossLimit === rules.dailyLossLimit) {
+  if (
+    drawdownType === rules.drawdownType &&
+    drawdownAmount === rules.drawdownAmount &&
+    dailyLossLimit === rules.dailyLossLimit
+  ) {
     return rules;
   }
 
-  return { ...rules, drawdownType, dailyLossLimit };
+  return { ...rules, drawdownType, drawdownAmount, dailyLossLimit };
 }
 
 /** Raccourci : règles effectives directement depuis le statut du compte. */
