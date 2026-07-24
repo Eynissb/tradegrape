@@ -247,6 +247,8 @@ export default function ComparatorView({
             floor: (t) => `${d.priceFrom} ${t}`,
             varies: (t) => `${t}, ${d.capVaries}`,
             stance: (s) => NEWS_LABELS(d)[s],
+            permanentPromo: (t) => `${t} · ${d.promoPermanent}`,
+            pending: d.notVerified,
           })
         : [],
     [picked, d],
@@ -913,7 +915,10 @@ function ComparePanel({
   }, [onClose]);
 
   const phases = PHASE_LABEL(d);
-  const visible = onlyDiff ? rows.filter((r) => r.differs) : rows;
+  /* Le durcissement (ligne pivot) reste visible même en « différences seulement » :
+     savoir qu'AUCUNE des offres comparées ne durcit est une information utile,
+     pas du bruit. */
+  const visible = onlyDiff ? rows.filter((r) => r.differs || r.pivotal) : rows;
 
   /* Les lignes sont regroupées par phase pour que « Cohérence (évaluation) » et
      « Cohérence (retrait) » ne se lisent jamais comme une seule règle. */
@@ -966,7 +971,10 @@ function ComparePanel({
                 <section key={g.phase} className="cmp-cmp-group">
                   <h3 className="cmp-cmp-gt">{phases[g.phase]}</h3>
                   {g.rows.map((r) => (
-                    <div key={r.key} className={`cmp-cmp-row${r.differs ? ' is-diff' : ''}`}>
+                    <div
+                      key={r.key}
+                      className={`cmp-cmp-row${r.differs ? ' is-diff' : ''}${r.pivotal ? ' is-pivot' : ''}`}
+                    >
                       <span className="cmp-cmp-label">{d[ROW_LABEL[r.key]]}</span>
                       {r.cells.map((c, i) => (
                         <span key={i} className="cmp-cmp-cell">

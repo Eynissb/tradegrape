@@ -272,6 +272,8 @@ describe('lignes de comparaison', () => {
     floor: (t: string) => `à partir de ${t}`,
     varies: (t: string) => `${t}, puis davantage`,
     stance: (s: string) => `[${s}]`,
+    permanentPromo: (t: string) => `${t} · permanente`,
+    pending: 'à vérifier',
   };
 
   it('marque comme différentes les seules lignes qui divergent', () => {
@@ -320,7 +322,7 @@ describe('lignes de comparaison', () => {
     expect(cell).toEqual({ kind: 'value', text: 'à partir de 1433 USD', tone: undefined });
   });
 
-  it('signale le durcissement en financé comme une divergence lisible', () => {
+  it('signale le durcissement en financé comme une divergence lisible et PIVOT', () => {
     const soft = toPublicOffer(row({ id: 'a' }));
     const hard = toPublicOffer(
       row({ id: 'b', drawdown_type: 'EOD', funded_drawdown_type: 'TRAIL' }),
@@ -328,9 +330,47 @@ describe('lignes de comparaison', () => {
     const rows = buildCompareRows([soft, hard], fmt);
     const h = rows.find((r) => r.key === 'hardening');
     expect(h?.differs).toBe(true);
+    // La ligne pivot reste mise en relief même en « différences seulement ».
+    expect(h?.pivotal).toBe(true);
     expect(h?.cells).toEqual([
       { kind: 'value', text: 'inchangées', tone: 'ok' },
       { kind: 'value', text: 'EOD → TRAIL', tone: 'bad' },
+    ]);
+  });
+
+  it('la ligne durcissement est pivot même quand aucune offre ne durcit', () => {
+    // Pivot ne dépend pas de `differs` : la ligne doit rester visible et repérable.
+    const o = toPublicOffer(row());
+    const h = buildCompareRows([o, o], fmt).find((r) => r.key === 'hardening');
+    expect(h?.pivotal).toBe(true);
+    expect(h?.differs).toBe(false);
+  });
+
+  it('signale la promo permanente en toutes lettres, pas seulement en couleur', () => {
+    const o = toPublicOffer(
+      row({ promo: { code: 'TG40', discount_pct: 40, ends_at: null } }),
+    );
+    const cell = buildCompareRows([o, o], fmt).find((r) => r.key === 'promo')?.cells[0];
+    expect(cell).toEqual({ kind: 'value', text: 'TG40 −40 % · permanente', tone: 'warn' });
+  });
+
+  it('une promo à échéance n’est pas marquée permanente', () => {
+    const o = toPublicOffer(
+      row({ promo: { code: 'SUMMER', discount_pct: 20, ends_at: '2026-08-31' } }),
+    );
+    const cell = buildCompareRows([o, o], fmt).find((r) => r.key === 'promo')?.cells[0];
+    expect(cell).toEqual({ kind: 'value', text: 'SUMMER −20 %', tone: undefined });
+  });
+
+  it('reviewed_at NULL se lit « à vérifier » (warn), pas « inconnu »', () => {
+    // Sens distinct : non vérifié par nous, ≠ non publié par la firm.
+    const verified = toPublicOffer(row({ id: 'v', reviewed_at: '2026-07-21' }));
+    const pending = toPublicOffer(row({ id: 'p', reviewed_at: null }));
+    const rows = buildCompareRows([verified, pending], fmt);
+    const cells = rows.find((r) => r.key === 'reviewed')?.cells;
+    expect(cells).toEqual([
+      { kind: 'value', text: '2026-07-21', tone: 'ok' },
+      { kind: 'value', text: 'à vérifier', tone: 'warn' },
     ]);
   });
 

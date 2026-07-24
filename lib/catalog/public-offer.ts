@@ -628,6 +628,13 @@ export interface CompareRow {
    * intérêt d'un comparatif : montrer où elles diffèrent réellement.
    */
   differs: boolean;
+  /**
+   * Ligne décisive, mise en relief par l'UI même si l'option « seulement les
+   * différences » est active. Réservé au durcissement du drawdown en financé :
+   * c'est LE piège que la comparaison côte à côte rend le plus lisible — une
+   * offre qui passe EOD→trailing à côté d'une qui ne bouge pas.
+   */
+  pivotal?: boolean;
 }
 
 const cellKey = (c: CompareCell): string =>
@@ -647,6 +654,10 @@ export interface CompareFormat {
   varies: (text: string) => string;
   /** Traduit une posture de règle de style. */
   stance: (s: RuleStance) => string;
+  /** Suffixe signalant une remise sans échéance : « TG40 −40 % · permanente ». */
+  permanentPromo: (text: string) => string;
+  /** Libellé d'une offre non vérifiée à la source (reviewed_at NULL). */
+  pending: string;
 }
 
 /** Construit les lignes du comparatif. */
@@ -655,11 +666,17 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
   const U: CompareCell = { kind: 'unknown' };
   const N: CompareCell = { kind: 'none' };
 
-  const row = (key: CompareRowKey, phase: CompareRow['phase'], cells: CompareCell[]): CompareRow => ({
+  const row = (
+    key: CompareRowKey,
+    phase: CompareRow['phase'],
+    cells: CompareCell[],
+    pivotal = false,
+  ): CompareRow => ({
     key,
     phase,
     cells,
     differs: new Set(cells.map(cellKey)).size > 1,
+    pivotal,
   });
 
   const each = (fn: (o: PublicOffer) => CompareCell): CompareCell[] => offers.map(fn);
@@ -678,15 +695,13 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
     row('activation', 'price', each((o) =>
       o.activationFee === 0 ? N : V(money(o, o.activationFee)),
     )),
-    row('promo', 'price', each((o) =>
-      o.trust.promo
-        ? V(
-            o.trust.promo.code +
-              (o.trust.promo.discountPct != null ? ` −${fmt.num(o.trust.promo.discountPct)} %` : ''),
-            o.trust.promo.permanent ? 'warn' : undefined,
-          )
-        : N,
-    )),
+    row('promo', 'price', each((o) => {
+      const p = o.trust.promo;
+      if (!p) return N;
+      const base = p.code + (p.discountPct != null ? ` −${fmt.num(p.discountPct)} %` : '');
+      // Remise sans échéance : signalée en toutes lettres, pas seulement colorée.
+      return V(p.permanent ? fmt.permanentPromo(base) : base, p.permanent ? 'warn' : undefined);
+    })),
 
     /* ---- évaluation ---- */
     row('drawdown', 'eval', each((o) =>
@@ -705,11 +720,19 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
     row('minDays', 'eval', each((o) => V(fmt.num(o.minTradingDays)))),
 
     /* ---- compte financé ---- */
-    row('hardening', 'funded', each((o) =>
-      o.fundedHardening.differs
-        ? V(`${o.drawdown.type} → ${o.funded.drawdown.type}`, 'bad')
-        : V('inchangées', 'ok'),
-    )),
+    /* Ligne pivot : le durcissement est la révélation la plus forte d'un côte à
+       côte. `pivotal` la garde visible et mise en relief même en mode
+       « différences seulement ». */
+    row(
+      'hardening',
+      'funded',
+      each((o) =>
+        o.fundedHardening.differs
+          ? V(`${o.drawdown.type} → ${o.funded.drawdown.type}`, 'bad')
+          : V('inchangées', 'ok'),
+      ),
+      true,
+    ),
     row('fundedDrawdown', 'funded', each((o) =>
       V(`${o.funded.drawdown.type} ${fmt.num(o.funded.drawdown.amount)}`),
     )),
@@ -746,8 +769,10 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
       o.firm.healthScore === null ? U : V(fmt.num(o.firm.healthScore)),
     )),
     row('rating', 'trust', each((o) => (o.plan.rating === null ? U : V(String(o.plan.rating))))),
+    /* `reviewed_at` NULL ≠ « la firm ne publie pas » : c'est « pas encore
+       vérifié par nous ». Même libellé que le badge du tableau. */
     row('reviewed', 'trust', each((o) =>
-      o.trust.reviewedAt ? V(o.trust.reviewedAt, 'ok') : U,
+      o.trust.reviewedAt ? V(o.trust.reviewedAt, 'ok') : V(fmt.pending, 'warn'),
     )),
   ];
 }

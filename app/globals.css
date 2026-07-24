@@ -1451,11 +1451,15 @@ body::before {
 .ui .cmp-modal-t { flex: 1; font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; color: var(--ink); }
 .cmp-modal-scroll { overflow: auto; padding: 6px 22px 22px; }
 
-.cmp-cmp { min-width: 640px; }
+/* Largeur mini = colonne d'attributs (figée) + N offres. `--lbl` centralise la
+   largeur du libellé pour la réduire sur mobile sans toucher au reste. */
+.cmp-cmp { --lbl: 190px; min-width: calc(var(--lbl) + var(--n) * 148px); }
 .cmp-cmp-head, .cmp-cmp-row {
-  display: grid; grid-template-columns: minmax(180px, 1.1fr) repeat(var(--n), minmax(120px, 1fr)); gap: 14px;
+  display: grid; grid-template-columns: var(--lbl) repeat(var(--n), minmax(120px, 1fr)); gap: 14px;
 }
 .cmp-cmp-head { position: sticky; top: 0; z-index: 2; padding: 14px 0; background: var(--bg2); }
+/* La première case de l'en-tête est le coin figé (haut + gauche). */
+.cmp-cmp-head > :first-child { position: sticky; left: 0; z-index: 3; background: var(--bg2); }
 .cmp-cmp-col { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
 .ui .cmp-cmp-col strong { color: var(--ink); font-weight: 700; }
 .cmp-cmp-plan { font-size: 11.5px; color: var(--ink2); }
@@ -1466,11 +1470,23 @@ body::before {
   text-transform: uppercase; color: var(--ink3);
 }
 .cmp-cmp-row { padding: 8px 0; font-size: 13px; color: var(--ink2); border-top: 1px solid rgba(150,110,240,.08); }
-.cmp-cmp-label { color: var(--ink3); }
+/* Colonne d'attributs figée : elle reste lisible pendant le défilement
+   horizontal. Fond opaque obligatoire — sinon les cellules glissent dessous. */
+.cmp-cmp-label {
+  position: sticky; left: 0; z-index: 1;
+  color: var(--ink3); background: var(--bg2); padding-right: 10px;
+  box-shadow: 8px 0 8px -8px rgba(0, 0, 0, .5);
+}
 .ui .cmp-cmp-cell { color: var(--ink); font-variant-numeric: tabular-nums; }
 /* Une ligne qui diverge est la seule information utile d'un comparatif. */
-.cmp-cmp-row.is-diff .cmp-cmp-label { color: var(--ink2); }
 .cmp-cmp-row.is-diff { background: rgba(150,110,240,.05); }
+.cmp-cmp-row.is-diff .cmp-cmp-label { color: var(--ink2); background: #12101d; }
+/* Ligne pivot (durcissement en financé) : elle doit sauter aux yeux. Marqueur
+   amber à gauche, visible même défilée, et libellé plein contraste. */
+.cmp-cmp-row.is-pivot { background: rgba(255, 180, 59, .06); border-top-color: rgba(255, 180, 59, .3); }
+.ui .cmp-cmp-row.is-pivot .cmp-cmp-label {
+  color: var(--ink); font-weight: 600; background: #171308; box-shadow: inset 3px 0 0 var(--amber);
+}
 .cmp-cmp-none { padding: 28px 0; text-align: center; }
 
 /* ---- États vides ---- */
@@ -1486,4 +1502,13 @@ body::before {
   .cmp-modal { padding: 0; }
   .cmp-modal-body { width: 100vw; max-height: 100vh; border-radius: 0; }
   .cmp-selbar { flex-direction: column; align-items: stretch; gap: 10px; border-radius: var(--r-lg); }
+}
+
+/* Mobile : la colonne d'attributs rétrécit pour laisser voir plus d'offres, et
+   le défilement horizontal reste maîtrisé grâce au libellé figé (ci-dessus). */
+@media (max-width: 520px) {
+  .cmp-cmp { --lbl: 116px; }
+  .cmp-modal-scroll { padding: 6px 14px 18px; }
+  .cmp-cmp-label { font-size: 12px; }
+  .ui .cmp-cmp-cell { font-size: 12.5px; }
 }
