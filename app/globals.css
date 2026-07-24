@@ -1463,6 +1463,27 @@ body::before {
 .home-faq-item[open] .home-faq-q::after { content: '−'; }
 .home-faq-a { margin: 0 0 16px; font-size: 14px; line-height: 1.65; color: var(--ink2); max-width: 72ch; }
 
+/* ---- Footer ---- */
+.home-footer {
+  margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--card-brd);
+}
+.home-footer-top {
+  display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 32px; align-items: start;
+}
+.home-footer-logo { font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; }
+.home-footer-tag { margin-top: 8px; max-width: 34ch; font-size: 13.5px; color: var(--ink3); }
+.home-footer-col { display: flex; flex-direction: column; gap: 10px; }
+.home-footer-ct {
+  font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
+}
+.ui .home-footer-link { color: var(--ink2); font-size: 14px; text-decoration: none; width: fit-content; }
+.ui .home-footer-link:hover { color: var(--ink); }
+.ui .home-footer-link.is-on { color: var(--ink); font-weight: 600; }
+.home-footer-bottom {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 36px; padding: 20px 0 40px; font-size: 12.5px; color: var(--ink3);
+}
+
 @media (max-width: 760px) {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
 }
@@ -1471,6 +1492,7 @@ body::before {
   .home-cta .btn { width: 100%; }
   .home-stat { flex-basis: 100%; }
   .home-section { margin-top: 52px; }
+  .home-footer-top { grid-template-columns: 1fr; gap: 26px; }
 }
 
 /* ---- Onglets de lecture (Éval / Financé) ---- */

@@ -108,6 +108,15 @@ const fr = {
     'Le prix affiché est le prix TTC, activation comprise. Aucune firm publiée ne facture aujourd’hui de frais d’activation séparés.',
   faqCompareCta: 'Ouvrir le comparateur',
 
+  /* ---- Footer ---- */
+  footerTagline: 'Ne choisis pas ta prop firm. Teste-la d’abord.',
+  footerNavTitle: 'Explorer',
+  footerCompare: 'Comparateur',
+  footerJournal: 'Journal gratuit',
+  footerLangTitle: 'Langue',
+  footerDataAsOf: 'Données du comparateur générées le',
+  footerRights: 'Comparateur de prop firms futures et journal de trading.',
+
   soon: 'Section à venir',
 } as const;
 
@@ -203,6 +212,14 @@ const en: Dict = {
   faqFeesAEmpty:
     'The listed price is the total price, activation included. No published firm currently charges a separate activation fee.',
   faqCompareCta: 'Open the comparator',
+
+  footerTagline: 'Don’t pick your prop firm. Test it first.',
+  footerNavTitle: 'Explore',
+  footerCompare: 'Comparator',
+  footerJournal: 'Free journal',
+  footerLangTitle: 'Language',
+  footerDataAsOf: 'Comparator data generated on',
+  footerRights: 'Futures prop firm comparison and trading journal.',
 
   soon: 'Section coming next',
 };

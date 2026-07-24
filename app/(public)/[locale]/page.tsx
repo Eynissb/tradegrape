@@ -7,6 +7,7 @@ import { HOME_DICTS } from '@/lib/i18n/home';
 import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
 import JournalCta from '@/app/(public)/_home/JournalCta';
+import SiteFooter from '@/app/(public)/_home/SiteFooter';
 
 /**
  * Page d'accueil publique, une par langue (`/fr`, `/en`). Porte d'entrée SEO :
@@ -54,7 +55,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const l = locale as Locale;
   const d = HOME_DICTS[l];
 
-  const { offers } = await loadPublicCatalog();
+  const { offers, generatedAt } = await loadPublicCatalog();
   const stats = buildHomeStats(offers);
   const preview = sortOffers(offers, 'total_price').slice(0, 5);
 
@@ -349,6 +350,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
       </section>
+
+      <SiteFooter locale={l} generatedAt={generatedAt} />
     </main>
   );
 }
