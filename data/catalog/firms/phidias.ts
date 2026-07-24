@@ -12,8 +12,8 @@ const BASE: Partial<OfferInput> = {
   is_recurring: false, // paiement unique ou mensuel au choix, sans activation en OTP
   activation_fee: 0,
   drawdown_locks_at_breakeven: true,
-  consistency_pct: 100, // aucune cohérence en évaluation, toutes formules
-  funded_consistency_pct: 30,
+  consistency_pct: 100, // aucune cohérence en évaluation, toutes formules — confirmé
+  funded_consistency_pct: 30, // Fundamental et Premium ; Express est à None (cf. plan)
   daily_loss_limit: null, // aucun DLL
   funded_daily_loss: null,
   payout_min_amount: 500,
@@ -52,11 +52,22 @@ export const phidias: FirmSeed = {
         min_trading_days: 0,
         profit_split: 90,
         payout_frequency_days: 1,
+        // CORRECTION 2026-07-24 : la table de comparaison officielle donne
+        // « Consistency (Funded) : None » pour Express to Live, alors que
+        // Fundamental et Premium sont à 30 %. Le fichier appliquait 30 % partout.
+        funded_consistency_pct: 100,
         confidence: 'verified',
         unverifiedFields: ['price'],
       },
       offers: [
-        { account_size: 25_000, drawdown_amount: 500, profit_target: 1_500, max_minis: 2, max_micros: 20, funded_max_minis: 2, funded_max_micros: 20, confidence: 'verified' },
+        {
+          account_size: 25_000, price: 277, drawdown_amount: 500, profit_target: 1_500,
+          max_minis: 2, max_micros: 20,
+          // La phase financée débloque 7 minis / 70 micros (relevé « AFTER YOU PASS »).
+          funded_max_minis: 7, funded_max_micros: 70,
+          confidence: 'verified',
+          note: 'Prix de base 277 $ (55 $ avec le code PHIDIAS80, -80 %). Le drawdown financé est de 800 $ contre 500 $ en évaluation — non modélisable, cf. engineCaveats.',
+        },
         { account_size: 50_000, drawdown_amount: 650, profit_target: 2_500, confidence: 'unverified', unverifiedFields: ['drawdown_amount', 'max_minis', 'price'], note: 'Drawdown et limites de contrats repris du concurrent.' },
         { account_size: 100_000, drawdown_amount: 800, profit_target: 3_500, confidence: 'unverified', unverifiedFields: ['drawdown_amount', 'max_minis', 'price'], note: 'Drawdown et limites de contrats repris du concurrent.' },
         { account_size: 150_000, drawdown_amount: 1_000, profit_target: 4_500, confidence: 'unverified', unverifiedFields: ['drawdown_amount', 'max_minis', 'price'], note: 'Drawdown et limites de contrats repris du concurrent.' },
@@ -90,7 +101,9 @@ export const phidias: FirmSeed = {
       offerDefaults: {
         ...BASE,
         drawdown_type: 'EOD', funded_drawdown_type: 'EOD',
-        min_trading_days: 3,
+        // CORRECTION 2026-07-24 : 1 jour minimum, pas 3. La table officielle
+        // donne « Min. Trading Days (Eval) » à 1 pour Premium, 3 pour Fundamental.
+        min_trading_days: 1,
         profit_split: 75, // valeur de DÉPART du palier
         payout_model: 'progressive',
         payout_frequency_days: 5,
@@ -114,10 +127,15 @@ export const phidias: FirmSeed = {
   ],
 
   engineCaveats: [
+    '⚠️ MANQUE DE SCHÉMA — le MONTANT du drawdown change entre les phases, pas seulement son type. Sur le 25K Express : 500 $ en évaluation, 800 $ une fois financé (relevé sur le sélecteur officiel « EVALUATION / AFTER YOU PASS »). `offers` porte `funded_drawdown_type` mais AUCUN `funded_drawdown_amount` : le moteur gardera 500 $ en financé, donc un plancher TROP HAUT et une marge sous-estimée. À ajouter au §12 avec les autres écarts de phase.',
     'Split progressif Premium (75 → 100 % sur cinq payouts) saisi dans les plafonds. La RÉPARTITION exacte entre les paliers 2 à 4 est interpolée : seuls les bornes 75 % et 100 % sont établies.',
     'Overnight et week-end autorisés sur Premium : `overnight_allowed`/`weekend_allowed` vivent au niveau FIRM, pas du plan — non renseignés pour éviter de généraliser à Fundamental.',
   ],
   riskFlags: [
     'Trustpilot 3,9/5 avec un groupe notable d’avis 1 étoile sur des DÉSACTIVATIONS DE COMPTES et des problèmes de flux de données. À intégrer au health score.',
+    'PROMO : bandeau « 80% Off OTP & Up to 60% Off Evals — Limited time », codes SUNSETPNL et PHIDIAS80, SANS date de fin (relevé 2026-07-24). Prix catalogue = tarif de base (277 $ sur le 25K Express contre 55 $ avec code).',
+    'CONTRADICTION SUR LA PAGE : la carte du 25K Express affiche « 0 MIN. DAYS » alors que la table de comparaison de la même page donne « Min. Trading Days (Eval) : 1 ». Valeur 0 conservée (celle de la carte produit) — à trancher à la source.',
+    'Un type de compte « 10K Challenge » figure au sélecteur officiel. La collecte le disait devenu une compétition mensuelle — non saisi, à clarifier.',
+    'Frais d’activation de 149 $ sur la formule MENSUELLE, 0 $ en paiement unique. Seul le paiement unique est saisi.',
   ],
 };
