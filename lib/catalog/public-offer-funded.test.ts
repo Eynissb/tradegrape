@@ -374,6 +374,23 @@ describe('lignes de comparaison', () => {
     ]);
   });
 
+  it('la date de vérification reste montrée même quand elle est identique', () => {
+    // Deux offres de la même firm : reviewed_at identique, donc `differs` est
+    // faux — mais `alwaysShow` la garde visible en mode « différences seulement ».
+    const o = toPublicOffer(row({ reviewed_at: '2026-07-21' }));
+    const reviewed = buildCompareRows([o, o], fmt).find((r) => r.key === 'reviewed');
+    expect(reviewed?.differs).toBe(false);
+    expect(reviewed?.alwaysShow).toBe(true);
+    expect(reviewed?.pivotal).toBeFalsy(); // visible, mais pas de relief amber
+  });
+
+  it('la ligne pivot est aussi alwaysShow, la mise en relief impliquant la visibilité', () => {
+    const o = toPublicOffer(row());
+    const h = buildCompareRows([o, o], fmt).find((r) => r.key === 'hardening');
+    expect(h?.pivotal).toBe(true);
+    expect(h?.alwaysShow).toBe(true);
+  });
+
   it('rend exactement les lignes déclarées, dans l’ordre déclaré', () => {
     // Garde-fou : une ligne ajoutée sans être déclarée n'aurait pas de libellé.
     const o = toPublicOffer(row());

@@ -629,12 +629,19 @@ export interface CompareRow {
    */
   differs: boolean;
   /**
-   * Ligne décisive, mise en relief par l'UI même si l'option « seulement les
-   * différences » est active. Réservé au durcissement du drawdown en financé :
-   * c'est LE piège que la comparaison côte à côte rend le plus lisible — une
-   * offre qui passe EOD→trailing à côté d'une qui ne bouge pas.
+   * Ligne décisive, mise en relief AMBER par l'UI. Réservé au durcissement du
+   * drawdown en financé : c'est LE piège que la comparaison côte à côte rend le
+   * plus lisible — une offre qui passe EOD→trailing à côté d'une qui ne bouge pas.
    */
   pivotal?: boolean;
+  /**
+   * Ligne conservée même en mode « différences seulement », sans mise en relief.
+   * Pour les signaux qu'on veut garantir présents quelles que soient les offres
+   * comparées : la date de vérification (`reviewed`) doit rester lisible même
+   * quand on compare deux offres de la même firm, où elle est identique.
+   * `pivotal` l'implique.
+   */
+  alwaysShow?: boolean;
 }
 
 const cellKey = (c: CompareCell): string =>
@@ -670,13 +677,15 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
     key: CompareRowKey,
     phase: CompareRow['phase'],
     cells: CompareCell[],
-    pivotal = false,
+    flags: { pivotal?: boolean; alwaysShow?: boolean } = {},
   ): CompareRow => ({
     key,
     phase,
     cells,
     differs: new Set(cells.map(cellKey)).size > 1,
-    pivotal,
+    pivotal: flags.pivotal ?? false,
+    // Une ligne pivot est toujours mise en avant : elle est donc toujours montrée.
+    alwaysShow: flags.alwaysShow ?? flags.pivotal ?? false,
   });
 
   const each = (fn: (o: PublicOffer) => CompareCell): CompareCell[] => offers.map(fn);
@@ -731,7 +740,7 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
           ? V(`${o.drawdown.type} → ${o.funded.drawdown.type}`, 'bad')
           : V('inchangées', 'ok'),
       ),
-      true,
+      { pivotal: true },
     ),
     row('fundedDrawdown', 'funded', each((o) =>
       V(`${o.funded.drawdown.type} ${fmt.num(o.funded.drawdown.amount)}`),
@@ -770,9 +779,14 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
     )),
     row('rating', 'trust', each((o) => (o.plan.rating === null ? U : V(String(o.plan.rating))))),
     /* `reviewed_at` NULL ≠ « la firm ne publie pas » : c'est « pas encore
-       vérifié par nous ». Même libellé que le badge du tableau. */
-    row('reviewed', 'trust', each((o) =>
-      o.trust.reviewedAt ? V(o.trust.reviewedAt, 'ok') : V(fmt.pending, 'warn'),
-    )),
+       vérifié par nous ». Même libellé que le badge du tableau. Toujours montrée
+       (`alwaysShow`) : la date de vérification est un signal de confiance qu'on
+       garde visible même en comparant deux offres identiques sur ce point. */
+    row(
+      'reviewed',
+      'trust',
+      each((o) => (o.trust.reviewedAt ? V(o.trust.reviewedAt, 'ok') : V(fmt.pending, 'warn'))),
+      { alwaysShow: true },
+    ),
   ];
 }

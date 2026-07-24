@@ -915,10 +915,10 @@ function ComparePanel({
   }, [onClose]);
 
   const phases = PHASE_LABEL(d);
-  /* Le durcissement (ligne pivot) reste visible même en « différences seulement » :
-     savoir qu'AUCUNE des offres comparées ne durcit est une information utile,
-     pas du bruit. */
-  const visible = onlyDiff ? rows.filter((r) => r.differs || r.pivotal) : rows;
+  /* En « différences seulement », on garde aussi les lignes `alwaysShow` : le
+     durcissement (savoir qu'AUCUNE offre ne durcit est une info) et la date de
+     vérification (signal de confiance à ne jamais masquer, même identique). */
+  const visible = onlyDiff ? rows.filter((r) => r.differs || r.alwaysShow) : rows;
 
   /* Les lignes sont regroupées par phase pour que « Cohérence (évaluation) » et
      « Cohérence (retrait) » ne se lisent jamais comme une seule règle. */
