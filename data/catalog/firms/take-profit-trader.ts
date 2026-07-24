@@ -31,10 +31,13 @@ const BASE: Partial<OfferInput> = {
   payout_model: 'buffer_then_free',
   payout_min_amount: 250,
   platforms: ['ninjatrader', 'tradovate', 'tradingview'],
-  price: null,
-  confidence: 'unverified',
-  unverifiedFields: ['drawdown_amount', 'price'],
-  note: 'Drawdowns repris du comparateur concurrent ; prix mensuel non trouvé.',
+  /* Vérifié sur takeprofittrader.com le 2026-07-24 : le tableau officiel
+     « Your Take Profit Funded Journey » confirme Test = End Of Day → PRO =
+     Intraday, split 80/20 en PRO (90/10 seulement en PRO+), cohérence en Test
+     uniquement, et aucune règle de daily loss dans aucune phase. */
+  confidence: 'verified',
+  unverifiedFields: ['activation_fee'],
+  note: 'Règles et prix vérifiés à la source. Frais d’activation PRO (130 $) non affichés sur la page publique.',
 };
 
 /** Buffer TPT = capital + drawdown. */
@@ -60,11 +63,11 @@ export const takeProfitTrader: FirmSeed = {
       description: 'Objectif à 6 % du capital. EOD pendant le Test, trailing intraday une fois financé.',
       offerDefaults: BASE,
       offers: [
-        { account_size: 25_000, drawdown_amount: 1_500, profit_target: 1_500, payout_buffer: b(25_000, 1_500), max_minis: 3, max_micros: 30, funded_max_minis: 3, funded_max_micros: 30, confidence: 'unverified' },
-        { account_size: 50_000, drawdown_amount: 2_000, profit_target: 3_000, payout_buffer: b(50_000, 2_000), max_minis: 6, max_micros: 60, funded_max_minis: 6, funded_max_micros: 60, confidence: 'unverified' },
-        { account_size: 75_000, drawdown_amount: 2_500, profit_target: 4_500, payout_buffer: b(75_000, 2_500), max_minis: 9, max_micros: 90, funded_max_minis: 9, funded_max_micros: 90, confidence: 'unverified' },
-        { account_size: 100_000, drawdown_amount: 3_000, profit_target: 6_000, payout_buffer: b(100_000, 3_000), max_minis: 12, max_micros: 120, funded_max_minis: 12, funded_max_micros: 120, confidence: 'unverified' },
-        { account_size: 150_000, drawdown_amount: 4_500, profit_target: 9_000, payout_buffer: b(150_000, 4_500), max_minis: 15, max_micros: 150, funded_max_minis: 15, funded_max_micros: 150, confidence: 'unverified' },
+        { account_size: 25_000, price: 150, drawdown_amount: 1_500, profit_target: 1_500, payout_buffer: b(25_000, 1_500), max_minis: 3, max_micros: 30, funded_max_minis: 3, funded_max_micros: 30, confidence: 'verified' },
+        { account_size: 50_000, price: 170, drawdown_amount: 2_000, profit_target: 3_000, payout_buffer: b(50_000, 2_000), max_minis: 6, max_micros: 60, funded_max_minis: 6, funded_max_micros: 60, confidence: 'verified' },
+        { account_size: 75_000, price: 245, drawdown_amount: 2_500, profit_target: 4_500, payout_buffer: b(75_000, 2_500), max_minis: 9, max_micros: 90, funded_max_minis: 9, funded_max_micros: 90, confidence: 'verified' },
+        { account_size: 100_000, price: 330, drawdown_amount: 3_000, profit_target: 6_000, payout_buffer: b(100_000, 3_000), max_minis: 12, max_micros: 120, funded_max_minis: 12, funded_max_micros: 120, confidence: 'verified' },
+        { account_size: 150_000, price: 360, drawdown_amount: 4_500, profit_target: 9_000, payout_buffer: b(150_000, 4_500), max_minis: 15, max_micros: 150, funded_max_minis: 15, funded_max_micros: 150, confidence: 'verified' },
       ],
     },
   ],
