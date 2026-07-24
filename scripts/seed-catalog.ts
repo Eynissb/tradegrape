@@ -81,6 +81,64 @@ function offerRow(firm: FirmSeed, planId: string, plan: FirmSeed['plans'][number
   };
 }
 
+/* --------------------------------------------------------------- pré-vol */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Db = ReturnType<typeof createClient<any>>;
+
+/**
+ * Vérifie que le schéma porte bien les colonnes attendues, et que `price`
+ * accepte NULL. PostgREST n'expose pas `information_schema` : on sonde donc
+ * par des `select … limit 0` (colonne absente = erreur immédiate), et la
+ * nullabilité de `price` par un aller-retour sur une ligne jetable annulé
+ * aussitôt — c'est le seul moyen fiable de la détecter sans SQL direct.
+ */
+async function preflight(db: Db): Promise<void> {
+  console.log(`\n=== PRÉ-VOL SCHÉMA ===`);
+  const probes: { table: string; cols: string; migration: string }[] = [
+    { table: 'offers', cols: 'reviewed_at', migration: '0011_offer_reviewed_at' },
+    { table: 'offers', cols: 'drawdown_locks_at_breakeven', migration: '0012_drawdown_lock' },
+    { table: 'offer_payout_caps', cols: 'variant, split_pct, consistency_pct, min_profit_days, daily_threshold', migration: '0013_payout_variants' },
+  ];
+  const missing: string[] = [];
+
+  for (const p of probes) {
+    const { error } = await db.from(p.table).select(p.cols).limit(0);
+    if (error) missing.push(`${p.migration} (${p.table}.${p.cols.split(',')[0].trim()})`);
+    else console.log(`  ${p.migration.padEnd(28)} ✓`);
+  }
+
+  // Nullabilité de `price` : on ne peut la lire, on la teste.
+  const anyNullPrice = [...FIRMS].some((f) =>
+    f.plans.some((pl) => pl.offers.some((o) => resolveOffer(pl, o).price == null)),
+  );
+  if (anyNullPrice) {
+    const { data: plan } = await db.from('plans').select('id').limit(1).maybeSingle();
+    if (plan) {
+      const probeSize = -1; // taille impossible : ne peut entrer en collision
+      const { error } = await db.from('offers').insert({
+        plan_id: plan.id, account_size: probeSize, price: null,
+        drawdown_type: 'EOD', drawdown_amount: 1,
+      });
+      if (error?.message?.includes('null value in column "price"')) {
+        missing.push('0014_price_nullable (offers.price doit accepter NULL)');
+      } else {
+        console.log(`  0014_price_nullable          ✓`);
+        await db.from('offers').delete().eq('plan_id', plan.id).eq('account_size', probeSize);
+      }
+    }
+  }
+
+  if (missing.length > 0) {
+    console.log(`\n  ✗ Migrations manquantes :`);
+    for (const m of missing) console.log(`      · ${m}`);
+    throw new Error(
+      'Applique ces migrations dans Supabase avant de relancer. ' +
+      'Aucune écriture n’a eu lieu.',
+    );
+  }
+}
+
 /* ------------------------------------------------------------------ main */
 
 async function main() {
@@ -138,7 +196,13 @@ async function main() {
 
   /* 3. Écriture. */
   const { url, key } = loadEnv();
-  const db = createClient(url, key, { auth: { persistSession: false } });
+  const db: Db = createClient(url, key, { auth: { persistSession: false } });
+
+  /* Pré-vol : le schéma doit être prêt AVANT la première écriture. Sans ce
+     contrôle, une migration manquante fait échouer le seed à mi-parcours et
+     laisse un état partiel — c'est exactement ce qui s'est produit avec 0014. */
+  await preflight(db);
+
   console.log(`\n=== ÉCRITURE ===`);
 
   const { error: pErr } = await db.from('platforms').upsert(
