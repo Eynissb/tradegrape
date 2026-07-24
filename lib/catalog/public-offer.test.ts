@@ -6,6 +6,7 @@ import {
   sortOffers,
   buildFacets,
   valueOf,
+  presetByKey,
   type PublicOfferRow,
 } from './public-offer';
 
@@ -189,6 +190,47 @@ describe('verrou du plancher', () => {
   });
   it('false est respecté (Apex sur Tradovate)', () => {
     expect(toPublicOffer(row({ drawdown_locks_at_breakeven: false })).drawdown.locksAtBreakeven).toBe(false);
+  });
+});
+
+describe('presets — les intentions d’arrivée', () => {
+  const cheapNoCons = toPublicOffer(row({ id: 'cheap', price: 99, activation_fee: 0, consistency_pct: 100 }));
+  const dearStrict = toPublicOffer(row({ id: 'dear', price: 700, activation_fee: 0, consistency_pct: 40 }));
+  const hardened = toPublicOffer(
+    row({ id: 'hardened', price: 120, activation_fee: 0, consistency_pct: 100, funded_drawdown_type: 'TRAIL' }),
+  );
+  const noPrice = toPublicOffer(row({ id: 'nop', price: null, consistency_pct: 100 }));
+  const all = [cheapNoCons, dearStrict, hardened, noPrice];
+
+  const apply = (key: string) => {
+    const p = presetByKey(key)!;
+    return sortOffers(filterOffers(all, p.filters), p.sort).map((o) => o.id);
+  };
+
+  it('« budget » garde le TTC sous 150 et écarte les prix inconnus', () => {
+    expect(apply('budget')).toEqual(['cheap', 'hardened']);
+  });
+
+  it('« sans cohérence » écarte les 40 %, garde les 100 %', () => {
+    expect(apply('no_consistency')).not.toContain('dear');
+    expect(apply('no_consistency')).toContain('cheap');
+  });
+
+  it('« débutant » écarte AUSSI les offres qui durcissent en financé', () => {
+    // Le point du preset : ne pas laisser un débutant découvrir un trailing
+    // intraday après avoir passé son évaluation en EOD.
+    const out = apply('beginner');
+    expect(out).not.toContain('hardened');
+    expect(out).toContain('cheap');
+  });
+
+  it('« meilleures notes » n’impose PAS « vérifiées seulement »', () => {
+    // Mélanger la qualité de l'offre et l'état de NOTRE collecte serait trompeur.
+    expect(presetByKey('top_rated')!.filters.verifiedOnly).toBeUndefined();
+  });
+
+  it('une clé inconnue ne renvoie rien plutôt que de filtrer au hasard', () => {
+    expect(presetByKey('nimportequoi')).toBeNull();
   });
 });
 

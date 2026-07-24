@@ -60,6 +60,8 @@ export interface PublicOfferRow {
 
   profit_split: number | null;
   payout_min_days: number | null;
+  /** Slugs du catalogue plateformes. */
+  platforms?: string[] | null;
   reviewed_at: string | null;
 
   plan: { slug: string; name: string; account_kind: string; rating: number | null };
@@ -108,6 +110,8 @@ export interface PublicOffer {
   hasConsistency: boolean;
   minTradingDays: number;
   profitSplit: number | null;
+  /** Slugs de plateformes ; résolus en noms à l'affichage. */
+  platforms: string[];
 
   trust: {
     /** `null` = règles jamais vérifiées à la source (§8). */
@@ -184,6 +188,7 @@ export function toPublicOffer(row: PublicOfferRow): PublicOffer {
     hasConsistency: consistency !== null && consistency > 0 && consistency < 100,
     minTradingDays: Number(row.min_trading_days ?? 1),
     profitSplit: n(row.profit_split),
+    platforms: row.platforms ?? [],
 
     trust: {
       reviewedAt: row.reviewed_at,
@@ -295,6 +300,48 @@ export function sortOffers(offers: PublicOffer[], key: SortKey = 'health'): Publ
         (a, b) => descNullLast(a.firm.healthScore, b.firm.healthScore) || a.size - b.size,
       );
   }
+}
+
+/* ------------------------------------------------------------------ presets */
+
+/**
+ * Filtres en un clic. Un comparateur avec vingt filtres n'est pas utilisable :
+ * les presets couvrent les intentions réelles d'arrivée.
+ *
+ * Ils vivent ici, et non dans le JSX, pour être testables — et pour que leur
+ * définition soit un choix éditorial explicite plutôt qu'un détail d'interface.
+ */
+export interface Preset {
+  key: string;
+  filters: OfferFilters;
+  sort: SortKey;
+}
+
+export const PRESETS: readonly Preset[] = [
+  /* « Budget » : prix TTC réel sous 150, trié du moins cher au plus cher.
+     Les offres sans prix publié sont écartées et comptées à l'écran. */
+  { key: 'budget', filters: { maxTotalPrice: 150 }, sort: 'total_price' },
+
+  /* « Meilleures notes » : tri par notation éditoriale du plan. On n'impose pas
+     `verifiedOnly` — ce serait mélanger la qualité de l'offre et l'état de notre
+     propre collecte. */
+  { key: 'top_rated', filters: {}, sort: 'rating' },
+
+  /* « Sans cohérence » : la règle qui fait le plus échouer les payouts. */
+  { key: 'no_consistency', filters: { noConsistency: true }, sort: 'health' },
+
+  /* « Débutant » : EOD (le plus indulgent), aucune cohérence, et surtout AUCUN
+     durcissement en financé — un débutant ne doit pas découvrir un trailing
+     intraday après avoir passé son éval en EOD. */
+  {
+    key: 'beginner',
+    filters: { drawdownTypes: ['EOD'], noConsistency: true, noFundedHardening: true },
+    sort: 'health',
+  },
+] as const;
+
+export function presetByKey(key: string): Preset | null {
+  return PRESETS.find((p) => p.key === key) ?? null;
 }
 
 /* ------------------------------------------------------------------ facettes */
