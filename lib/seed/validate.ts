@@ -29,27 +29,40 @@ export function resolveOffer(plan: PlanSeed, offer: OfferInput): OfferSeed {
 }
 
 /**
- * Champs COMMERCIAUX : leur incertitude ne remet pas en cause la vérification
- * des RÈGLES. `reviewed_at` date la vérification des règles à la source (§8) —
- * un prix introuvable ne doit pas faire croire que le drawdown n'a pas été
- * vérifié, sinon la file de travail `where reviewed_at is null` se remplit de
- * faux positifs et perd son utilité.
+ * Champs dont l'incertitude NE BLOQUE PAS la vérification.
+ *
+ * Critère unique : **ce champ peut-il faire échouer un compte ?**
+ *  - Commerciaux — un prix introuvable ne dit rien de la justesse du drawdown.
+ *  - Limites de contrats — elles bornent la taille de position, elles ne
+ *    décident jamais de la survie du compte ; le moteur ne les lit même pas.
+ *
+ * Sans cette distinction, la file `where reviewed_at is null` confondrait
+ * « limite de contrats inconnue » et « drawdown incertain », et perdrait son
+ * tranchant : on ne saurait plus quoi revérifier en priorité.
+ *
+ * Liste volontairement NÉGATIVE : un champ non listé bloque par défaut. Sur un
+ * outil de gestion du risque, une incertitude non classée doit coûter.
  */
-const COMMERCIAL_FIELDS = new Set(['price', 'price_regular', 'activation_fee', 'is_recurring']);
+const NON_BLOCKING_FIELDS = new Set([
+  // Commercial
+  'price', 'price_regular', 'activation_fee', 'is_recurring',
+  // Taille de position — jamais une cause d'échec
+  'max_minis', 'max_micros', 'funded_max_minis', 'funded_max_micros',
+]);
 
-/** Champs incertains qui portent réellement sur une règle. */
-export function unverifiedRuleFields(offer: OfferSeed): string[] {
-  return (offer.unverifiedFields ?? []).filter((f) => !COMMERCIAL_FIELDS.has(f));
+/** Champs incertains qui peuvent réellement faire échouer un compte. */
+export function blockingUnverifiedFields(offer: OfferSeed): string[] {
+  return (offer.unverifiedFields ?? []).filter((f) => !NON_BLOCKING_FIELDS.has(f));
 }
 
 /**
- * `reviewed_at` d'une offre : la date de collecte si ses RÈGLES sont vérifiées,
- * sinon `null`. Une offre dont un champ de règle reste douteux n'est pas
- * vérifiée — elle doit rester dans la file de revérification.
+ * `reviewed_at` d'une offre : la date de collecte si les règles qui décident de
+ * la survie du compte sont vérifiées, sinon `null`. Une offre dont un champ
+ * bloquant reste douteux doit rester dans la file de revérification.
  */
 export function reviewedAtFor(firm: FirmSeed, offer: OfferSeed): string | null {
   if (offer.confidence !== 'verified') return null;
-  if (unverifiedRuleFields(offer).length > 0) return null;
+  if (blockingUnverifiedFields(offer).length > 0) return null;
   return firm.collectedAt;
 }
 

@@ -138,7 +138,44 @@ async function checkBuffers() {
   console.log(`\n  ${suspects === 0 ? 'Aucun buffer suspect.' : `${suspects} buffer(s) SUSPECT(S) — unité probablement fausse.`}`);
 }
 
+/**
+ * File de revérification, relue depuis la base et ventilée par firm.
+ * Croise avec le fichier source pour dire POURQUOI chaque offre y est.
+ */
+async function queue() {
+  const { data: offers } = await db
+    .from('offers')
+    .select('account_size, reviewed_at, plan:plans!inner(slug, firm:firms!inner(slug, name))')
+    .order('account_size');
+
+  const rel = <T>(v: T | T[] | null): T | null => (Array.isArray(v) ? v[0] ?? null : v);
+  const byFirm = new Map<string, { total: number; todo: number }>();
+  for (const o of offers ?? []) {
+    const plan = rel(o.plan as never) as { firm: unknown } | null;
+    const firm = plan && (rel(plan.firm as never) as { name: string } | null);
+    const name = firm?.name ?? '?';
+    const e = byFirm.get(name) ?? { total: 0, todo: 0 };
+    e.total++;
+    if (o.reviewed_at == null) e.todo++;
+    byFirm.set(name, e);
+  }
+
+  console.log(`\n=== FILE DE REVÉRIFICATION (reviewed_at IS NULL) ===`);
+  const rows = [...byFirm.entries()].sort((a, b) => b[1].todo - a[1].todo || a[0].localeCompare(b[0]));
+  for (const [name, e] of rows) {
+    const bar = e.todo === 0 ? '' : ` ${'█'.repeat(Math.ceil((e.todo / e.total) * 10))}`;
+    console.log(`  ${name.padEnd(24)}${String(e.todo).padStart(3)} / ${String(e.total).padEnd(4)}${bar}`);
+  }
+  const total = rows.reduce((s, [, e]) => s + e.total, 0);
+  const todo = rows.reduce((s, [, e]) => s + e.todo, 0);
+  console.log(`  ${'TOTAL'.padEnd(24)}${String(todo).padStart(3)} / ${total}`);
+}
+
 async function main() {
+  if (process.argv.includes('--queue')) {
+    await queue();
+    return;
+  }
   if (slugs.length === 0) {
     await counts();
     return;
