@@ -60,17 +60,21 @@ async function detail(slug: string) {
   for (const plan of plans ?? []) {
     const { data: offers } = await db
       .from('offers')
-      .select('id, account_size, price, drawdown_type, drawdown_amount, drawdown_locks_at_breakeven, consistency_pct, funded_drawdown_type, funded_consistency_pct, payout_buffer, profit_split, reviewed_at')
+      .select('id, account_size, price, drawdown_type, drawdown_amount, drawdown_locks_at_breakeven, consistency_pct, funded_drawdown_type, funded_drawdown_amount, funded_consistency_pct, payout_buffer, profit_split, reviewed_at')
       .eq('plan_id', plan.id).order('account_size');
 
     console.log(`\n  ── ${plan.name} (${plan.slug})`);
     console.log(`     ${'taille'.padEnd(10)}${'dd éval'.padEnd(16)}${'dd financé'.padEnd(13)}${'cohér. éval'.padEnd(13)}${'cohér. fin.'.padEnd(13)}${'buffer'.padEnd(12)}vérifiée`);
     for (const o of offers ?? []) {
       const lock = o.drawdown_locks_at_breakeven ? '' : ' (non verrouillé)';
+      // Montant financé distinct : c'est le 4e mécanisme de durcissement.
+      const fundedDd = o.funded_drawdown_amount != null
+        ? `${o.funded_drawdown_type ?? '—'} ${money(o.funded_drawdown_amount)}`
+        : String(o.funded_drawdown_type ?? '—');
       console.log(
         `     ${money(o.account_size).padEnd(10)}` +
         `${(o.drawdown_type + ' ' + money(o.drawdown_amount) + lock).padEnd(16)}` +
-        `${String(o.funded_drawdown_type ?? '—').padEnd(13)}` +
+        `${fundedDd.padEnd(13)}` +
         `${pct(o.consistency_pct).padEnd(13)}` +
         `${pct(o.funded_consistency_pct).padEnd(13)}` +
         `${money(o.payout_buffer).padEnd(12)}` +

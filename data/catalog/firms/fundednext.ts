@@ -58,10 +58,19 @@ export const fundednext: FirmSeed = {
         confidence: 'verified',
         unverifiedFields: ['price'],
       },
+      /* Prix de BASE relevés sur fundednext.com le 2026-07-24 (le site affiche
+         -47 % avec le code JLFLEX). Seul le 150K a pu être relu en détail : la
+         carte affiche « Challenge Rules » et « Funded & Reward Rules » côte à
+         côte, et confirme « Consistency Rule : None » une fois financé. */
       offers: [
-        { account_size: 50_000, drawdown_amount: 2_000, profit_target: 2_500, confidence: 'verified' },
-        { account_size: 100_000, drawdown_amount: 2_500, profit_target: 5_000, confidence: 'verified' },
-        { account_size: 150_000, drawdown_amount: 4_000, profit_target: 8_000, confidence: 'verified' },
+        { account_size: 50_000, price: 133.99, drawdown_amount: 2_000, profit_target: 2_500, confidence: 'verified' },
+        { account_size: 100_000, price: 249.99, drawdown_amount: 2_500, profit_target: 5_000, confidence: 'verified' },
+        {
+          account_size: 150_000, price: 483.99, drawdown_amount: 4_000, profit_target: 8_000,
+          max_minis: 8, max_micros: 80, funded_max_minis: 8, funded_max_micros: 80,
+          confidence: 'verified',
+          payoutCaps: [{ cycle_from: 1, cycle_to: null, max_amount: 4_000, min_profit_days: 5, note: 'Maximum Withdrawal relevé à la source' }],
+        },
       ],
     },
     {
@@ -122,5 +131,9 @@ export const fundednext: FirmSeed = {
   ],
   riskFlags: [
     '« Bolt » arrêté pour les nouveaux achats : les données du comparateur concurrent restent valables pour les comptes existants mais sont périmées à l’achat.',
+    '[PROMO] Deux remises permanentes affichées (relevé 2026-07-24) : « Rapid Pro and Rapid Daily : 50% Off » code RAPID50, et « First 5 : 47% OFF | After 5 : 40% OFF » code JLFLEX sur Flex. AUCUNE date de fin. Prix catalogue = tarif de base.',
+    'RAPID SE DIVISE EN DEUX PARCOURS — « Rapid Pro » (sans limite de perte quotidienne, paiement en 3 jours) et « Rapid Daily » (récompenses quotidiennes, sans cohérence). Le catalogue ne porte que Rapid Daily : le parcours Pro manque (§12 #5, comme Topstep et Tradeify Select).',
+    'Prix Legacy et Rapid NON relevés : les onglets de la page ne re-rendent pas les cartes, toutes les lectures renvoyaient le contenu de Flex. Non devinés.',
+    'Part de récompense « jusqu’à 95 % » via un module payant (« Add-Ons : 95% Reward Share »), en plus de l’option 90 % déjà connue. Le `profit_split` de base reste à 80 — les options payantes sont parkées (§12 #8).',
   ],
 };

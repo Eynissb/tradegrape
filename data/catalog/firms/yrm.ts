@@ -53,21 +53,32 @@ export const yrm: FirmSeed = {
       description: 'Six jours qualifiants à 150 $ minimum. Cohérence 35 % en compte financé.',
       offerDefaults: {
         ...BASE,
-        consistency_pct: 100, // aucune cohérence en évaluation
+        // CORRECTION 2026-07-24 : les cartes officielles affichent
+        // « Consistency : 50% » dans les Challenge Rules. Le fichier disait
+        // « aucune cohérence en évaluation » — c'était faux, et une cohérence
+        // absente est la plus permissive des erreurs possibles.
+        consistency_pct: 50,
         funded_consistency_pct: 35,
         payout_min_days: 6,
+        // Activation à 0 $ actuellement, 99 $ barré — la gratuité est promotionnelle.
+        activation_fee: 0,
+        // L'onglet « Funded Rules » de la page ne bascule pas : la cohérence
+        // financée (35 %) n'a pas pu être relue à la source.
+        unverifiedFields: ['funded_consistency_pct'],
       },
       offers: [
         {
-          account_size: 25_000, drawdown_amount: 1_000, profit_target: 1_500, confidence: 'verified',
+          account_size: 25_000, price: 99, drawdown_amount: 1_000, profit_target: 1_500,
+          max_minis: 2, max_micros: 20, confidence: 'verified',
           payoutCaps: [{ cycle_from: 1, cycle_to: 1, max_amount: 800, note: 'Plafond du premier payout' }],
         },
         {
-          account_size: 50_000, drawdown_amount: 2_000, profit_target: 3_000, confidence: 'verified',
+          account_size: 50_000, price: 132, drawdown_amount: 2_000, profit_target: 3_000,
+          max_minis: 5, max_micros: 50, confidence: 'verified',
           payoutCaps: [{ cycle_from: 1, cycle_to: 1, max_amount: 1_500, note: 'Plafond du premier payout' }],
         },
-        { account_size: 100_000, drawdown_amount: 3_000, profit_target: 6_000, confidence: 'verified' },
-        { account_size: 150_000, drawdown_amount: 4_500, profit_target: 9_000, confidence: 'verified' },
+        { account_size: 100_000, price: 232, drawdown_amount: 3_000, profit_target: 6_000, max_minis: 10, max_micros: 100, confidence: 'verified' },
+        { account_size: 150_000, price: 298, drawdown_amount: 4_500, profit_target: 9_000, max_minis: 15, max_micros: 150, confidence: 'verified' },
       ],
     },
     {
@@ -103,5 +114,7 @@ export const yrm: FirmSeed = {
     'Des traders signalent avoir été marqués pour « schémas de trading automatisé » alors qu’ils tradaient manuellement.',
     'Un seul moyen de paiement (Rise), sans alternative. Plusieurs pays interdits.',
     'Positif : 1,72 M$ payés sur 938 transactions en dix mois ; dirigeants identifiés, issus de TradeZero.',
+    '[PROMO] Remise permanente affichée : « Save 40% with JULY40 » sur chaque carte, prix barrés 99/132/232/298 → 59/79/139/179, et frais d’activation « $0 » barrant « $99 » (relevé 2026-07-24). AUCUNE date de fin. Prix catalogue = tarif de base ; l’activation gratuite est elle aussi promotionnelle.',
+    'Prix de reset relevés (90/123/215/265 $ de base) : aucune colonne `reset_fee` au schéma (§12 #9).',
   ],
 };
