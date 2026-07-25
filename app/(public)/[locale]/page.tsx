@@ -8,7 +8,7 @@ import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
 import JournalCta from '@/app/(public)/_home/JournalCta';
 import SiteFooter from '@/app/(public)/_home/SiteFooter';
-import HeroArt from '@/app/(public)/_home/HeroArt';
+import HeroGrape from '@/app/(public)/_home/HeroGrape';
 
 /**
  * Page d'accueil publique, une par langue (`/fr`, `/en`). Porte d'entrée SEO :
@@ -182,9 +182,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </dl>
         </div>
 
-        {/* Illustration à droite — SVG stylisé, décoratif. */}
-        <div className="home-hero-art" aria-hidden="true">
-          <HeroArt />
+        {/* Visuel à droite — la grappe flottant dans le vide noir. */}
+        <div className="home-hero-art">
+          <HeroGrape />
         </div>
       </section>
 

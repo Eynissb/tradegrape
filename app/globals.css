@@ -1361,9 +1361,41 @@ body::before {
 .home-stat-label { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
 .home-stat-note { color: var(--ink3); }
 
-/* Illustration */
+/* Visuel — la grappe dans le vide noir */
 .home-hero-art { min-width: 0; display: flex; justify-content: center; }
-.home-art-svg { width: 100%; max-width: 480px; height: auto; }
+/* Wrapper : porte la parallaxe souris (variables posées en JS). */
+.home-hero-grape {
+  position: relative; width: 100%; max-width: 520px; aspect-ratio: 7 / 6;
+  transform: translate(var(--px, 0px), var(--py, 0px));
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+/* Halo qui respire — décor, donc le violet est permis ici. */
+.home-grape-glow {
+  position: absolute; inset: 12%;
+  background: radial-gradient(circle at 60% 45%, rgba(192, 75, 255, .38), transparent 68%);
+  filter: blur(34px); opacity: .6; z-index: 0;
+  animation: grape-glow 6s ease-in-out infinite;
+}
+/* La grappe elle-même : image de fond (jamais LCP), flottement doux. */
+.home-grape-img {
+  position: absolute; inset: 0; z-index: 1;
+  background: url(/brand/hero-grape.png) center right / contain no-repeat;
+  animation: grape-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes grape-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+@keyframes grape-glow {
+  0%, 100% { opacity: .45; transform: scale(.94); }
+  50% { opacity: .85; transform: scale(1.06); }
+}
+/* Respect strict de la préférence système : tout se fige. */
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-grape { transition: none; transform: none; }
+  .home-grape-img, .home-grape-glow { animation: none; }
+}
 
 /* ---- Sections ---- */
 .home-section { margin-top: 72px; }
@@ -1496,10 +1528,13 @@ body::before {
 }
 
 @media (max-width: 900px) {
-  /* Le texte prime : l'illustration passe dessous, centrée et plafonnée. */
+  /* Le texte prime : le visuel passe dessous, centré et plafonné. Image FIXE :
+     pas de flottement, pas de lueur animée, pas de parallaxe (coupée en JS). */
   .home-hero { grid-template-columns: 1fr; gap: 28px; }
   .home-hero-art { order: 2; }
-  .home-art-svg { max-width: 380px; }
+  .home-hero-grape { max-width: 340px; transform: none; }
+  .home-grape-img { animation: none; }
+  .home-grape-glow { animation: none; opacity: .55; }
 }
 @media (max-width: 760px) {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
