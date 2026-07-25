@@ -1323,36 +1323,47 @@ body::before {
    ===================================================================== */
 
 /* ---- Hero ---- */
-.home-hero { max-width: 860px; padding: 40px 0 20px; }
+/* Hero deux colonnes : texte à gauche, illustration à droite (mise en scène
+   dense inspirée de la concurrence, entièrement dans nos tokens). */
+.home-hero {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 48px; align-items: center; padding: 40px 0 28px;
+}
+.home-hero-text { min-width: 0; }
 .home-kicker {
   display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--ink3);
 }
+/* Titre XL, aligné à gauche. */
 .ui .home-title {
-  margin-top: 16px; font-family: var(--font-title); font-weight: 800;
-  font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -1.5px; color: var(--ink);
+  margin-top: 18px; font-family: var(--font-title); font-weight: 800;
+  font-size: clamp(2.6rem, 6.2vw, 5.4rem); line-height: 1.02; letter-spacing: -2px; color: var(--ink);
 }
 .ui .home-sub {
-  margin-top: 18px; max-width: 620px; font-size: clamp(15px, 2vw, 18px);
+  margin-top: 20px; max-width: 560px; font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.6; color: var(--ink2);
 }
-.home-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.home-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
 
-/* Trois chiffres — surfaces solides, chiffres tabulaires, jamais l'accent de
-   marque sur la donnée. */
-.home-stats {
-  display: flex; flex-wrap: wrap; gap: 14px; margin: 40px 0 0;
+/* Bloc encadré de 3 chiffres, sous les CTA. Surfaces solides, chiffres
+   tabulaires, jamais l'accent de marque sur la donnée. */
+.home-statbar {
+  display: grid; grid-template-columns: repeat(3, 1fr); margin: 34px 0 0; max-width: 560px;
+  border: 1px solid var(--card-brd); border-radius: var(--r-lg);
+  background: var(--card); overflow: hidden;
 }
-.home-stat {
-  flex: 1 1 180px; min-width: 160px; padding: 18px 20px;
-  border-radius: var(--r-lg); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
-}
+.home-statcell { padding: 18px 20px; min-width: 0; }
+.home-statcell + .home-statcell { border-left: 1px solid var(--card-brd); }
 .ui .home-stat-num {
-  margin: 0; font-family: var(--font-title); font-weight: 800; font-size: 2rem;
+  margin: 0; font-family: var(--font-title); font-weight: 800; font-size: clamp(1.5rem, 2.4vw, 2rem);
   line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums;
 }
-.home-stat-label { display: block; margin-top: 8px; font-size: 13px; color: var(--ink2); }
+.home-stat-label { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
 .home-stat-note { color: var(--ink3); }
+
+/* Illustration */
+.home-hero-art { min-width: 0; display: flex; justify-content: center; }
+.home-art-svg { width: 100%; max-width: 480px; height: auto; }
 
 /* ---- Sections ---- */
 .home-section { margin-top: 72px; }
@@ -1484,15 +1495,24 @@ body::before {
   gap: 12px; margin-top: 36px; padding: 20px 0 40px; font-size: 12.5px; color: var(--ink3);
 }
 
+@media (max-width: 900px) {
+  /* Le texte prime : l'illustration passe dessous, centrée et plafonnée. */
+  .home-hero { grid-template-columns: 1fr; gap: 28px; }
+  .home-hero-art { order: 2; }
+  .home-art-svg { max-width: 380px; }
+}
 @media (max-width: 760px) {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
 }
 @media (max-width: 520px) {
   .home-hero { padding: 24px 0 8px; }
   .home-cta .btn { width: 100%; }
-  .home-stat { flex-basis: 100%; }
+  .home-statbar { max-width: none; }
+  /* Deux chiffres par ligne à l'étroit plutôt qu'un empilement trop haut. */
+  .home-statcell:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--card-brd); }
   .home-section { margin-top: 52px; }
   .home-footer-top { grid-template-columns: 1fr; gap: 26px; }
+  .home-art-svg { max-width: 320px; }
 }
 
 /* ---- Onglets de lecture (Éval / Financé) ---- */

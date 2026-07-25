@@ -8,6 +8,7 @@ import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
 import JournalCta from '@/app/(public)/_home/JournalCta';
 import SiteFooter from '@/app/(public)/_home/SiteFooter';
+import HeroArt from '@/app/(public)/_home/HeroArt';
 
 /**
  * Page d'accueil publique, une par langue (`/fr`, `/en`). Porte d'entrée SEO :
@@ -143,40 +144,48 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ---------------------------------------------------------- HERO */}
       <section className="home-hero">
-        <span className="home-kicker">{d.heroKicker}</span>
-        <h1 className="home-title">{d.heroTitle}</h1>
-        <p className="home-sub">{d.heroSubtitle}</p>
+        <div className="home-hero-text">
+          <span className="home-kicker">{d.heroKicker}</span>
+          <h1 className="home-title">{d.heroTitle}</h1>
+          <p className="home-sub">{d.heroSubtitle}</p>
 
-        <div className="home-cta">
-          <Link href={comparatorHref(l)} className={buttonClasses({ size: 'lg' })}>
-            {d.ctaCompare}
-          </Link>
-          {/* Déconnecté : /signup. Connecté : /app. Bascule côté client. */}
-          <JournalCta signedOutLabel={d.ctaJournal} signedInLabel={d.ctaJournalSignedIn} />
+          <div className="home-cta">
+            <Link href={comparatorHref(l)} className={buttonClasses({ size: 'lg' })}>
+              {d.ctaCompare}
+            </Link>
+            {/* Déconnecté : /signup. Connecté : /app. Bascule côté client. */}
+            <JournalCta signedOutLabel={d.ctaJournal} signedInLabel={d.ctaJournalSignedIn} />
+          </div>
+
+          {/* Bloc encadré de 3 chiffres réels, sous les CTA. */}
+          <dl className="home-statbar">
+            <div className="home-statcell">
+              <dd className="home-stat-num num">{nf(stats.firmCount)}</dd>
+              <dt className="home-stat-label">{d.statFirms}</dt>
+            </div>
+            <div className="home-statcell">
+              <dd className="home-stat-num num">{nf(stats.offerCount)}</dd>
+              <dt className="home-stat-label">{d.statOffers}</dt>
+            </div>
+            <div className="home-statcell">
+              <dd className="home-stat-num num">
+                {stats.cheapest ? money(stats.cheapest.totalPrice, stats.cheapest.currency) : '—'}
+              </dd>
+              <dt className="home-stat-label">
+                {d.statCheapest}
+                <span className="home-stat-note">
+                  {' · '}
+                  {stats.cheapest ? stats.cheapest.firmName : d.statCheapestEmpty}
+                </span>
+              </dt>
+            </div>
+          </dl>
         </div>
 
-        <dl className="home-stats">
-          <div className="home-stat">
-            <dd className="home-stat-num num">{nf(stats.firmCount)}</dd>
-            <dt className="home-stat-label">{d.statFirms}</dt>
-          </div>
-          <div className="home-stat">
-            <dd className="home-stat-num num">{nf(stats.offerCount)}</dd>
-            <dt className="home-stat-label">{d.statOffers}</dt>
-          </div>
-          <div className="home-stat">
-            <dd className="home-stat-num num">
-              {stats.cheapest ? money(stats.cheapest.totalPrice, stats.cheapest.currency) : '—'}
-            </dd>
-            <dt className="home-stat-label">
-              {d.statCheapest}
-              <span className="home-stat-note">
-                {' · '}
-                {stats.cheapest ? stats.cheapest.firmName : d.statCheapestEmpty}
-              </span>
-            </dt>
-          </div>
-        </dl>
+        {/* Illustration à droite — SVG stylisé, décoratif. */}
+        <div className="home-hero-art" aria-hidden="true">
+          <HeroArt />
+        </div>
       </section>
 
       {/* -------------------------------------- 1. APERÇU COMPARATEUR */}
