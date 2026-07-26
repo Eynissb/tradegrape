@@ -1376,12 +1376,18 @@ body::before {
   filter: blur(34px); opacity: .6; z-index: 0;
   animation: grape-glow 6s ease-in-out infinite;
 }
-/* La grappe elle-même : image de fond (jamais LCP), flottement doux. */
+/* Couche flottante : porte le flottement, contient fallback + photo. */
+.home-grape-float {
+  position: absolute; inset: 0; z-index: 1;
+  animation: grape-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+/* Fallback SVG — dessous, visible tant que la photo est absente. */
+.home-grape-fallback { position: absolute; inset: 8%; width: 84%; height: 84%; z-index: 0; }
+/* Photo réelle — dessus ; son fond noir opaque recouvre le fallback. */
 .home-grape-img {
   position: absolute; inset: 0; z-index: 1;
   background: url(/brand/hero-grape.png) center right / contain no-repeat;
-  animation: grape-float 7s ease-in-out infinite;
-  will-change: transform;
 }
 @keyframes grape-float {
   0%, 100% { transform: translateY(0); }
@@ -1394,7 +1400,7 @@ body::before {
 /* Respect strict de la préférence système : tout se fige. */
 @media (prefers-reduced-motion: reduce) {
   .home-hero-grape { transition: none; transform: none; }
-  .home-grape-img, .home-grape-glow { animation: none; }
+  .home-grape-float, .home-grape-glow { animation: none; }
 }
 
 /* ---- Sections ---- */
@@ -1533,7 +1539,7 @@ body::before {
   .home-hero { grid-template-columns: 1fr; gap: 28px; }
   .home-hero-art { order: 2; }
   .home-hero-grape { max-width: 340px; transform: none; }
-  .home-grape-img { animation: none; }
+  .home-grape-float { animation: none; }
   .home-grape-glow { animation: none; opacity: .55; }
 }
 @media (max-width: 760px) {
