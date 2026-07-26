@@ -1292,9 +1292,15 @@ body::before {
    d'un contrôle. Les signaux d'honnêteté passent par amber/red sémantiques.
    ======================================================================== */
 
-.pub-shell { position: relative; min-height: 100vh; }
+/* `overflow-x: clip` rogne le décor qui déborde (glows ambiants) sans créer de
+   conteneur de défilement — donc sans casser un futur `position: sticky`
+   (ce que ferait `hidden`). */
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; }
+/* Barre full-width (le fond touche les bords) ; contenu centré à l'intérieur. */
 .pub-header {
-  position: relative; z-index: 2;
+  position: relative; z-index: 2; width: 100%;
+}
+.pub-header-inner {
   display: flex; align-items: center; gap: 28px;
   width: var(--container); margin: 0 auto; padding: 20px 0;
 }
@@ -1323,13 +1329,21 @@ body::before {
    ===================================================================== */
 
 /* ---- Hero ---- */
-/* Hero deux colonnes : texte à gauche, illustration à droite (mise en scène
-   dense inspirée de la concurrence, entièrement dans nos tokens). */
+/* PLEINE LARGEUR (full-bleed) : le hero est hors de .pub-main, enfant direct de
+   .pub-shell → largeur 100 % = bord à bord. Aucune marge, bordure ni radius.
+   Un seul plan : grappe en fond plein, voile dégradé, texte au-dessus à gauche.
+   Le texte reste dans un conteneur centré aligné sur les sections. */
 .home-hero {
-  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 48px; align-items: center; padding: 40px 0 28px;
+  position: relative; overflow: hidden; width: 100%;
+  display: flex; align-items: center;
+  min-height: clamp(460px, 68vh, 620px);
+  padding: 40px 0;
 }
-.home-hero-text { min-width: 0; }
+.home-hero-inner {
+  position: relative; z-index: 2;
+  width: var(--container); margin: 0 auto;
+}
+.home-hero-text { width: 100%; max-width: 600px; }
 .home-kicker {
   display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--ink3);
@@ -1361,48 +1375,36 @@ body::before {
 .home-stat-label { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
 .home-stat-note { color: var(--ink3); }
 
-/* Visuel — la grappe dans le vide noir */
-.home-hero-art { min-width: 0; display: flex; justify-content: center; }
-/* Wrapper : porte la parallaxe souris (variables posées en JS). */
-.home-hero-grape {
-  position: relative; width: 100%; max-width: 520px; aspect-ratio: 7 / 6;
-  transform: translate(var(--px, 0px), var(--py, 0px));
-  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
-}
-/* Halo qui respire — décor, donc le violet est permis ici. */
-.home-grape-glow {
-  position: absolute; inset: 12%;
-  background: radial-gradient(circle at 60% 45%, rgba(192, 75, 255, .38), transparent 68%);
-  filter: blur(34px); opacity: .6; z-index: 0;
-  animation: grape-glow 6s ease-in-out infinite;
-}
-/* Couche flottante : porte le flottement, contient fallback + photo. */
-.home-grape-float {
-  position: absolute; inset: 0; z-index: 1;
-  animation: grape-float 7s ease-in-out infinite;
+/* Fond du hero : image pleine + voile. */
+.home-hero-bg { position: absolute; inset: 0; z-index: 0; }
+/* L'image : cover, ancrée à droite (la grappe y est). Débord + scale pour que
+   la parallaxe ne montre jamais de bord. Nom de fichier EXACT (casse sensible
+   en prod). Image absente = hero sombre, texte lisible : rien ne casse. */
+.home-hero-img {
+  position: absolute; inset: -5%;
+  background: url(/brand/Hero-tradegrape.jpg) right center / cover no-repeat;
+  transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.06);
+  transition: transform .4s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 }
-/* Fallback SVG — dessous, visible tant que la photo est absente. */
-.home-grape-fallback { position: absolute; inset: 8%; width: 84%; height: 84%; z-index: 0; }
-/* Photo réelle — dessus ; son fond noir opaque recouvre le fallback.
-   Nom EXACT du fichier (casse + extension) : les URLs sont sensibles à la casse
-   en prod. */
-.home-grape-img {
-  position: absolute; inset: 0; z-index: 1;
-  background: url(/brand/Hero-tradegrape.jpg) center right / contain no-repeat;
+/* Voile : opaque à gauche (texte), transparent à droite (grappe). Un fondu
+   VERTICAL en bas ramène vers le fond de page → raccord propre avec la section
+   suivante, sans ligne de coupure. */
+.home-hero-veil {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent 82%, var(--bg) 100%),
+    linear-gradient(
+      90deg,
+      var(--bg) 0%,
+      rgba(7, 5, 16, 0.95) 24%,
+      rgba(7, 5, 16, 0.62) 50%,
+      rgba(7, 5, 16, 0.15) 78%,
+      rgba(7, 5, 16, 0) 100%
+    );
 }
-@keyframes grape-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-16px); }
-}
-@keyframes grape-glow {
-  0%, 100% { opacity: .45; transform: scale(.94); }
-  50% { opacity: .85; transform: scale(1.06); }
-}
-/* Respect strict de la préférence système : tout se fige. */
 @media (prefers-reduced-motion: reduce) {
-  .home-hero-grape { transition: none; transform: none; }
-  .home-grape-float, .home-grape-glow { animation: none; }
+  .home-hero-img { transition: none; transform: scale(1.06); }
 }
 
 /* ---- Sections ---- */
@@ -1535,27 +1537,31 @@ body::before {
   gap: 12px; margin-top: 36px; padding: 20px 0 40px; font-size: 12.5px; color: var(--ink3);
 }
 
-@media (max-width: 900px) {
-  /* Le texte prime : le visuel passe dessous, centré et plafonné. Image FIXE :
-     pas de flottement, pas de lueur animée, pas de parallaxe (coupée en JS). */
-  .home-hero { grid-template-columns: 1fr; gap: 28px; }
-  .home-hero-art { order: 2; }
-  .home-hero-grape { max-width: 340px; transform: none; }
-  .home-grape-float { animation: none; }
-  .home-grape-glow { animation: none; opacity: .55; }
-}
 @media (max-width: 760px) {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
 }
+@media (max-width: 640px) {
+  /* Nav texte masquée en mobile — elle passe dans le tiroir à l'étape 2 (header
+     premium). Le sélecteur de langue reste visible. Temporaire d'ici là. */
+  .pub-nav { display: none; }
+  /* Mobile : l'image passe en fond, la parallaxe est coupée (pointeur grossier),
+     et le voile est PLUS FORT — le texte occupe toute la largeur au-dessus de
+     l'image, il doit rester lisible partout. Voile vertical + horizontal. */
+  .home-hero-veil {
+    background:
+      linear-gradient(180deg, rgba(7, 5, 16, 0.55) 0%, rgba(7, 5, 16, 0.8) 60%, var(--bg) 100%),
+      linear-gradient(90deg, var(--bg) 0%, rgba(7, 5, 16, 0.72) 55%, rgba(7, 5, 16, 0.5) 100%);
+  }
+  .home-hero-img { transform: scale(1.06); }
+}
 @media (max-width: 520px) {
-  .home-hero { padding: 24px 0 8px; }
+  .home-hero { min-height: 500px; padding: 28px 0; }
   .home-cta .btn { width: 100%; }
   .home-statbar { max-width: none; }
   /* Deux chiffres par ligne à l'étroit plutôt qu'un empilement trop haut. */
   .home-statcell:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--card-brd); }
   .home-section { margin-top: 52px; }
   .home-footer-top { grid-template-columns: 1fr; gap: 26px; }
-  .home-art-svg { max-width: 320px; }
 }
 
 /* ---- Onglets de lecture (Éval / Financé) ---- */

@@ -135,15 +135,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   ];
 
   return (
-    <main className="pub-main home">
+    <>
       <script
         type="application/ld+json"
         // Construit côté serveur, aucune entrée utilisateur.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* ---------------------------------------------------------- HERO */}
+      {/* ---- HERO — pleine largeur (full-bleed), HORS du conteneur .pub-main.
+             Le fond (grappe + voile) touche les bords ; le texte reste dans un
+             conteneur centré aligné sur les sections. ---- */}
       <section className="home-hero">
+        {/* La grappe en fond plein + voile dégradé, sous le texte. */}
+        <HeroGrape />
+        <div className="home-hero-inner">
         <div className="home-hero-text">
           <span className="home-kicker">{d.heroKicker}</span>
           <h1 className="home-title">{d.heroTitle}</h1>
@@ -181,13 +186,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </div>
           </dl>
         </div>
-
-        {/* Visuel à droite — la grappe flottant dans le vide noir. */}
-        <div className="home-hero-art">
-          <HeroGrape />
         </div>
       </section>
 
+      <main className="pub-main home">
       {/* -------------------------------------- 1. APERÇU COMPARATEUR */}
       <section id="apercu" className="home-section">
         <h2 className="home-h2">{d.previewTitle}</h2>
@@ -361,6 +363,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       <SiteFooter locale={l} generatedAt={generatedAt} />
-    </main>
+      </main>
+    </>
   );
 }
