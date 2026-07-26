@@ -1471,6 +1471,16 @@ body::before {
   transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.06);
   transition: transform .4s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
+  /* Masque radial centré sur la grappe : l'image (fond noir compris) devient
+     transparente vers la gauche, le haut et le bas → le #070510 de la page
+     transparaît, aucune arête droite. Seule la grappe reste, son fond noir se
+     dissout dans le violet de tous les côtés.
+     Centre à 65 % / 49 % : la grappe est en `cover` ancrée à droite, donc rognée
+     à gauche — en coordonnées de l'élément elle occupe X~47-85 %, Y~19-81 %
+     (mesuré sur la source). Rayons généreux pour ne jamais couper les grains. */
+  --grape-mask: radial-gradient(ellipse 44% 56% at 65% 49%, #000 58%, rgba(0,0,0,0.5) 80%, transparent 94%);
+  -webkit-mask-image: var(--grape-mask); mask-image: var(--grape-mask);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
 }
 /* Lueur AU-DESSUS de l'image, en `screen` : elle éclaire le verre de la grappe
    là où elle passe (le blend se fait avec l'image dessous), et balaie en boucle
@@ -1663,7 +1673,12 @@ body::before {
       linear-gradient(180deg, rgba(7, 5, 16, 0.55) 0%, rgba(7, 5, 16, 0.8) 60%, var(--bg) 100%),
       linear-gradient(90deg, var(--bg) 0%, rgba(7, 5, 16, 0.72) 55%, rgba(7, 5, 16, 0.5) 100%);
   }
-  .home-hero-img { transform: scale(1.06); }
+  /* En `cover` mobile, la grappe est recadrée plus au centre (X~13-74 %) : le
+     masque se recentre pour ne pas rogner ses grains. */
+  .home-hero-img {
+    transform: scale(1.06);
+    --grape-mask: radial-gradient(ellipse 52% 54% at 45% 49%, #000 62%, rgba(0,0,0,0.5) 82%, transparent 94%);
+  }
 }
 @media (max-width: 520px) {
   .home-hero { min-height: 500px; padding: 28px 0; }
