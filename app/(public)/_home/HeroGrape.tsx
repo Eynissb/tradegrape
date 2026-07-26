@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
  * DEUX couches, pour ne JAMAIS montrer un vide (règle transverse « une image
  * absente ne casse jamais le rendu ») :
  *  - un fallback SVG grappe, toujours rendu, en dessous ;
- *  - la photo réelle (`/brand/hero-grape.png`) en `background-image` au-dessus.
+ *  - la photo réelle (`/brand/Hero-tradegrape.jpg`) en `background-image` au-dessus.
  *    La photo a un fond noir opaque : présente, elle recouvre le SVG ; absente
  *    (404), le SVG reste visible.
  *

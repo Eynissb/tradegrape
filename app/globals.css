@@ -1384,10 +1384,12 @@ body::before {
 }
 /* Fallback SVG — dessous, visible tant que la photo est absente. */
 .home-grape-fallback { position: absolute; inset: 8%; width: 84%; height: 84%; z-index: 0; }
-/* Photo réelle — dessus ; son fond noir opaque recouvre le fallback. */
+/* Photo réelle — dessus ; son fond noir opaque recouvre le fallback.
+   Nom EXACT du fichier (casse + extension) : les URLs sont sensibles à la casse
+   en prod. */
 .home-grape-img {
   position: absolute; inset: 0; z-index: 1;
-  background: url(/brand/hero-grape.png) center right / contain no-repeat;
+  background: url(/brand/Hero-tradegrape.jpg) center right / contain no-repeat;
 }
 @keyframes grape-float {
   0%, 100% { transform: translateY(0); }
