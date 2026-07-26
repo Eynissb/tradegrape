@@ -1466,30 +1466,56 @@ body::before {
    la parallaxe ne montre jamais de bord. Nom de fichier EXACT (casse sensible
    en prod). Image absente = hero sombre, texte lisible : rien ne casse. */
 .home-hero-img {
-  position: absolute; inset: -5%;
+  position: absolute; inset: -5%; z-index: 0;
   background: url(/brand/Hero-tradegrape.jpg) right center / cover no-repeat;
   transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.06);
   transition: transform .4s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 }
-/* Voile : opaque à gauche (texte), transparent à droite (grappe). Un fondu
-   VERTICAL en bas ramène vers le fond de page → raccord propre avec la section
-   suivante, sans ligne de coupure. */
+/* Lueur AU-DESSUS de l'image, en `screen` : elle éclaire le verre de la grappe
+   là où elle passe (le blend se fait avec l'image dessous), et balaie en boucle
+   comme un reflet mouvant. Décor → violet permis. */
+.home-hero-glow {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(
+    36% 42% at 70% 42%,
+    rgba(168, 96, 255, 0.55),
+    rgba(110, 60, 230, 0.18) 52%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+  animation: hero-glow-sweep 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes hero-glow-sweep {
+  0%   { transform: translate(-7%, -9%) scale(1);    opacity: .75; }
+  50%  { transform: translate(7%, 9%)  scale(1.18);  opacity: 1; }
+  100% { transform: translate(-7%, -9%) scale(1);    opacity: .75; }
+}
+/* Voile : sombre à gauche (texte), transparent à droite (grappe). Le fondu bas
+   est délégué à `.home-hero-fade`. */
 .home-hero-veil {
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(180deg, transparent 82%, var(--bg) 100%),
-    linear-gradient(
-      90deg,
-      var(--bg) 0%,
-      rgba(7, 5, 16, 0.95) 24%,
-      rgba(7, 5, 16, 0.62) 50%,
-      rgba(7, 5, 16, 0.15) 78%,
-      rgba(7, 5, 16, 0) 100%
-    );
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(
+    90deg,
+    var(--bg) 0%,
+    rgba(7, 5, 16, 0.95) 24%,
+    rgba(7, 5, 16, 0.62) 50%,
+    rgba(7, 5, 16, 0.15) 78%,
+    rgba(7, 5, 16, 0) 100%
+  );
+}
+/* Fondu bas DÉDIÉ vers #070510 : la grappe se dissout, aucune ligne au raccord
+   avec la section. Couvre le tiers bas et devient pleinement opaque avant le
+   bord, de sorte que le bas du hero EST exactement le fond de page. */
+.home-hero-fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 42%; z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(7, 5, 16, 0.75) 55%, #070510 88%);
 }
 @media (prefers-reduced-motion: reduce) {
   .home-hero-img { transition: none; transform: scale(1.06); }
+  .home-hero-glow { animation: none; }
 }
 
 /* ---- Sections ---- */

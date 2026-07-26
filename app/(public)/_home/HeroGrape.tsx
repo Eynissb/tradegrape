@@ -45,7 +45,14 @@ export default function HeroGrape() {
   return (
     <div className="home-hero-bg" aria-hidden="true">
       <div ref={ref} className="home-hero-img" />
+      {/* Lueur AU-DESSUS de l'image (blend screen) : elle balaie la grappe comme
+          un reflet mouvant, illumine le verre sans l'écraser. */}
+      <div className="home-hero-glow" />
+      {/* Voile : sombre à gauche (texte), transparent à droite (grappe). */}
       <div className="home-hero-veil" />
+      {/* Fondu bas dédié vers le fond de page : raccord invisible avec la
+          section suivante, aucune ligne de coupure. */}
+      <div className="home-hero-fade" />
     </div>
   );
 }
