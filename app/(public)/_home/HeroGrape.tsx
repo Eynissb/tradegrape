@@ -50,9 +50,6 @@ export default function HeroGrape() {
       <div className="home-hero-glow" />
       {/* Voile : sombre à gauche (texte), transparent à droite (grappe). */}
       <div className="home-hero-veil" />
-      {/* Fondu bas dédié vers le fond de page : raccord invisible avec la
-          section suivante, aucune ligne de coupure. */}
-      <div className="home-hero-fade" />
     </div>
   );
 }
