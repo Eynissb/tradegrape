@@ -1295,27 +1295,110 @@ body::before {
 /* `overflow-x: clip` rogne le décor qui déborde (glows ambiants) sans créer de
    conteneur de défilement — donc sans casser un futur `position: sticky`
    (ce que ferait `hidden`). */
-.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; }
-/* Barre full-width (le fond touche les bords) ; contenu centré à l'intérieur. */
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 66px; }
+/* ---- Header fondu dans le hero ----
+   Fixe et TRANSPARENT en haut : aucun fond, aucune bordure, aucun blur — il
+   flotte sur la grappe. Au scroll (`.is-solid`, posé en JS quand le hero n'est
+   plus derrière) : fond translucide + backdrop-filter pour rester lisible. */
 .pub-header {
-  position: relative; z-index: 2; width: 100%;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: transparent;
+  transition: background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease;
+}
+.pub-header.is-solid {
+  background: rgba(9, 7, 20, 0.72);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow: 0 1px 0 rgba(150, 110, 240, 0.12);
 }
 .pub-header-inner {
   display: flex; align-items: center; gap: 28px;
-  width: var(--container); margin: 0 auto; padding: 20px 0;
+  width: var(--container); margin: 0 auto; height: var(--header-h);
 }
-.ui .pub-brand { font-family: var(--font-title); font-weight: 800; font-size: 1.35rem; letter-spacing: -.4px; }
-.pub-nav { display: flex; gap: 20px; margin-left: 12px; }
-.ui .pub-navlink { font-size: 14px; font-weight: 500; color: var(--ink2); }
+/* Logo : grappe + nom (asset), fallback texte. */
+.pub-brand { display: inline-flex; align-items: center; }
+.pub-logo-img { height: 30px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; letter-spacing: -.4px; }
+.pub-nav { display: flex; gap: 22px; margin-left: 8px; }
+.ui .pub-navlink { font-size: 14px; font-weight: 500; color: var(--ink2); transition: color .15s; }
 .ui .pub-navlink:hover { color: var(--ink); }
-.pub-locales { display: flex; gap: 4px; margin-left: auto; }
-.ui .pub-locale {
-  padding: 5px 10px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 600;
-  color: var(--ink3); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
-}
-.ui .pub-locale.is-on { color: var(--ink); background: rgba(255,255,255,.09); }
+.pub-header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 
-.pub-main { position: relative; z-index: 1; width: var(--container); margin: 0 auto; padding: 8px 0 80px; }
+/* Sélecteur de langue rond, à drapeaux. */
+.pub-lang { position: relative; }
+.pub-lang-btn {
+  width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; font-size: 17px; line-height: 1;
+  background: rgba(255, 255, 255, .09); color: var(--ink);
+  transition: background .15s;
+}
+.pub-lang-btn:hover { background: rgba(255, 255, 255, .16); }
+.pub-lang-pop {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  display: flex; flex-direction: column; gap: 6px; padding: 6px;
+  border-radius: var(--r-md); background: rgba(9, 7, 20, 0.92);
+  backdrop-filter: blur(18px); box-shadow: var(--elev-2-shadow), 0 12px 28px rgba(0,0,0,.5);
+}
+.pub-lang-opt {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 17px; background: rgba(255, 255, 255, .06);
+}
+.pub-lang-opt:hover { background: rgba(255, 255, 255, .14); }
+
+/* CTA session — pilule en verre, lisible sur l'image comme sur le fond solide. */
+.ui .pub-cta {
+  padding: 8px 16px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 600;
+  color: #fff; background: rgba(255, 255, 255, .11); white-space: nowrap;
+  transition: background .15s;
+}
+.ui .pub-cta:hover { background: rgba(255, 255, 255, .2); }
+
+/* Bouton tiroir (mobile). */
+.pub-burger {
+  display: none; width: 40px; height: 40px; border: 0; border-radius: var(--r-md);
+  background: rgba(255, 255, 255, .09); cursor: pointer;
+  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+}
+.pub-burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--ink); }
+
+/* Tiroir mobile — un seul système de nav. */
+.pub-drawer { position: fixed; inset: 0; z-index: 45; visibility: hidden; }
+.pub-drawer.is-open { visibility: visible; }
+.pub-drawer-scrim {
+  position: absolute; inset: 0; background: rgba(4, 2, 12, .6);
+  opacity: 0; transition: opacity .25s;
+}
+.pub-drawer.is-open .pub-drawer-scrim { opacity: 1; }
+.pub-drawer-panel {
+  position: absolute; top: 0; right: 0; height: 100%; width: min(80vw, 320px);
+  display: flex; flex-direction: column; gap: 6px;
+  padding: calc(var(--header-h) + 16px) 20px 24px;
+  background: rgba(11, 8, 24, 0.96); backdrop-filter: blur(20px);
+  box-shadow: -12px 0 40px rgba(0,0,0,.5);
+  transform: translateX(100%); transition: transform .28s cubic-bezier(.22,1,.36,1);
+}
+.pub-drawer.is-open .pub-drawer-panel { transform: translateX(0); }
+.ui .pub-drawer-link { padding: 12px 4px; font-size: 16px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--card-brd); }
+.ui .pub-drawer-cta {
+  margin-top: 14px; padding: 12px; text-align: center; border-radius: var(--r-pill);
+  font-weight: 700; color: #fff; background: var(--grad);
+}
+
+/* Contenu sous le header FIXE : les pages sans hero décalent leur contenu ;
+   la home ne décale pas (le hero passe volontairement DERRIÈRE le header). */
+.pub-main {
+  position: relative; z-index: 1; width: var(--container); margin: 0 auto;
+  padding: calc(var(--header-h) + 8px) 0 80px;
+}
+.pub-main.home { padding-top: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
+}
+@media (max-width: 640px) {
+  .pub-cta { display: none; }   /* dans le tiroir */
+  .pub-burger { display: flex; }
+}
 .pub-head { max-width: 760px; margin-bottom: 26px; }
 .ui .pub-h1 { font-family: var(--font-title); font-weight: 800; font-size: 2.4rem; line-height: 1.1; letter-spacing: -1px; }
 .ui .pub-sub { margin-top: 12px; font-size: 15px; line-height: 1.55; color: var(--ink2); }
@@ -1337,7 +1420,9 @@ body::before {
   position: relative; overflow: hidden; width: 100%;
   display: flex; align-items: center;
   min-height: clamp(460px, 68vh, 620px);
-  padding: 40px 0;
+  /* Le header fixe passe DEVANT le haut du hero (grappe derrière) : le contenu
+     du hero est décalé pour ne pas passer sous le header. */
+  padding: calc(var(--header-h) + 28px) 0 40px;
 }
 .home-hero-inner {
   position: relative; z-index: 2;
@@ -1741,7 +1826,6 @@ body::before {
 .ui .cmp-empty-b { margin-top: 8px; font-size: 14px; color: var(--ink2); }
 
 @media (max-width: 900px) {
-  .pub-header { flex-wrap: wrap; gap: 14px; }
   .ui .pub-h1 { font-size: 1.85rem; }
   .cmp-bar { flex-direction: column; align-items: stretch; }
   .cmp-bar-right { justify-content: space-between; }
