@@ -206,6 +206,7 @@ const fr = {
   ddUnchanged: '= en financé',
   fSeeAll: 'Voir tout',
   fSeeLess: 'Réduire',
+  journal: 'Journal',
 } as const;
 
 /**
@@ -397,6 +398,7 @@ const en: Dict = {
   ddUnchanged: '= when funded',
   fSeeAll: 'See all',
   fSeeLess: 'Show less',
+  journal: 'Journal',
 };
 
 export const DICTS: Record<Locale, Dict> = { fr, en };

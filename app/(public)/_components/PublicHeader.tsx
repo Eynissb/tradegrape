@@ -193,6 +193,10 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   const menu = profile ? profileLinks(l, profile.staff) : [];
   const topMsg = l === 'fr' ? 'Données vérifiées à la source et datées.' : 'Data verified at source and dated.';
 
+  // Le comparateur est une app plein écran : il fournit son propre chrome (logo,
+  // journal, barre d'actions). On masque donc le header capsule sur cette route.
+  if (pathname && (pathname.endsWith('/comparateur') || pathname.endsWith('/compare'))) return null;
+
   return (
     <>
       <div className="pub-headwrap">

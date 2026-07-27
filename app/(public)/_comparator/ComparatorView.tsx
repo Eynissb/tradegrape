@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   filterOffers,
   hiddenByUnknownPrice,
@@ -21,7 +22,6 @@ import {
   type SortKey,
 } from '@/lib/catalog/public-offer';
 import type { ComparatorDict, Locale } from '@/lib/i18n/comparator';
-import Select from '@/components/ui/Select';
 import OfferRow from './OfferRow';
 import SideFirms from './SideFirms';
 
@@ -198,11 +198,13 @@ export default function ComparatorView({
   platformNames,
   d,
   locale,
+  generatedAt,
 }: {
   offers: PublicOffer[];
   platformNames: Record<string, string>;
   d: ComparatorDict;
   locale: Locale;
+  generatedAt: string;
 }) {
   const { compact, money } = useMemo(() => makeFormat(locale), [locale]);
   const [filters, setFilters] = useState<OfferFilters>({});
@@ -307,46 +309,96 @@ export default function ComparatorView({
   const news = NEWS_LABELS(d);
 
   return (
-    <>
-      {/* ---------- Onglets de phase ---------- */}
-      <div className="cmp-tabs" role="tablist" aria-label={d.title}>
-        {([
-          ['eval', d.tabEval],
-          ['funded', d.tabFunded],
-        ] as const).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={tab === key}
-            className={`cmp-tab${tab === key ? ' is-on' : ''}`}
-            onClick={() => switchTab(key)}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="cmp-app">
+      {/* Barre de marque : logo (retour home) + accès journal — jamais enfermé. */}
+      <div className="cmp-topnav">
+        <Link href={`/${locale}`} className="cmp-home" aria-label="Tradegrape">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.svg" alt="Tradegrape" className="cmp-home-logo" />
+        </Link>
+        <Link href="/app" className="control control--sm cmp-journal-link">{d.journal}</Link>
       </div>
 
-      {tab === 'funded' ? <p className="cmp-phase-note">{d.fundedIntro}</p> : null}
+      {/* Barre d'actions : compteur · comparer / réinitialiser · tri en pilules. */}
+      <div className="cmp-actionbar">
+        <p className="cmp-count">
+          <span className="cmp-count-lbl">{d.results}</span>
+          <strong className="num">{shown.length}</strong>
+          <span className="cmp-count-sep"> / </span>
+          <span className="num">{offers.length}</span>
+        </p>
+
+        <div className="cmp-actionbar-mid">
+          <button
+            type="button"
+            className="cmp-abtn"
+            disabled={selected.length < COMPARE_MIN}
+            onClick={() => setCompareOpen(true)}
+          >
+            {d.compareOpen}{selected.length ? ` (${selected.length})` : ''}
+          </button>
+          <button type="button" className="cmp-abtn cmp-abtn--reset" onClick={reset} disabled={!active}>
+            {d.reset}
+          </button>
+        </div>
+
+        <div className="cmp-sortpills" role="group" aria-label={d.sort}>
+          {SORT_OPTIONS(d, tab).map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
+              aria-pressed={sort === o.value}
+              onClick={() => setSort(o.value as SortKey)}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ---------- Layout deux colonnes : filtres à gauche, résultats à droite ---------- */}
       <div className="cmp-shell">
         <aside className="cmp-side" aria-label={d.filters}>
+          {/* En-tête filtres + switch Éval / Financé (haut de colonne, image 3). */}
+          <div className="cmp-side-head">
+            <span className="cmp-side-title">{d.filters}</span>
+            <div className="cmp-tabs" role="tablist" aria-label={d.title}>
+              {([
+                ['eval', d.tabEval],
+                ['funded', d.tabFunded],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === key}
+                  className={`cmp-tab${tab === key ? ' is-on' : ''}`}
+                  onClick={() => switchTab(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
       {/* ---------- Presets ---------- */}
-      <section className="cmp-presets" aria-label={d.presets}>
-        {PRESETS.map((p) => (
-          <button
-            key={p.key}
-            type="button"
-            className={`cmp-chip${preset === p.key ? ' is-on' : ''}`}
-            aria-pressed={preset === p.key}
-            onClick={() => applyPreset(p.key)}
-          >
-            {d[`preset_${p.key}` as keyof ComparatorDict] as string}
-          </button>
-        ))}
-      </section>
+      <div className="cmp-presets-group">
+        <span className="cmp-side-ct">{d.presets}</span>
+        <section className="cmp-presets" aria-label={d.presets}>
+          {PRESETS.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className={`cmp-chip${preset === p.key ? ' is-on' : ''}`}
+              aria-pressed={preset === p.key}
+              onClick={() => applyPreset(p.key)}
+            >
+              {d[`preset_${p.key}` as keyof ComparatorDict] as string}
+            </button>
+          ))}
+        </section>
+      </div>
 
       {/* ---------- Filtres ---------- */}
       <section className="card cmp-filters" aria-label={d.filters}>
@@ -520,46 +572,22 @@ export default function ComparatorView({
           ))}
         </div>
       </section>
+
+          {/* Transparence : date de génération des données (honnêteté, §8). */}
+          <p className="cmp-side-foot">
+            {d.generatedAt} <span className="num">{generatedAt.slice(0, 10)}</span>
+          </p>
         </aside>
 
         <div className="cmp-results">
 
-      {/* ---------- Barre de résultats ---------- */}
-      <div className="cmp-bar">
-        <p className="cmp-count">
-          <strong className="num">{shown.length}</strong>
-          <span className="cmp-count-sep"> {d.of} </span>
-          <span className="num">{offers.length}</span> {d.results}
-          {hiddenPrice > 0 ? (
-            <span className="cmp-hidden">
-              {' · '}
-              <span className="num">{hiddenPrice}</span>{' '}
-              {hiddenPrice > 1 ? d.hiddenNoPricePlural : d.hiddenNoPrice}
-            </span>
-          ) : null}
+      {/* Offres masquées faute de prix publié : une information, pas une alerte. */}
+      {hiddenPrice > 0 ? (
+        <p className="cmp-hidden-note">
+          <span className="num">{hiddenPrice}</span>{' '}
+          {hiddenPrice > 1 ? d.hiddenNoPricePlural : d.hiddenNoPrice}
         </p>
-
-        <div className="cmp-bar-right">
-          <div className="cmp-sort">
-            <span className="cmp-sort-label">{d.sort}</span>
-            {/* Composant DS, jamais le <select> natif (§11 « Style ») : le natif
-                rend une liste système qui casse le thème sombre. Le libellé est
-                rendu à côté, d'où `ariaLabel`. */}
-            <Select
-              options={SORT_OPTIONS(d, tab)}
-              value={sort}
-              onChange={(v) => setSort(v as SortKey)}
-              ariaLabel={d.sort}
-              width="md"
-            />
-          </div>
-          {active ? (
-            <button type="button" className="cmp-chip cmp-chip-sm" onClick={reset}>
-              {d.reset}
-            </button>
-          ) : null}
-        </div>
-      </div>
+      ) : null}
 
       {/* ---------- Tableau ---------- */}
       {shown.length === 0 ? (
@@ -653,7 +681,7 @@ export default function ComparatorView({
           onClose={() => setCompareOpen(false)}
         />
       ) : null}
-    </>
+    </div>
   );
 }
 

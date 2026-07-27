@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { loadPublicCatalog } from '@/lib/catalog/query';
 import { COMPARATOR_PATH, DICTS, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 import ComparatorView from './ComparatorView';
@@ -68,30 +67,22 @@ export default async function ComparatorPage({ locale }: { locale: Locale }) {
   };
 
   return (
-    <main className="pub-main">
+    <>
       <script
         type="application/ld+json"
         // Données structurées : construites côté serveur, aucune entrée utilisateur.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="pub-head">
-        <h1 className="pub-h1">{d.title}</h1>
-        <p className="pub-sub">{d.intro}</p>
-      </div>
-
-      {/* Les onglets de phase sont interactifs : ils vivent dans la vue cliente. */}
-      <ComparatorView offers={offers} platformNames={platformNames} d={d} locale={locale} />
-
-      <footer className="pub-foot">
-        <span>
-          {d.generatedAt}{' '}
-          <span className="num">{generatedAt.slice(0, 10)}</span>
-        </span>
-        <Link href={`/${locale === 'fr' ? 'en' : 'fr'}/${COMPARATOR_PATH[locale === 'fr' ? 'en' : 'fr']}`} className="link-accent">
-          {locale === 'fr' ? 'English version' : 'Version française'}
-        </Link>
-      </footer>
-    </main>
+      {/* App plein écran : la vue cliente fournit son propre chrome (logo, journal,
+          barre d'actions, filtres pleine hauteur). Pas de titre marketing ici. */}
+      <ComparatorView
+        offers={offers}
+        platformNames={platformNames}
+        d={d}
+        locale={locale}
+        generatedAt={generatedAt}
+      />
+    </>
   );
 }

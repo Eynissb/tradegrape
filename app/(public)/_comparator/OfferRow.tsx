@@ -30,7 +30,7 @@ function Logo({ offer }: { offer: PublicOffer }) {
   const mono = offer.firm.name.trim().slice(0, 2).toUpperCase();
   if (meta && !broken) {
     return (
-      <span className={`cmp-logo cmp-logo--img ${meta.light ? '' : 'is-inv'}`} aria-hidden="true">
+      <span className={`cmp-logo cmp-logo--img ${meta.light ? '' : 'lift'}`} aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
@@ -51,7 +51,7 @@ function PlatMark({ slug, name, variant }: { slug: string; name: string; variant
   const cls = variant === 'lic' ? 'cmp-lic' : 'cmp-plat';
   if (meta && !broken) {
     return (
-      <span className={`${cls} ${meta.light ? '' : 'is-inv'}`} title={name}>
+      <span className={`${cls} ${meta.light ? '' : 'lift'}`} title={name}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
@@ -103,20 +103,22 @@ function CountryFlag({ code }: { code: string | null }) {
   return <span className="cmp-flag cmp-flag--txt num" title={c}>{c}</span>;
 }
 
-/* Jauge de note circulaire : lime ≥8, ambre 4-7, rouge ≤3. Jamais l'accent. */
+/* Jauge de note circulaire : lime ≥8, ambre 4-7, rouge ≤3 (jamais l'accent).
+   Sans note : anneau gris en place, prêt à recevoir le score. */
 function Gauge({ rating }: { rating: number | null }) {
-  if (rating == null) return <span className="cmp-dash">—</span>;
-  const tone = rating >= 8 ? 'var(--lime)' : rating >= 4 ? 'var(--amber)' : 'var(--red)';
+  const tone = rating == null ? 'var(--ink3)' : rating >= 8 ? 'var(--lime)' : rating >= 4 ? 'var(--amber)' : 'var(--red)';
   const circ = 2 * Math.PI * 15;
-  const off = circ * (1 - Math.max(0, Math.min(10, rating)) / 10);
+  const off = rating == null ? circ : circ * (1 - Math.max(0, Math.min(10, rating)) / 10);
   return (
     <span className="cmp-gauge">
       <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
         <circle className="cmp-gauge-track" cx="21" cy="21" r="15" fill="none" strokeWidth="4" />
-        <circle cx="21" cy="21" r="15" fill="none" stroke={tone} strokeWidth="4" strokeLinecap="round"
-          strokeDasharray={circ} strokeDashoffset={off} transform="rotate(-90 21 21)" />
+        {rating != null ? (
+          <circle cx="21" cy="21" r="15" fill="none" stroke={tone} strokeWidth="4" strokeLinecap="round"
+            strokeDasharray={circ} strokeDashoffset={off} transform="rotate(-90 21 21)" />
+        ) : null}
       </svg>
-      <b className="num" style={{ color: tone }}>{rating}</b>
+      <b className="num" style={{ color: tone }}>{rating != null ? rating : '–'}</b>
     </span>
   );
 }

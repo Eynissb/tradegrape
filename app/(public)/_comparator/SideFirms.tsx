@@ -19,7 +19,7 @@ function FirmMark({ slug, name }: Firm) {
   const meta = firmLogo(slug);
   if (meta && !broken) {
     return (
-      <span className={`cmp-sidef-logo ${meta.light ? '' : 'is-inv'}`} aria-hidden="true">
+      <span className={`cmp-sidef-logo ${meta.light ? '' : 'lift'}`} aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
