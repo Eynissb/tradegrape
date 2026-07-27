@@ -1474,42 +1474,8 @@ body::before {
   transition: transform .4s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 }
-/* Lueur AU-DESSUS de l'image, en `screen` : elle éclaire le verre de la grappe
-   là où elle passe (le blend se fait avec l'image dessous), et balaie en boucle
-   comme un reflet mouvant. Décor → violet permis. */
-.home-hero-glow {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: radial-gradient(
-    36% 42% at 70% 42%,
-    rgba(168, 96, 255, 0.55),
-    rgba(110, 60, 230, 0.18) 52%,
-    transparent 72%
-  );
-  mix-blend-mode: screen;
-  animation: hero-glow-sweep 12s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-@keyframes hero-glow-sweep {
-  0%   { transform: translate(-7%, -9%) scale(1);    opacity: .75; }
-  50%  { transform: translate(7%, 9%)  scale(1.18);  opacity: 1; }
-  100% { transform: translate(-7%, -9%) scale(1);    opacity: .75; }
-}
-/* Voile : sombre à gauche (texte), transparent à droite (grappe). Le fondu bas
-   est délégué à `.home-hero-fade`. */
-.home-hero-veil {
-  position: absolute; inset: 0; z-index: 2;
-  background: linear-gradient(
-    90deg,
-    var(--bg) 0%,
-    rgba(7, 5, 16, 0.95) 24%,
-    rgba(7, 5, 16, 0.62) 50%,
-    rgba(7, 5, 16, 0.15) 78%,
-    rgba(7, 5, 16, 0) 100%
-  );
-}
 @media (prefers-reduced-motion: reduce) {
   .home-hero-img { transition: none; transform: scale(1.06); }
-  .home-hero-glow { animation: none; }
 }
 
 /* ---- Sections ---- */
@@ -1649,14 +1615,7 @@ body::before {
   /* Nav texte masquée en mobile — elle passe dans le tiroir à l'étape 2 (header
      premium). Le sélecteur de langue reste visible. Temporaire d'ici là. */
   .pub-nav { display: none; }
-  /* Mobile : l'image passe en fond, la parallaxe est coupée (pointeur grossier),
-     et le voile est PLUS FORT — le texte occupe toute la largeur au-dessus de
-     l'image, il doit rester lisible partout. Voile vertical + horizontal. */
-  .home-hero-veil {
-    background:
-      linear-gradient(180deg, rgba(7, 5, 16, 0.55) 0%, rgba(7, 5, 16, 0.8) 60%, var(--bg) 100%),
-      linear-gradient(90deg, var(--bg) 0%, rgba(7, 5, 16, 0.72) 55%, rgba(7, 5, 16, 0.5) 100%);
-  }
+  /* Mobile : parallaxe coupée (pointeur grossier), image fixe. */
   .home-hero-img { transform: scale(1.06); }
 }
 @media (max-width: 520px) {
