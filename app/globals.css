@@ -1295,40 +1295,59 @@ body::before {
 /* `overflow-x: clip` rogne le décor qui déborde (glows ambiants) sans créer de
    conteneur de défilement — donc sans casser un futur `position: sticky`
    (ce que ferait `hidden`). */
-/* `--header-h` = espace réservé sous le header : le contenu du hero et des pages
-   commence dessous, la barre ne chevauche rien. */
-.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 84px; }
+/* `--header-h` = espace réservé sous le header (barre + main + nav) : le contenu
+   du hero et des pages commence dessous, rien n'est chevauché. */
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 138px; }
 
-/* ---- Header : structure Brixo, système d'états du JOURNAL ----
-   Barre sticky TRANSPARENTE (le fond de page reste visible). Trois zones :
-   logo NU à gauche, nav en CAPSULE glass au centre, actions à droite. Flotte,
-   ne chevauche pas le hero (offset --header-h). */
+/* ---- Header à DEUX niveaux, épuré (façon PropFirmMatch, notre violet) ---- */
+.pub-headwrap { position: fixed; top: 0; left: 0; right: 0; z-index: 50; }
+
+/* 1. Barre supérieure fine, fond légèrement distinct, fermable, disparaît au
+   scroll (hauteur → 0). Violet de marque, jamais d'orange. */
+.pub-topbar {
+  position: relative;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 36px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(91, 63, 255, .16), rgba(192, 75, 255, .10));
+  border-bottom: 1px solid rgba(150, 110, 240, .16);
+  font-size: 12.5px; color: var(--ink2);
+  transition: height .3s ease, opacity .3s ease, border-color .3s ease;
+}
+.pub-topbar.is-hidden { height: 0; opacity: 0; border-bottom-color: transparent; }
+.pub-topbar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+.pub-topbar-msg { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pub-topbar-close {
+  position: absolute; right: 14px; width: 22px; height: 22px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--ink3); font-size: 17px; line-height: 1; cursor: pointer;
+}
+.pub-topbar-close:hover { color: var(--ink); background: rgba(255, 255, 255, .08); }
+
+/* 2 + 3. Header principal + nav : une surface glass, deux rangées. */
 .pub-header {
-  position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 50;
-  width: min(1400px, calc(100vw - 40px));
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px;
-  padding: 16px 0;
+  background: rgba(11, 8, 24, 0.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid var(--card-brd);
 }
 
-/* Logo NU, affirmé — pas de capsule. */
-.pub-brand { justify-self: start; display: inline-flex; align-items: center; }
-.pub-logo-img { height: 34px; width: auto; display: block; }
-.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.4rem; letter-spacing: -.4px; }
-
-/* Nav au centre — CAPSULE liquid glass. Les items sont des `.control` : l'actif
-   porte `.control--active` (comme le journal), les autres `.control--ghost`. */
-.pub-nav {
-  justify-self: center; display: flex; align-items: center; gap: 4px;
-  padding: 5px; border-radius: 999px;
-  background: rgba(18, 13, 34, 0.5);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  backdrop-filter: blur(20px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+/* Rangée principale : logo · centre réservé · actions. */
+.pub-header-main {
+  display: flex; align-items: center; gap: 20px;
+  width: var(--container); margin: 0 auto; height: 56px;
 }
+.pub-brand { display: inline-flex; align-items: center; }
+.pub-logo-img { height: 32px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.35rem; letter-spacing: -.4px; }
+/* Centre réservé au futur switch Futures/Forex/Crypto — occupe l'espace. */
+.pub-header-center { flex: 1; }
+.pub-header-actions { display: flex; align-items: center; gap: 10px; }
 
-/* Actions à droite */
-.pub-header-right { justify-self: end; display: flex; align-items: center; gap: 10px; }
+/* Rangée de nav de contenu, séparée par un filet. */
+.pub-header-nav {
+  display: flex; align-items: center; gap: 4px;
+  width: var(--container); margin: 0 auto; height: 44px;
+  border-top: 1px solid rgba(255, 255, 255, .05);
+}
 
 /* Sélecteur de langue rond, pastille de drapeau SVG. */
 .pub-lang { position: relative; }
@@ -1393,7 +1412,7 @@ body::before {
    la home ne décale pas (le hero passe volontairement DERRIÈRE le header). */
 .pub-main {
   position: relative; z-index: 1; width: var(--container); margin: 0 auto;
-  padding: calc(var(--header-h) + 8px) 0 80px;
+  padding: calc(var(--header-h) + 20px) 0 80px;
 }
 .pub-main.home { padding-top: 8px; }
 
@@ -1401,10 +1420,10 @@ body::before {
   .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
 }
 @media (max-width: 640px) {
-  /* Nav + actions passent dans le tiroir ; logo + langue + burger restent.
-     Spécificité 0,3,0 pour battre `.ui .control { display: inline-flex }`. */
-  .pub-nav { display: none; }
-  .ui .pub-header-right .pub-cta, .ui .pub-header-right .pub-signin { display: none; }
+  /* Rangée de nav + Connexion + Commencer passent dans le tiroir ; logo + langue
+     + burger restent. Spécificité 0,3,0 pour battre `.ui .control`. */
+  .pub-header-nav { display: none; }
+  .ui .pub-header-actions .pub-cta, .ui .pub-header-actions .pub-signin { display: none; }
   .pub-burger { display: flex; }
 }
 .pub-head { max-width: 760px; margin-bottom: 26px; }

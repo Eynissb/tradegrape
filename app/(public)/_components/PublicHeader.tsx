@@ -7,16 +7,18 @@ import { createClient } from '@/lib/supabase/client';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 
 /**
- * En-tête public — structure façon Brixo, système d'états du JOURNAL.
+ * En-tête public — deux niveaux, façon PropFirmMatch mais ÉPURÉ.
  *
- * Trois zones : logo NU à gauche, nav en CAPSULE liquid glass au centre, actions
- * à droite. L'item de nav actif porte `.control--active` (fond quasi-noir +
- * liseré d'accent) — la MÊME classe que le journal, pour que la home et l'app
- * aient l'air du même produit. « Connexion » = `.control` discret ; « Ouvrir le
- * journal » = `.control--primary` (comme « Enregistrer l'entrée »).
+ *  1. Barre supérieure fine, discrète, FERMABLE (un message clé) — disparaît au
+ *     scroll, se souvient de la fermeture (localStorage).
+ *  2. Header principal : logo à gauche ; centre RÉSERVÉ au futur switch
+ *     Futures/Forex/Crypto (pas encore affiché) ; à droite langue ronde,
+ *     « Connexion » discret, « Commencer » en pilule primaire.
+ *  3. Ligne de nav de contenu : Comparateur / Journal / Guides ; l'onglet actif
+ *     en `.control--active` (repris du journal).
  *
- * Le header flotte, sticky, ne chevauche pas le hero (offset `--header-h`).
- * Drapeaux en SVG inline (jamais d'emoji). Tiroir mobile réutilisé.
+ * Header sticky ; la barre supérieure peut disparaître, le header principal
+ * reste. Système Tradawave (violet-magenta), liquid glass. Drapeaux en SVG.
  */
 
 /* ---- Drapeaux ronds, SVG inline ---- */
@@ -65,7 +67,7 @@ function FlagRound({ locale }: { locale: Locale }) {
   );
 }
 
-/* ---- Logo nu ---- */
+/* ---- Logo ---- */
 
 function Logo() {
   const [failed, setFailed] = useState(false);
@@ -84,11 +86,12 @@ function navItems(l: Locale) {
   ];
 }
 
-/** Actif si la route courante EST l'item (ou une de ses sous-pages). */
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+
+const TOPBAR_KEY = 'tg-topbar-dismissed';
 
 export default function PublicHeader({ locale }: { locale: Locale }) {
   const l = locale;
@@ -96,6 +99,8 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   const [authed, setAuthed] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
+  const [topDismissed, setTopDismissed] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,6 +112,22 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
       on = false;
       sub.subscription.unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(TOPBAR_KEY) === '1') setTopDismissed(true);
+    } catch {
+      /* localStorage indisponible : on garde la barre visible. */
+    }
+  }, []);
+
+  // La barre supérieure disparaît au scroll ; le header principal reste.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -123,95 +144,127 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
     };
   }, [langOpen]);
 
+  const dismissTop = () => {
+    setTopDismissed(true);
+    try {
+      localStorage.setItem(TOPBAR_KEY, '1');
+    } catch {
+      /* pas de persistance possible : la fermeture ne tiendra pas la session. */
+    }
+  };
+
   const others = LOCALES.filter((x) => x !== l);
   const nav = navItems(l);
-  const journalHref = authed ? '/app' : '/signup';
-  const journalLabel = authed
-    ? l === 'fr' ? 'Ouvrir mon journal' : 'Open my journal'
-    : l === 'fr' ? 'Ouvrir le journal' : 'Open the journal';
+  const ctaHref = authed ? '/app' : '/signup';
+  const ctaLabel = authed
+    ? l === 'fr' ? 'Mon journal' : 'My journal'
+    : l === 'fr' ? 'Commencer' : 'Get started';
   const signinLabel = l === 'fr' ? 'Connexion' : 'Sign in';
+  const topMsg = l === 'fr' ? 'Données vérifiées à la source et datées.' : 'Data verified at source and dated.';
 
   return (
     <>
-      <header className="pub-header">
-        {/* Gauche : logo nu, sans capsule. */}
-        <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
-          <Logo />
-        </Link>
-
-        {/* Centre : nav en capsule ; l'item actif en `.control--active`. */}
-        <nav className="pub-nav" aria-label="Navigation principale">
-          {nav.map((n) => {
-            const active = isActive(pathname, n.href);
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={`control control--sm ${active ? 'control--active' : 'control--ghost'}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Droite : langue ronde, Connexion discret, CTA primaire. */}
-        <div className="pub-header-right">
-          <div className="pub-lang" ref={langRef}>
+      <div className="pub-headwrap">
+        {/* 1. Barre supérieure fermable, disparaît au scroll. */}
+        {!topDismissed ? (
+          <div className={`pub-topbar${scrolled ? ' is-hidden' : ''}`} role="note">
+            <span className="pub-topbar-dot" aria-hidden="true" />
+            <span className="pub-topbar-msg">{topMsg}</span>
             <button
               type="button"
-              className="pub-lang-btn"
-              aria-haspopup="true"
-              aria-expanded={langOpen}
-              aria-label={`Langue : ${l.toUpperCase()}`}
-              onClick={() => setLangOpen((o) => !o)}
+              className="pub-topbar-close"
+              aria-label={l === 'fr' ? 'Fermer' : 'Dismiss'}
+              onClick={dismissTop}
             >
-              <FlagRound locale={l} />
+              ×
             </button>
-            {langOpen ? (
-              <div className="pub-lang-pop" role="menu">
-                {others.map((x) => (
-                  <Link
-                    key={x}
-                    href={`/${x}`}
-                    hrefLang={x}
-                    className="pub-lang-opt"
-                    role="menuitem"
-                    aria-label={x.toUpperCase()}
-                    onClick={() => setLangOpen(false)}
-                  >
-                    <FlagRound locale={x} />
-                  </Link>
-                ))}
+          </div>
+        ) : null}
+
+        {/* 2 + 3 : header principal (glass) et ligne de nav. */}
+        <header className="pub-header">
+          <div className="pub-header-main">
+            <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
+              <Logo />
+            </Link>
+
+            {/* Centre RÉSERVÉ au futur switch Futures/Forex/Crypto — pas affiché. */}
+            <div className="pub-header-center" aria-hidden="true" />
+
+            <div className="pub-header-actions">
+              <div className="pub-lang" ref={langRef}>
+                <button
+                  type="button"
+                  className="pub-lang-btn"
+                  aria-haspopup="true"
+                  aria-expanded={langOpen}
+                  aria-label={`Langue : ${l.toUpperCase()}`}
+                  onClick={() => setLangOpen((o) => !o)}
+                >
+                  <FlagRound locale={l} />
+                </button>
+                {langOpen ? (
+                  <div className="pub-lang-pop" role="menu">
+                    {others.map((x) => (
+                      <Link
+                        key={x}
+                        href={`/${x}`}
+                        hrefLang={x}
+                        className="pub-lang-opt"
+                        role="menuitem"
+                        aria-label={x.toUpperCase()}
+                        onClick={() => setLangOpen(false)}
+                      >
+                        <FlagRound locale={x} />
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+
+              {!authed ? (
+                <Link href="/login" className="control control--sm pub-signin">
+                  {signinLabel}
+                </Link>
+              ) : null}
+              <Link href={ctaHref} className="control control--sm control--primary pub-cta">
+                {ctaLabel}
+              </Link>
+
+              <button
+                type="button"
+                className="pub-burger"
+                aria-label="Menu"
+                aria-expanded={drawer}
+                onClick={() => setDrawer((d) => !d)}
+              >
+                <span />
+                <span />
+                <span />
+              </button>
+            </div>
           </div>
 
-          {!authed ? (
-            <Link href="/login" className="control control--sm pub-signin">
-              {signinLabel}
-            </Link>
-          ) : null}
-          <Link href={journalHref} className="control control--sm control--primary pub-cta">
-            {journalLabel}
-          </Link>
+          {/* 3. Ligne de nav de contenu. */}
+          <nav className="pub-header-nav" aria-label="Navigation principale">
+            {nav.map((n) => {
+              const active = isActive(pathname, n.href);
+              return (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  className={`control control--sm ${active ? 'control--active' : 'control--ghost'}`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </header>
+      </div>
 
-          <button
-            type="button"
-            className="pub-burger"
-            aria-label="Menu"
-            aria-expanded={drawer}
-            onClick={() => setDrawer((d) => !d)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
-      </header>
-
-      {/* Tiroir mobile réutilisé : nav + actions. */}
+      {/* Tiroir mobile : nav + actions. */}
       <div className={`pub-drawer${drawer ? ' is-open' : ''}`} aria-hidden={!drawer}>
         <div className="pub-drawer-scrim" onClick={() => setDrawer(false)} />
         <nav className="pub-drawer-panel" aria-label="Navigation">
@@ -225,8 +278,8 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
               {signinLabel}
             </Link>
           ) : null}
-          <Link href={journalHref} className="control control--primary pub-drawer-cta" onClick={() => setDrawer(false)}>
-            {journalLabel}
+          <Link href={ctaHref} className="control control--primary pub-drawer-cta" onClick={() => setDrawer(false)}>
+            {ctaLabel}
           </Link>
         </nav>
       </div>
