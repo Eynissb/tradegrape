@@ -2165,7 +2165,7 @@ body::before {
    Le seul conteneur de défilement (X et Y) est .cmp-listscroll — deux conteneurs
    imbriqués faisaient fuir la hauteur du tableau hors du cadre 100vh. */
 .cmp-oscroll { display: contents; }
-.cmp-otable { min-width: 860px; max-width: 1680px; display: flex; flex-direction: column; gap: 12px; }
+.cmp-otable { min-width: 900px; max-width: 1680px; display: flex; flex-direction: column; gap: 14px; }
 /* Une seule grille partagée par l'en-tête ET chaque ligne → colonnes alignées. */
 /* Colonnes équilibrées : firm flexible (1fr, plus dominante), le reste en largeurs
    fixes calibrées sur le contenu — drawdown large pour son badge + le durcissement,
@@ -2174,14 +2174,14 @@ body::before {
    colonnes proportionnellement (plus de « firm » qui absorbe tout et laisse un
    vide au milieu). Sur écran large, tout reste équilibré. */
 .cmp-otable--eval {
-  --ocols: 24px 24px minmax(150px, 2.2fr) minmax(48px, 0.65fr) minmax(92px, 1.15fr) minmax(60px, 0.85fr) minmax(72px, 1fr) minmax(80px, 1.05fr) minmax(106px, 1.35fr) minmax(64px, 0.85fr) minmax(42px, 0.6fr);
+  --ocols: 26px 24px minmax(158px, 1.8fr) minmax(50px, 0.7fr) minmax(108px, 1.2fr) minmax(60px, 0.8fr) minmax(70px, 0.95fr) minmax(156px, 1.5fr) minmax(114px, 1.3fr) minmax(60px, 0.85fr) minmax(52px, 0.62fr);
 }
 .cmp-otable--funded {
-  --ocols: 24px 24px minmax(150px, 2.2fr) minmax(48px, 0.65fr) minmax(80px, 0.95fr) minmax(104px, 1.35fr) minmax(72px, 0.95fr) minmax(88px, 1.15fr) minmax(76px, 0.95fr) minmax(76px, 0.95fr) minmax(42px, 0.6fr);
+  --ocols: 26px 24px minmax(168px, 2.3fr) minmax(56px, 0.7fr) minmax(88px, 0.95fr) minmax(122px, 1.4fr) minmax(80px, 0.95fr) minmax(98px, 1.15fr) minmax(84px, 0.95fr) minmax(84px, 0.95fr) minmax(52px, 0.62fr);
 }
 .cmp-ocols {
-  display: grid; grid-template-columns: var(--ocols); gap: 10px; align-items: center;
-  padding: 2px 14px; font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
+  display: grid; grid-template-columns: var(--ocols); gap: 11px; align-items: center;
+  padding: 2px 18px; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
 }
 .cmp-ocols span { min-width: 0; }
 
@@ -2215,8 +2215,9 @@ body::before {
 .cmp-orow.is-picked { box-shadow: inset 0 0 0 1px rgba(140, 90, 255, .45), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px rgba(0, 0, 0, .38); }
 
 .cmp-orow-head {
-  display: grid; grid-template-columns: var(--ocols); gap: 10px; align-items: center;
-  padding: 20px 14px; cursor: pointer; border-radius: var(--r-lg);
+  display: grid; grid-template-columns: var(--ocols); gap: 11px; align-items: center;
+  padding: 26px 18px; cursor: pointer; border-radius: var(--r-lg);
+  font-size: 15.5px;
 }
 .cmp-orow-head > span { min-width: 0; }
 .cmp-orow-pick { justify-self: center; }
@@ -2232,10 +2233,10 @@ body::before {
 .cmp-chev:focus-visible { outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 1px; }
 
 /* ---- Cellule firm ---- */
-.ui .cmp-firm { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.ui .cmp-firm { display: flex; align-items: center; gap: 13px; min-width: 0; }
 .cmp-logo {
-  width: 42px; height: 42px; flex: none; border-radius: 11px; display: grid; place-items: center;
-  font-weight: 800; font-size: 14px; color: #fff; overflow: hidden;
+  width: 52px; height: 52px; flex: none; border-radius: 13px; display: grid; place-items: center;
+  font-weight: 800; font-size: 16px; color: #fff; overflow: hidden;
 }
 /* Fond SOMBRE derrière chaque logo (jamais blanc), agrandi pour REMPLIR la
    pastille (le vide transparent déborde et est rogné). Les logos gardent leurs
@@ -2250,56 +2251,74 @@ body::before {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -2px 4px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .4);
 }
 .cmp-firm-txt { min-width: 0; }
-.ui .cmp-firm-name { font-weight: 700; font-size: 14.5px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cmp-firm-sub { display: flex; align-items: center; gap: 7px; margin-top: 2px; color: var(--ink3); font-size: 12px; }
+.ui .cmp-firm-name { font-weight: 700; font-size: 17px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-firm-sub { display: flex; align-items: center; gap: 8px; margin-top: 3px; color: var(--ink3); font-size: 13px; }
 .cmp-flag { width: 17px; height: 12px; border-radius: 2.5px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); display: inline-block; }
 .cmp-flag svg { width: 100%; height: 100%; display: block; }
 .cmp-flag--txt { width: auto; height: auto; padding: 1px 5px; border-radius: 4px; font-size: 10px; letter-spacing: .3px; color: var(--ink2); background: rgba(255, 255, 255, .06); box-shadow: none; }
 
-.cmp-size { font-size: 13.5px; font-weight: 600; }
+.cmp-size { font-size: 16.5px; font-weight: 700; }
 
 /* Prix : la donnée qui RESSORT — plus gros, blanc pur. Jamais vert (c'est une
    donnée, pas un état) ni violet (l'accent n'habille pas une donnée). */
 .cmp-price { display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
-.ui .cmp-price b { display: inline-flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 800; letter-spacing: -.3px; color: #fff; }
+.ui .cmp-price b { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 800; letter-spacing: -.4px; color: #fff; }
 /* Prix remisé : vert « bon plan » (comme « Incluse » / « Gratuite »), étiquette
    verte à côté, prix normal barré en dessous. */
 .ui .cmp-price--promo b { color: var(--lime); }
-.cmp-price-tag { display: inline-grid; place-items: center; width: 21px; height: 21px; flex: none; border-radius: 6px; color: var(--lime); background: rgba(56, 255, 176, .08); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .34); }
-.cmp-price-tag svg { width: 12px; height: 12px; }
-.cmp-price s { font-size: 11.5px; color: var(--ink3); text-decoration: line-through; }
+.cmp-price-tag { display: inline-grid; place-items: center; width: 25px; height: 25px; flex: none; border-radius: 7px; color: var(--lime); background: rgba(56, 255, 176, .08); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .34); }
+.cmp-price-tag svg { width: 14px; height: 14px; }
+.cmp-price s { font-size: 13px; color: var(--ink3); text-decoration: line-through; }
 
 .ui .cmp-promo { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-sm); font-size: 11.5px; font-weight: 700; letter-spacing: .3px; color: var(--amber); background: rgba(255, 180, 59, .10); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .28); }
 .cmp-promo code { font-family: var(--font-mono); font-size: 11px; }
 
-.cmp-plats { display: flex; gap: 5px; }
-.cmp-plat { width: 30px; height: 30px; flex: none; border-radius: 8px; overflow: hidden; display: grid; place-items: center; background: #100c20; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-plats { display: flex; gap: 6px; }
+.cmp-plat { width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden; display: grid; place-items: center; background: #100c20; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 5px rgba(0, 0, 0, .45); }
 .cmp-plat.lift { background: #2b2647; }
 .cmp-plat img { width: 100%; height: 100%; object-fit: contain; display: block; }
 /* Repli sans fichier : glyphe générique « plateforme », pastille sombre. */
 .cmp-plat--gen { background: #1a1530; color: var(--ink3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
-.cmp-plat--gen svg { width: 17px; height: 17px; }
+.cmp-plat--gen svg { width: 20px; height: 20px; }
 
 .cmp-ddcell { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
 .cmp-dd { display: flex; align-items: center; gap: 8px; }
 /* Coloré par RISQUE : STATIC (fixe, sûr) → lime · EOD (moyen) → ambre ·
    TRAIL (le piège n°1, §4) → ROUGE plein. Sémantique d'état, jamais l'accent. */
-.cmp-dd-badge { font-size: 10px; font-weight: 800; letter-spacing: .5px; padding: 4px 8px; border-radius: 6px; }
+.cmp-dd-badge { font-size: 11.5px; font-weight: 800; letter-spacing: .5px; padding: 5px 9px; border-radius: 7px; }
 .cmp-dd-static { color: var(--lime); background: rgba(56, 255, 176, .12); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .32); }
 .cmp-dd-eod { color: var(--amber); background: rgba(255, 180, 59, .12); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .32); }
 .cmp-dd-trail { color: #fff; background: rgba(255, 77, 94, .9); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 2px 6px rgba(255, 77, 94, .4); }
-.cmp-dd .num { font-size: 13.5px; font-weight: 600; }
+.cmp-dd .num { font-size: 16px; font-weight: 700; }
 /* Durcissement en financé : signal DANGER → rouge (état), pas l'accent. */
-.cmp-harden { font-size: 10px; font-weight: 700; color: var(--red); background: rgba(255, 77, 94, .10); box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .30); padding: 2px 7px; border-radius: 5px; }
+.cmp-harden { font-size: 11px; font-weight: 700; color: var(--red); background: rgba(255, 77, 94, .10); box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .30); padding: 3px 8px; border-radius: 6px; }
 /* Règles inchangées en financé : réassurance (lime, discret) — inédit vs concurrents. */
 .cmp-same { font-size: 9.5px; font-weight: 700; letter-spacing: .2px; color: var(--lime); background: rgba(56, 255, 176, .07); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .22); padding: 2px 7px; border-radius: 5px; }
 
 /* Jauge de note — lime/ambre/rouge, JAMAIS violette. */
 .cmp-notecell { justify-self: end; }
-.cmp-gauge { position: relative; width: 42px; height: 42px; display: inline-grid; place-items: center; }
+.cmp-gauge { position: relative; width: 48px; height: 48px; display: inline-grid; place-items: center; }
 .cmp-gauge svg { position: absolute; inset: 0; }
 .cmp-gauge-track { stroke: rgba(255, 255, 255, .08); }
-.cmp-gauge b { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+.cmp-gauge b { font-family: var(--font-mono); font-weight: 700; font-size: 16px; }
+
+/* Laptops (901–1400px) : le tableau agrandi ne rentre pas dans la colonne
+   résultats plus étroite → scroll horizontal. On RÉCUPÈRE l'espace sur les
+   marges, gaps et icônes de plateforme (colonnes resserrées), en GARDANT les
+   grandes polices et logos. Au-dessus de 1400px, l'échelle pleine s'applique ;
+   sous 901px, l'empilement mobile prend le relais (non touché ici). */
+@media (min-width: 901px) and (max-width: 1400px) {
+  .cmp-otable { min-width: 0; }
+  .cmp-otable--eval {
+    --ocols: 22px 22px minmax(150px, 1.8fr) minmax(46px, 0.7fr) minmax(96px, 1.2fr) minmax(52px, 0.8fr) minmax(62px, 0.95fr) minmax(140px, 1.5fr) minmax(104px, 1.3fr) minmax(56px, 0.85fr) minmax(48px, 0.62fr);
+  }
+  .cmp-otable--funded {
+    --ocols: 22px 22px minmax(150px, 2fr) minmax(46px, 0.7fr) minmax(78px, 0.95fr) minmax(104px, 1.4fr) minmax(72px, 0.95fr) minmax(86px, 1.15fr) minmax(74px, 0.95fr) minmax(74px, 0.95fr) minmax(48px, 0.62fr);
+  }
+  .cmp-ocols { gap: 8px; padding-left: 14px; padding-right: 14px; }
+  .cmp-orow-head { gap: 8px; padding-left: 14px; padding-right: 14px; }
+  .cmp-plat { width: 30px; height: 30px; }
+}
 
 /* ---- Panneau déplié : relief journal ---- */
 .cmp-orow-detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(.22, 1, .36, 1); }
