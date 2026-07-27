@@ -1295,46 +1295,40 @@ body::before {
 /* `overflow-x: clip` rogne le décor qui déborde (glows ambiants) sans créer de
    conteneur de défilement — donc sans casser un futur `position: sticky`
    (ce que ferait `hidden`). */
-/* `--header-h` = espace réservé sous la capsule (marge haute + hauteur + jeu) :
-   le contenu du hero et des pages commence dessous, la capsule ne chevauche rien. */
-.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 88px; }
+/* `--header-h` = espace réservé sous le header : le contenu du hero et des pages
+   commence dessous, la barre ne chevauche rien. */
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 84px; }
 
-/* ---- Header : CAPSULE flottante iOS ----
-   Pilule arrondie détachée du haut (marge tout autour), verre liquide : fond
-   translucide + backdrop-filter, arête claire en haut, ombre douce dessous.
-   Centrée sur une largeur maximale. Sticky ; se densifie au scroll (.is-solid). */
+/* ---- Header : structure Brixo, système d'états du JOURNAL ----
+   Barre sticky TRANSPARENTE (le fond de page reste visible). Trois zones :
+   logo NU à gauche, nav en CAPSULE glass au centre, actions à droite. Flotte,
+   ne chevauche pas le hero (offset --header-h). */
 .pub-header {
-  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 50;
-  width: min(1080px, calc(100vw - 28px));
-  display: flex; align-items: center; gap: 18px;
-  padding: 8px 8px 8px 20px;
-  border-radius: 999px;
-  background: rgba(18, 13, 34, 0.55);
-  -webkit-backdrop-filter: blur(22px) saturate(1.7);
-  backdrop-filter: blur(22px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  transition: background .3s ease, box-shadow .3s ease, border-color .3s ease;
-}
-/* Densification au scroll : plus opaque, ombre/arête un peu plus marquées. */
-.pub-header.is-solid {
-  background: rgba(18, 13, 34, 0.82);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 42px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 50;
+  width: min(1400px, calc(100vw - 40px));
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px;
+  padding: 16px 0;
 }
 
-/* Logo à gauche */
-.pub-brand { flex: none; display: inline-flex; align-items: center; }
-.pub-logo-img { height: 26px; width: auto; display: block; }
-.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.2rem; letter-spacing: -.4px; }
+/* Logo NU, affirmé — pas de capsule. */
+.pub-brand { justify-self: start; display: inline-flex; align-items: center; }
+.pub-logo-img { height: 34px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.4rem; letter-spacing: -.4px; }
 
-/* Nav au centre */
-.pub-nav { flex: 1; display: flex; justify-content: center; gap: 26px; }
-.ui .pub-navlink { font-size: 14px; font-weight: 500; color: var(--ink2); transition: color .15s; }
-.ui .pub-navlink:hover { color: var(--ink); }
+/* Nav au centre — CAPSULE liquid glass. Les items sont des `.control` : l'actif
+   porte `.control--active` (comme le journal), les autres `.control--ghost`. */
+.pub-nav {
+  justify-self: center; display: flex; align-items: center; gap: 4px;
+  padding: 5px; border-radius: 999px;
+  background: rgba(18, 13, 34, 0.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
 
 /* Actions à droite */
-.pub-header-right { flex: none; display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.pub-header-right { justify-self: end; display: flex; align-items: center; gap: 10px; }
 
 /* Sélecteur de langue rond, pastille de drapeau SVG. */
 .pub-lang { position: relative; }
@@ -1361,13 +1355,8 @@ body::before {
 }
 .pub-lang-opt:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.34); }
 
-/* CTA session — pilule en verre. */
-.ui .pub-cta {
-  padding: 8px 16px; border-radius: var(--r-pill); font-size: 13px; font-weight: 600;
-  color: #fff; background: rgba(255, 255, 255, 0.12); white-space: nowrap;
-  transition: background .15s;
-}
-.ui .pub-cta:hover { background: rgba(255, 255, 255, 0.2); }
+/* « Connexion » et « Ouvrir le journal » réutilisent .control / .control--primary
+   du journal — aucune surcharge ici, juste la cohérence produit. */
 
 /* Bouton tiroir (mobile). */
 .pub-burger {
@@ -1395,10 +1384,10 @@ body::before {
 }
 .pub-drawer.is-open .pub-drawer-panel { transform: translateX(0); }
 .ui .pub-drawer-link { padding: 12px 4px; font-size: 16px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--card-brd); }
-.ui .pub-drawer-cta {
-  margin-top: 14px; padding: 12px; text-align: center; border-radius: var(--r-pill);
-  font-weight: 700; color: #fff; background: var(--grad);
-}
+/* CTA / Connexion du tiroir : mêmes .control / .control--primary, pleine largeur. */
+.ui .pub-drawer-signin, .ui .pub-drawer-cta { width: 100%; }
+.ui .pub-drawer-signin { margin-top: 14px; }
+.ui .pub-drawer-cta { margin-top: 8px; }
 
 /* Contenu sous le header FIXE : les pages sans hero décalent leur contenu ;
    la home ne décale pas (le hero passe volontairement DERRIÈRE le header). */
@@ -1412,7 +1401,10 @@ body::before {
   .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
 }
 @media (max-width: 640px) {
-  .pub-cta { display: none; }   /* dans le tiroir */
+  /* Nav + actions passent dans le tiroir ; logo + langue + burger restent.
+     Spécificité 0,3,0 pour battre `.ui .control { display: inline-flex }`. */
+  .pub-nav { display: none; }
+  .ui .pub-header-right .pub-cta, .ui .pub-header-right .pub-signin { display: none; }
   .pub-burger { display: flex; }
 }
 .pub-head { max-width: 760px; margin-bottom: 26px; }
@@ -1628,9 +1620,6 @@ body::before {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
 }
 @media (max-width: 640px) {
-  /* Nav texte masquée en mobile — elle passe dans le tiroir à l'étape 2 (header
-     premium). Le sélecteur de langue reste visible. Temporaire d'ici là. */
-  .pub-nav { display: none; }
   /* Mobile : parallaxe coupée (pointeur grossier), image fixe. */
   .home-hero-img { transform: scale(1.06); }
 }

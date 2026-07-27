@@ -2,22 +2,21 @@
 
 import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 
 /**
- * En-tête public — CAPSULE flottante façon iOS.
+ * En-tête public — structure façon Brixo, système d'états du JOURNAL.
  *
- * Pilule arrondie, détachée du haut (marge tout autour), verre liquide (fond
- * translucide + backdrop-filter, arête claire en haut, ombre douce dessous),
- * centrée sur une largeur maximale. Sticky au scroll ; se densifie légèrement
- * (`.is-solid`) pour rester lisible sur le contenu clair, sans perdre sa forme.
+ * Trois zones : logo NU à gauche, nav en CAPSULE liquid glass au centre, actions
+ * à droite. L'item de nav actif porte `.control--active` (fond quasi-noir +
+ * liseré d'accent) — la MÊME classe que le journal, pour que la home et l'app
+ * aient l'air du même produit. « Connexion » = `.control` discret ; « Ouvrir le
+ * journal » = `.control--primary` (comme « Enregistrer l'entrée »).
  *
- * Le contenu du hero commence SOUS la capsule (offset `--header-h`) : elle ne
- * chevauche jamais le titre.
- *
- * Drapeaux en SVG inline (jamais d'emoji : rendus en lettres sur Windows) →
- * rendu identique partout.
+ * Le header flotte, sticky, ne chevauche pas le hero (offset `--header-h`).
+ * Drapeaux en SVG inline (jamais d'emoji). Tiroir mobile réutilisé.
  */
 
 /* ---- Drapeaux ronds, SVG inline ---- */
@@ -66,7 +65,7 @@ function FlagRound({ locale }: { locale: Locale }) {
   );
 }
 
-/* ---- Logo ---- */
+/* ---- Logo nu ---- */
 
 function Logo() {
   const [failed, setFailed] = useState(false);
@@ -77,8 +76,6 @@ function Logo() {
   );
 }
 
-/* ---- Nav ---- */
-
 function navItems(l: Locale) {
   return [
     { label: l === 'fr' ? 'Comparateur' : 'Compare', href: comparatorHref(l) },
@@ -87,15 +84,20 @@ function navItems(l: Locale) {
   ];
 }
 
+/** Actif si la route courante EST l'item (ou une de ses sous-pages). */
+function isActive(pathname: string | null, href: string): boolean {
+  if (!pathname) return false;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function PublicHeader({ locale }: { locale: Locale }) {
   const l = locale;
-  const [solid, setSolid] = useState(false);
+  const pathname = usePathname();
   const [authed, setAuthed] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
-  // Session : CTA « Ouvrir le journal » (connecté) vs « Connexion ».
   useEffect(() => {
     const sb = createClient();
     let on = true;
@@ -107,15 +109,6 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
     };
   }, []);
 
-  // Densification au scroll : la capsule reste une capsule, fond plus opaque.
-  useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 24);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Fermeture du popover langue au clic extérieur / Échap.
   useEffect(() => {
     if (!langOpen) return;
     const onDoc = (e: MouseEvent) => {
@@ -132,28 +125,39 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
 
   const others = LOCALES.filter((x) => x !== l);
   const nav = navItems(l);
-  const ctaLabel = authed
-    ? l === 'fr' ? 'Ouvrir le journal' : 'Open journal'
-    : l === 'fr' ? 'Connexion' : 'Sign in';
-  const ctaHref = authed ? '/app' : '/login';
+  const journalHref = authed ? '/app' : '/signup';
+  const journalLabel = authed
+    ? l === 'fr' ? 'Ouvrir mon journal' : 'Open my journal'
+    : l === 'fr' ? 'Ouvrir le journal' : 'Open the journal';
+  const signinLabel = l === 'fr' ? 'Connexion' : 'Sign in';
 
   return (
     <>
-      <header className={`pub-header${solid ? ' is-solid' : ''}`}>
+      <header className="pub-header">
+        {/* Gauche : logo nu, sans capsule. */}
         <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
           <Logo />
         </Link>
 
+        {/* Centre : nav en capsule ; l'item actif en `.control--active`. */}
         <nav className="pub-nav" aria-label="Navigation principale">
-          {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="pub-navlink">
-              {n.label}
-            </Link>
-          ))}
+          {nav.map((n) => {
+            const active = isActive(pathname, n.href);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={`control control--sm ${active ? 'control--active' : 'control--ghost'}`}
+                aria-current={active ? 'page' : undefined}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
         </nav>
 
+        {/* Droite : langue ronde, Connexion discret, CTA primaire. */}
         <div className="pub-header-right">
-          {/* Sélecteur de langue rond, à drapeaux SVG. */}
           <div className="pub-lang" ref={langRef}>
             <button
               type="button"
@@ -184,8 +188,13 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
             ) : null}
           </div>
 
-          <Link href={ctaHref} className="pub-cta">
-            {ctaLabel}
+          {!authed ? (
+            <Link href="/login" className="control control--sm pub-signin">
+              {signinLabel}
+            </Link>
+          ) : null}
+          <Link href={journalHref} className="control control--sm control--primary pub-cta">
+            {journalLabel}
           </Link>
 
           <button
@@ -202,7 +211,7 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
         </div>
       </header>
 
-      {/* Tiroir mobile : la nav + le CTA (un seul système). */}
+      {/* Tiroir mobile réutilisé : nav + actions. */}
       <div className={`pub-drawer${drawer ? ' is-open' : ''}`} aria-hidden={!drawer}>
         <div className="pub-drawer-scrim" onClick={() => setDrawer(false)} />
         <nav className="pub-drawer-panel" aria-label="Navigation">
@@ -211,8 +220,13 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
               {n.label}
             </Link>
           ))}
-          <Link href={ctaHref} className="pub-drawer-cta" onClick={() => setDrawer(false)}>
-            {ctaLabel}
+          {!authed ? (
+            <Link href="/login" className="control pub-drawer-signin" onClick={() => setDrawer(false)}>
+              {signinLabel}
+            </Link>
+          ) : null}
+          <Link href={journalHref} className="control control--primary pub-drawer-cta" onClick={() => setDrawer(false)}>
+            {journalLabel}
           </Link>
         </nav>
       </div>
