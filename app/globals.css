@@ -1992,3 +1992,123 @@ body::before {
   .cmp-cmp-label { font-size: 12px; }
   .ui .cmp-cmp-cell { font-size: 12.5px; }
 }
+
+/* =====================================================================
+   Comparateur — LIGNES DÉPLIABLES (compact par défaut, détail à la demande).
+   Surfaces solides pour les données (lisibilité chirurgicale) ; relief journal
+   réservé aux sous-cartes du déplié. Accent violet jamais sur une donnée.
+   ===================================================================== */
+.cmp-oscroll { overflow-x: auto; }
+.cmp-otable { min-width: 980px; display: flex; flex-direction: column; gap: 10px; }
+/* Une seule grille partagée par l'en-tête ET chaque ligne → colonnes alignées. */
+.cmp-otable--eval {
+  --ocols: 26px 26px minmax(190px, 2.1fr) 74px 1.2fr 104px 92px 96px 1fr 84px 54px;
+}
+.cmp-otable--funded {
+  --ocols: 26px 26px minmax(190px, 2.1fr) 74px 92px 1fr 92px 1fr 96px 96px 54px;
+}
+.cmp-ocols {
+  display: grid; grid-template-columns: var(--ocols); gap: 12px; align-items: center;
+  padding: 2px 16px; font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
+}
+.cmp-ocols span { min-width: 0; }
+
+/* ---- Ligne (carte solide) ---- */
+.cmp-orow {
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .022), rgba(255, 255, 255, .006)), #0c0a18;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 1px 2px rgba(0, 0, 0, .5), 0 8px 20px rgba(0, 0, 0, .3);
+  transition: box-shadow .2s;
+}
+.cmp-orow.is-open {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 1px 2px rgba(0, 0, 0, .55), 0 14px 34px rgba(0, 0, 0, .45);
+}
+/* Sélection pour comparaison = un ÉTAT actif → liseré violet admis (pas une donnée). */
+.cmp-orow.is-picked { box-shadow: inset 0 0 0 1px rgba(140, 90, 255, .45), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px rgba(0, 0, 0, .38); }
+
+.cmp-orow-head {
+  display: grid; grid-template-columns: var(--ocols); gap: 12px; align-items: center;
+  padding: 13px 16px; cursor: pointer; border-radius: var(--r-lg);
+}
+.cmp-orow-head > span { min-width: 0; }
+.cmp-orow-pick { justify-self: center; }
+
+.cmp-chev {
+  width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0;
+  background: transparent; color: var(--ink3); cursor: pointer; border-radius: 7px;
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), color .15s, background .15s;
+}
+.cmp-chev:hover { color: var(--ink); background: rgba(255, 255, 255, .05); }
+.cmp-orow.is-open .cmp-chev { transform: rotate(90deg); color: var(--ink); }
+.cmp-chev svg { width: 15px; height: 15px; }
+.cmp-chev:focus-visible { outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 1px; }
+
+/* ---- Cellule firm ---- */
+.ui .cmp-firm { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.cmp-logo {
+  width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  font-weight: 800; font-size: 13px; color: #fff; overflow: hidden;
+  background: var(--grad);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -2px 4px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .4);
+}
+.cmp-logo--img { object-fit: cover; background: #14101f; }
+.cmp-firm-txt { min-width: 0; }
+.ui .cmp-firm-name { font-weight: 700; font-size: 14.5px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-firm-sub { display: flex; align-items: center; gap: 7px; margin-top: 2px; color: var(--ink3); font-size: 12px; }
+.cmp-flag { width: 17px; height: 12px; border-radius: 2.5px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); display: inline-block; }
+.cmp-flag svg { width: 100%; height: 100%; display: block; }
+.cmp-flag--txt { width: auto; height: auto; padding: 1px 5px; border-radius: 4px; font-size: 10px; letter-spacing: .3px; color: var(--ink2); background: rgba(255, 255, 255, .06); box-shadow: none; }
+
+.cmp-size { font-size: 13.5px; font-weight: 600; }
+
+/* Prix : une DONNÉE, pas un état → encre, jamais vert. */
+.cmp-price { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.ui .cmp-price b { font-size: 14px; font-weight: 700; color: var(--ink); }
+.cmp-price s { font-size: 11.5px; color: var(--ink3); text-decoration: line-through; }
+
+.ui .cmp-promo { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-sm); font-size: 11.5px; font-weight: 700; letter-spacing: .3px; color: var(--amber); background: rgba(255, 180, 59, .10); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .28); }
+.cmp-promo code { font-family: var(--font-mono); font-size: 11px; }
+
+.cmp-plats { display: flex; }
+.cmp-plat { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-size: 9.5px; font-weight: 800; color: var(--ink); margin-left: -7px; background: #171226; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), 0 2px 5px rgba(0, 0, 0, .5); }
+.cmp-plat:first-child { margin-left: 0; }
+
+.cmp-ddcell { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
+.cmp-dd { display: flex; align-items: center; gap: 8px; }
+.cmp-dd-badge { font-size: 10px; font-weight: 800; letter-spacing: .5px; padding: 3px 7px; border-radius: 6px; }
+.cmp-dd-eod { color: #c9b8ff; background: rgba(120, 90, 255, .16); box-shadow: inset 0 0 0 1px rgba(140, 90, 255, .34); }
+.cmp-dd-trail { color: var(--amber); background: rgba(255, 180, 59, .12); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .32); }
+.cmp-dd-static { color: var(--ink2); background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14); }
+.cmp-dd .num { font-size: 13.5px; font-weight: 600; }
+/* Durcissement en financé : signal DANGER → rouge (état), pas l'accent. */
+.cmp-harden { font-size: 10px; font-weight: 700; color: var(--red); background: rgba(255, 77, 94, .10); box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .30); padding: 2px 7px; border-radius: 5px; }
+
+/* Jauge de note — lime/ambre/rouge, JAMAIS violette. */
+.cmp-notecell { justify-self: end; }
+.cmp-gauge { position: relative; width: 42px; height: 42px; display: inline-grid; place-items: center; }
+.cmp-gauge svg { position: absolute; inset: 0; }
+.cmp-gauge-track { stroke: rgba(255, 255, 255, .08); }
+.cmp-gauge b { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+
+/* ---- Panneau déplié : relief journal ---- */
+.cmp-orow-detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(.22, 1, .36, 1); }
+.cmp-orow.is-open .cmp-orow-detail { grid-template-rows: 1fr; }
+.cmp-orow-detail-in { overflow: hidden; min-height: 0; }
+.cmp-subgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 2px 16px 18px; }
+.cmp-subcard {
+  border-radius: var(--r-md); padding: 13px 15px;
+  background: linear-gradient(180deg, var(--elev-2-bg), rgba(255, 255, 255, .006)), #0e0b1b;
+  box-shadow: var(--elev-2-shadow);
+}
+.cmp-subcard--wide { grid-column: span 2; }
+.cmp-subk { font-size: 10.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+.ui .cmp-subv { font-size: 18px; font-weight: 700; letter-spacing: -.3px; color: var(--ink); }
+.ui .cmp-subv .num { font-weight: 700; }
+.cmp-scalp { display: flex; flex-direction: column; gap: 4px; }
+.cmp-scalp-note { font-size: 12px; font-weight: 400; color: var(--ink3); line-height: 1.45; }
+.cmp-lics { display: flex; gap: 8px; }
+.cmp-lic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-size: 10px; font-weight: 800; color: var(--ink); background: #171226; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), 0 2px 5px rgba(0, 0, 0, .5); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cmp-orow-detail, .cmp-chev { transition: none; }
+}

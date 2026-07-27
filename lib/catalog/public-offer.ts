@@ -52,6 +52,10 @@ export interface PublicOfferRow {
   daily_loss_limit: number | null;
   consistency_pct: number | null;
   min_trading_days: number | null;
+  max_minis: number | null;
+  max_micros: number | null;
+  funded_max_minis: number | null;
+  funded_max_micros: number | null;
 
   funded_drawdown_type: 'EOD' | 'TRAIL' | 'STATIC' | null;
   funded_drawdown_amount: number | null;
@@ -70,7 +74,15 @@ export interface PublicOfferRow {
   reviewed_at: string | null;
 
   plan: { slug: string; name: string; account_kind: string; rating: number | null };
-  firm: { slug: string; name: string; health_score: number | null };
+  firm: {
+    slug: string;
+    name: string;
+    health_score: number | null;
+    logo_url: string | null;
+    country: string | null;
+    founded_year: number | null;
+    max_funded_accounts: number | null;
+  };
   /** Promo active de la firm, si elle en a une. */
   promo?: { code: string; discount_pct: number | null; ends_at: string | null } | null;
   /** Plafonds par cycle de retrait, triés par `cycle_from` croissant. */
@@ -78,6 +90,11 @@ export interface PublicOfferRow {
   /** Posture de la firm sur le trading pendant les annonces (`firm_style_rules`). */
   news_stance?: RuleStance | null;
   news_note?: string | null;
+  /** Posture de la firm sur le scalping (sous-carte du déplié). */
+  scalp_stance?: RuleStance | null;
+  scalp_note?: string | null;
+  /** Slugs des plateformes dont la licence est OFFERTE (`firm_platforms.is_free`). */
+  licenses?: string[];
 }
 
 export type PayoutModel =
@@ -105,7 +122,18 @@ export interface PayoutCapRow {
 
 export interface PublicOffer {
   id: string;
-  firm: { slug: string; name: string; healthScore: number | null };
+  firm: {
+    slug: string;
+    name: string;
+    healthScore: number | null;
+    /** URL du logo (`null` → l'UI retombe sur le monogramme). */
+    logo: string | null;
+    /** Code pays ISO pour le drapeau, ou `null`. */
+    country: string | null;
+    foundedYear: number | null;
+    /** Nombre max de comptes financés cumulables (firm-level). */
+    maxAccounts: number | null;
+  };
   plan: { slug: string; name: string; kind: string; rating: number | null };
 
   size: number;
@@ -154,6 +182,12 @@ export interface PublicOffer {
   profitSplit: number | null;
   /** Slugs de plateformes ; résolus en noms à l'affichage. */
   platforms: string[];
+  /** Limites de contrats en évaluation (sous-carte « Sizing » du déplié). */
+  sizing: { minis: number | null; micros: number | null };
+  /** Posture de la firm sur le scalping, `null` si non renseignée. */
+  scalping: { stance: RuleStance; note: string | null } | null;
+  /** Slugs des plateformes dont la licence est offerte (`firm_platforms.is_free`). */
+  licenses: string[];
 
   /** Tout ce qui ne s'applique QU'UNE FOIS le compte financé (onglet dédié). */
   funded: FundedView;
@@ -187,6 +221,8 @@ export interface FundedView {
   /** Cohérence appliquée AU RETRAIT, distincte de celle de l'évaluation. */
   consistencyPct: number | null;
   hasConsistency: boolean;
+  /** Limites de contrats une fois financé (repli sur l'éval si non renseigné). */
+  sizing: { minis: number | null; micros: number | null };
 
   profitSplit: number | null;
   /**
@@ -262,6 +298,11 @@ function buildFunded(row: PublicOfferRow): FundedView {
     dailyLossLimit: n(row.funded_daily_loss) ?? n(row.daily_loss_limit),
     consistencyPct,
     hasConsistency: constrains(consistencyPct),
+    // Sizing financé : la valeur propre à la phase, à défaut celle de l'éval.
+    sizing: {
+      minis: row.funded_max_minis ?? row.max_minis,
+      micros: row.funded_max_micros ?? row.max_micros,
+    },
 
     profitSplit: n(row.profit_split),
     splitTiers: splitTiers.length > 1 ? splitTiers : [],
@@ -304,7 +345,15 @@ export function toPublicOffer(row: PublicOfferRow): PublicOffer {
 
   return {
     id: row.id,
-    firm: { slug: row.firm.slug, name: row.firm.name, healthScore: n(row.firm.health_score) },
+    firm: {
+      slug: row.firm.slug,
+      name: row.firm.name,
+      healthScore: n(row.firm.health_score),
+      logo: row.firm.logo_url,
+      country: row.firm.country,
+      foundedYear: row.firm.founded_year,
+      maxAccounts: row.firm.max_funded_accounts,
+    },
     plan: {
       slug: row.plan.slug,
       name: row.plan.name,
@@ -341,6 +390,9 @@ export function toPublicOffer(row: PublicOfferRow): PublicOffer {
     minTradingDays: Number(row.min_trading_days ?? 1),
     profitSplit: n(row.profit_split),
     platforms: row.platforms ?? [],
+    sizing: { minis: n(row.max_minis), micros: n(row.max_micros) },
+    scalping: row.scalp_stance ? { stance: row.scalp_stance, note: row.scalp_note ?? null } : null,
+    licenses: row.licenses ?? [],
 
     funded: buildFunded(row),
 

@@ -9,9 +9,17 @@ import type { PublicOfferRow } from './public-offer';
  *
  * Valeurs calquées sur Take Profit Trader 50k, la première offre publiée.
  */
-export function row(over: Partial<PublicOfferRow> = {}): PublicOfferRow {
-  return {
-    id: over.id ?? 'o1',
+/**
+ * `firm` se fusionne en profondeur : les tests n'en surchargent souvent qu'une
+ * partie (`{ slug, name, health_score }`) et héritent des autres champs par
+ * défaut (logo, pays, année…), sans avoir à tous les répéter.
+ */
+type RowOverride = Partial<Omit<PublicOfferRow, 'firm'>> & { firm?: Partial<PublicOfferRow['firm']> };
+
+export function row(over: RowOverride = {}): PublicOfferRow {
+  const { firm: firmOver, ...rest } = over;
+  const base: PublicOfferRow = {
+    id: 'o1',
     account_size: 50_000,
     currency: 'USD',
     price: 170,
@@ -25,6 +33,10 @@ export function row(over: Partial<PublicOfferRow> = {}): PublicOfferRow {
     daily_loss_limit: null,
     consistency_pct: null,
     min_trading_days: 5,
+    max_minis: null,
+    max_micros: null,
+    funded_max_minis: null,
+    funded_max_micros: null,
     funded_drawdown_type: null,
     funded_drawdown_amount: null,
     funded_daily_loss: null,
@@ -38,10 +50,18 @@ export function row(over: Partial<PublicOfferRow> = {}): PublicOfferRow {
     payout_method: null,
     reviewed_at: '2026-07-21',
     plan: { slug: 'test-pro', name: 'TPT Test → PRO', account_kind: 'evaluation', rating: null },
-    firm: { slug: 'take-profit-trader', name: 'Take Profit Trader', health_score: 70 },
+    firm: {
+      slug: 'take-profit-trader',
+      name: 'Take Profit Trader',
+      health_score: 70,
+      logo_url: null,
+      country: 'US',
+      founded_year: 2021,
+      max_funded_accounts: null,
+    },
     promo: null,
-    ...over,
   };
+  return { ...base, ...rest, firm: { ...base.firm, ...firmOver } };
 }
 
 /** Raccourci de ligne de plafond : la plupart des champs sont nuls la plupart du temps. */

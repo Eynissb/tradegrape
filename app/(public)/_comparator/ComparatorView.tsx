@@ -21,8 +21,8 @@ import {
   type SortKey,
 } from '@/lib/catalog/public-offer';
 import type { ComparatorDict, Locale } from '@/lib/i18n/comparator';
-import Badge from '@/components/ui/Badge';
 import Select from '@/components/ui/Select';
+import OfferRow from './OfferRow';
 
 /**
  * Comparateur — deux jeux de colonnes commutables (évaluation / compte financé)
@@ -568,18 +568,11 @@ export default function ComparatorView({
           <p className="cmp-empty-b">{d.emptyBody}</p>
         </div>
       ) : (
-        <div className="table-scroll">
-          <div
-            className={`data-list ${tab === 'eval' ? 'cmp-list' : 'cmp-list-funded'}`}
-            role="table"
-            aria-label={d.title}
-          >
-            <div className="data-head" role="row">
-              <span role="columnheader" className="cmp-pick-h">
-                <span className="sr-only">{d.compareSelect}</span>
-              </span>
+        <div className="cmp-oscroll">
+          <div className={`cmp-otable cmp-otable--${tab}`} role="table" aria-label={d.title}>
+            <div className={`cmp-ocols cmp-ocols--${tab}`} role="row" aria-hidden="true">
+              <span /><span />
               <span role="columnheader">{d.colFirm}</span>
-              <span role="columnheader">{d.colPlan}</span>
               <span role="columnheader">{d.colSize}</span>
               {tab === 'eval' ? (
                 <>
@@ -589,8 +582,6 @@ export default function ComparatorView({
                   <span role="columnheader">{d.colPlatforms}</span>
                   <span role="columnheader">{d.colDrawdown}</span>
                   <span role="columnheader">{d.colTarget}</span>
-                  <span role="columnheader">{d.colRating}</span>
-                  <span role="columnheader">{d.colReviewed}</span>
                 </>
               ) : (
                 <>
@@ -600,248 +591,25 @@ export default function ComparatorView({
                   <span role="columnheader">{d.colCap}</span>
                   <span role="columnheader">{d.colFrequency}</span>
                   <span role="columnheader">{d.colNews}</span>
-                  <span role="columnheader">{d.colReviewed}</span>
                 </>
               )}
+              <span role="columnheader">{d.colRating}</span>
             </div>
 
-            {shown.map((o) => {
-              const isPicked = selected.includes(o.id);
-              return (
-                <div key={o.id} className={`data-row${isPicked ? ' is-picked' : ''}`} role="row">
-                  {/* Sélection pour comparaison */}
-                  <span role="cell" className="cmp-pick">
-                    <label className="check">
-                      <input
-                        type="checkbox"
-                        checked={isPicked}
-                        // Bloqué à COMPARE_MAX, mais jamais pour DÉcocher.
-                        disabled={!isPicked && selected.length >= COMPARE_MAX}
-                        onChange={() => setSelected((s) => toggleCompare(s, o.id))}
-                      />
-                      <span className="check-box">
-                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5 6 12l7.5-8" /></svg>
-                      </span>
-                      <span className="sr-only">
-                        {d.compareSelect} — {o.firm.name} {o.plan.name} {compact(o.size)}
-                      </span>
-                    </label>
-                  </span>
-
-                  {/* Prop firm */}
-                  <span role="cell" data-label={d.colFirm} className="cmp-firm">
-                    <span className="cmp-firm-name">{o.firm.name}</span>
-                    {o.firm.healthScore != null ? (
-                      <span className="cmp-health" title={d.healthScore}>
-                        <span className="num">{o.firm.healthScore}</span>
-                      </span>
-                    ) : null}
-                  </span>
-
-                  {/* Compte */}
-                  <span role="cell" data-label={d.colPlan}>{o.plan.name}</span>
-
-                  {/* Taille */}
-                  <span role="cell" data-label={d.colSize} className="num">{compact(o.size)}</span>
-
-                  {tab === 'eval' ? (
-                    <>
-                      {/* Prix TTC — inconnu affiché comme inconnu */}
-                      <span role="cell" data-label={d.colPrice}>
-                        {o.totalPrice.known ? (
-                          <>
-                            <span className="cmp-price num">
-                              {o.totalPriceIsFloor ? <span className="cmp-from">{d.priceFrom} </span> : null}
-                              {money(o.totalPrice.value, o.currency)}
-                            </span>
-                            {/* Un abonnement + une activation ponctuelle ne font pas
-                                un prix mensuel : on détaille les deux composantes. */}
-                            <span className="cmp-price-sub" title={o.totalPriceIsFloor ? d.priceFloorHint : undefined}>
-                              {o.totalPriceIsFloor
-                                ? `${money(o.price.known ? o.price.value : 0, o.currency)}${d.perMonth} + ${money(o.activationFee, o.currency)} ${d.perMonthPlusActivation}`
-                                : o.isRecurring
-                                  ? d.perMonth
-                                  : d.oneTime}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="cmp-unknown" title={d.priceUnknownHint}>{d.priceUnknown}</span>
-                        )}
-                      </span>
-
-                      {/* Code promo — permanent signalé */}
-                      <span role="cell" data-label={d.colPromo}>
-                        {o.trust.promo ? (
-                          <span className="cmp-promo">
-                            <code className="cmp-code">{o.trust.promo.code}</code>
-                            {o.trust.promo.discountPct != null ? (
-                              <span className="cmp-promo-pct num">−{o.trust.promo.discountPct}%</span>
-                            ) : null}
-                            {o.trust.promo.permanent ? (
-                              <Badge variant="warn" className="cmp-badge">
-                                <span title={d.promoPermanentHint}>{d.promoPermanent}</span>
-                              </Badge>
-                            ) : (
-                              <span className="cmp-promo-until">
-                                {d.promoUntil} {o.trust.promo.endsAt?.slice(0, 10)}
-                              </span>
-                            )}
-                          </span>
-                        ) : (
-                          <span className="cmp-dash">—</span>
-                        )}
-                      </span>
-
-                      {/* Activation */}
-                      <span role="cell" data-label={d.colActivation} className="num">
-                        {o.activationFee === 0 ? (
-                          <span className="cmp-included">{d.activationIncluded}</span>
-                        ) : (
-                          money(o.activationFee, o.currency)
-                        )}
-                      </span>
-
-                      {/* Plateformes */}
-                      <span role="cell" data-label={d.colPlatforms} className="cmp-plats">
-                        {o.platforms.length
-                          ? o.platforms.map((s) => platformNames[s] ?? s).join(' · ')
-                          : <span className="cmp-dash">—</span>}
-                      </span>
-
-                      {/* Drawdown — durcissement et verrou signalés */}
-                      <span role="cell" data-label={d.colDrawdown}>
-                        <span className="cmp-dd">
-                          <span className="cmp-dd-type">{o.drawdown.type}</span>
-                          <span className="num">{compact(o.drawdown.amount)}</span>
-                        </span>
-                        {!o.drawdown.locksAtBreakeven ? (
-                          <span className="cmp-note" title={d.notLockedHint}>{d.notLocked}</span>
-                        ) : null}
-                        {o.fundedHardening.differs ? (
-                          <Badge variant="danger" className="cmp-badge">
-                            <span title={d.hardeningHint}>
-                              {o.drawdown.type} → {o.funded.drawdown.type}
-                            </span>
-                          </Badge>
-                        ) : null}
-                      </span>
-
-                      {/* Objectif */}
-                      <span role="cell" data-label={d.colTarget} className="num">
-                        {o.profitTarget != null ? compact(o.profitTarget) : <span className="cmp-dash">—</span>}
-                      </span>
-
-                      {/* Note */}
-                      <span role="cell" data-label={d.colRating} className="num">
-                        {o.plan.rating != null ? o.plan.rating : <span className="cmp-dash">—</span>}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      {/* Cohérence AU RETRAIT — jamais celle de l'évaluation */}
-                      {/* 100 % ne contraint rien : l'afficher en amber ferait
-                          craindre une règle qui n'existe pas. */}
-                      <span role="cell" data-label={d.colConsistencyFunded}>
-                        {o.funded.hasConsistency ? (
-                          <span className="cmp-warnv num">{o.funded.consistencyPct} %</span>
-                        ) : (
-                          <span className="cmp-okv">{d.noConsistencyValue}</span>
-                        )}
-                      </span>
-
-                      {/* Drawdown effectivement appliqué une fois financé */}
-                      <span role="cell" data-label={d.colDrawdownFunded}>
-                        <span className="cmp-dd">
-                          <span className="cmp-dd-type">{o.funded.drawdown.type}</span>
-                          <span className="num">{compact(o.funded.drawdown.amount)}</span>
-                        </span>
-                        {o.fundedHardening.differs ? (
-                          <Badge variant="danger" className="cmp-badge">
-                            <span title={d.hardeningHint}>
-                              {o.drawdown.type} → {o.funded.drawdown.type}
-                            </span>
-                          </Badge>
-                        ) : null}
-                      </span>
-
-                      {/* Profit split, avec ses paliers quand il y en a */}
-                      <span role="cell" data-label={d.colSplit} className="num">
-                        {o.funded.splitTiers.length ? (
-                          <span title={d.splitTiersHint}>
-                            {o.funded.splitTiers.map((t) => `${t.splitPct} %`).join(' → ')}
-                          </span>
-                        ) : o.funded.profitSplit != null ? (
-                          `${o.funded.profitSplit} %`
-                        ) : (
-                          <span className="cmp-unknown" title={d.unknownHint}>{d.unknownValue}</span>
-                        )}
-                      </span>
-
-                      {/* Plafond du premier retrait */}
-                      <span role="cell" data-label={d.colCap} className="num">
-                        {!o.funded.firstCap.known ? (
-                          <span className="cmp-unknown" title={d.unknownHint}>{d.unknownValue}</span>
-                        ) : o.funded.firstCap.value === null ? (
-                          <span className="cmp-okv">{d.noCap}</span>
-                        ) : (
-                          <>
-                            {money(o.funded.firstCap.value, o.currency)}
-                            {o.funded.capVaries ? (
-                              <span className="cmp-note" title={d.capVariesHint}>{d.capVaries}</span>
-                            ) : null}
-                          </>
-                        )}
-                        {o.funded.payoutVariants.length > 1 ? (
-                          <Badge variant="warn" className="cmp-badge">
-                            <span title={d.twoPathsHint}>{d.twoPaths}</span>
-                          </Badge>
-                        ) : null}
-                      </span>
-
-                      {/* Fréquence de retrait */}
-                      <span role="cell" data-label={d.colFrequency} className="num">
-                        {o.funded.frequencyDays != null ? (
-                          `${d.everyDays} ${o.funded.frequencyDays} ${d.fDays}`
-                        ) : (
-                          <span className="cmp-unknown" title={d.unknownHint}>{d.unknownValue}</span>
-                        )}
-                      </span>
-
-                      {/* Trading sur annonces */}
-                      <span role="cell" data-label={d.colNews}>
-                        {o.funded.news.stance ? (
-                          <span
-                            className={
-                              o.funded.news.stance === 'forbidden'
-                                ? 'cmp-badv'
-                                : o.funded.news.stance === 'allowed'
-                                  ? 'cmp-okv'
-                                  : 'cmp-warnv'
-                            }
-                            title={o.funded.news.note ?? undefined}
-                          >
-                            {news[o.funded.news.stance]}
-                          </span>
-                        ) : (
-                          <span className="cmp-unknown" title={d.unknownHint}>{d.unknownValue}</span>
-                        )}
-                      </span>
-                    </>
-                  )}
-
-                  {/* Vérifié le — ce que le concurrent n'affiche pas */}
-                  <span role="cell" data-label={d.colReviewed}>
-                    {o.trust.verified ? (
-                      <span className="cmp-reviewed num">{o.trust.reviewedAt}</span>
-                    ) : (
-                      <Badge variant="warn" className="cmp-badge">
-                        <span title={d.notVerifiedHint}>{d.notVerified}</span>
-                      </Badge>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
+            {shown.map((o) => (
+              <OfferRow
+                key={o.id}
+                offer={o}
+                tab={tab}
+                d={d}
+                fmt={{ compact, money }}
+                platformNames={platformNames}
+                newsLabel={(s) => news[s]}
+                selected={selected.includes(o.id)}
+                selectDisabled={!selected.includes(o.id) && selected.length >= COMPARE_MAX}
+                onToggleSelect={() => setSelected((s) => toggleCompare(s, o.id))}
+              />
+            ))}
           </div>
         </div>
       )}

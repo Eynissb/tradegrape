@@ -178,6 +178,30 @@ const fr = {
     'Le prix est un abonnement mensuel : ce total est un minimum — un mois plus l’activation. Le coût réel dépend du nombre de mois passés en évaluation.',
   priceFrom: 'à partir de',
   perMonthPlusActivation: 'd’activation',
+
+  /* ---- Ligne dépliable : libellés des sous-cartes ---- */
+  expand: 'Voir le détail',
+  collapse: 'Masquer le détail',
+  founded: 'Créée en',
+  sDailyLoss: 'Daily Loss Limit',
+  sSizing: 'Sizing',
+  sConsistency: 'Constance',
+  sMinDays: 'Jours minimum',
+  sScalping: 'Scalping',
+  sMaxAccounts: 'Max comptes',
+  sLicenses: 'Licence fournie',
+  sBuffer: 'Buffer',
+  sFirstCap: 'Plafond 1ᵉʳ retrait',
+  sMethod: 'Méthode de retrait',
+  sMinProfitDays: 'Jours de profit',
+  sReviewed: 'Vérifié le',
+  sMinis: 'minis',
+  sMicros: 'micros',
+  // Posture au masculin singulier (« le scalping »), distincte des annonces (fém. plur.).
+  scAllowed: 'Autorisé',
+  scRestricted: 'Restreint',
+  scForbidden: 'Interdit',
+  scMonitored: 'Surveillé',
 } as const;
 
 /**
@@ -343,6 +367,29 @@ const en: Dict = {
     'The price is a monthly subscription: this total is a minimum — one month plus activation. The real cost depends on how many months the evaluation takes.',
   priceFrom: 'from',
   perMonthPlusActivation: 'activation',
+
+  /* ---- Expandable row: sub-card labels ---- */
+  expand: 'Show detail',
+  collapse: 'Hide detail',
+  founded: 'Founded',
+  sDailyLoss: 'Daily Loss Limit',
+  sSizing: 'Sizing',
+  sConsistency: 'Consistency',
+  sMinDays: 'Minimum days',
+  sScalping: 'Scalping',
+  sMaxAccounts: 'Max accounts',
+  sLicenses: 'License provided',
+  sBuffer: 'Buffer',
+  sFirstCap: 'First payout cap',
+  sMethod: 'Payout method',
+  sMinProfitDays: 'Profit days',
+  sReviewed: 'Verified on',
+  sMinis: 'minis',
+  sMicros: 'micros',
+  scAllowed: 'Allowed',
+  scRestricted: 'Restricted',
+  scForbidden: 'Forbidden',
+  scMonitored: 'Monitored',
 };
 
 export const DICTS: Record<Locale, Dict> = { fr, en };
