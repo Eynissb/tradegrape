@@ -328,6 +328,10 @@ export default function ComparatorView({
 
       {tab === 'funded' ? <p className="cmp-phase-note">{d.fundedIntro}</p> : null}
 
+      {/* ---------- Layout deux colonnes : filtres à gauche, résultats à droite ---------- */}
+      <div className="cmp-shell">
+        <aside className="cmp-side" aria-label={d.filters}>
+
       {/* ---------- Presets ---------- */}
       <section className="cmp-presets" aria-label={d.presets}>
         {PRESETS.map((p) => (
@@ -523,6 +527,9 @@ export default function ComparatorView({
           ))}
         </div>
       </section>
+        </aside>
+
+        <div className="cmp-results">
 
       {/* ---------- Barre de résultats ---------- */}
       <div className="cmp-bar">
@@ -613,6 +620,8 @@ export default function ComparatorView({
           </div>
         </div>
       )}
+        </div>
+      </div>
 
       {/* ---------- Barre de sélection ---------- */}
       {selected.length > 0 ? (
