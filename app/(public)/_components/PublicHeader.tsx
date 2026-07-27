@@ -4,8 +4,20 @@ import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { signout } from '@/app/(auth)/actions';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 import SearchBar from './SearchBar';
+
+/* Rôles « staff » — dupliqués ici volontairement : `lib/auth/roles` importe le
+   client Supabase SERVEUR (next/headers) et casserait le bundle client. */
+const STAFF_ROLES = new Set(['owner', 'admin', 'editor', 'moderator', 'analyst']);
+
+interface HeaderProfile {
+  name: string;
+  initials: string;
+  avatarUrl: string | null;
+  staff: boolean;
+}
 
 /**
  * En-tête public — UNE capsule unique, tout sur une ligne.
@@ -13,8 +25,9 @@ import SearchBar from './SearchBar';
  *  1. Barre supérieure fine, FERMABLE (un message clé) — disparaît au scroll,
  *     se souvient de la fermeture (localStorage).
  *  2. Capsule : logo · recherche (prend l'espace) · nav (actif en
- *     `.control--active`, repris du journal) · langue ronde · boutons conscients
- *     de la session (déconnecté = Connexion + Commencer ; connecté = Mon journal).
+ *     `.control--active`, repris du journal) · langue ronde · zone de session
+ *     (déconnecté = Connexion + Commencer ; connecté = avatar rond de profil
+ *     ouvrant un menu Mon journal / Préférences / Admin (staff) / Déconnexion).
  *
  * La capsule est posée sur le RELIEF 3D des cartes du journal (tokens `--elev`),
  * pas de liquid glass. Seule la barre de recherche est une surface creusée
@@ -86,6 +99,28 @@ function navItems(l: Locale) {
   ];
 }
 
+/** Entrées du menu profil (hors « Déconnexion », qui est une action serveur). */
+function profileLinks(l: Locale, staff: boolean) {
+  const items = [
+    { label: l === 'fr' ? 'Mon journal' : 'My journal', href: '/app' },
+    { label: l === 'fr' ? 'Préférences' : 'Preferences', href: '/settings' },
+  ];
+  if (staff) items.push({ label: 'Admin', href: '/admin' });
+  return items;
+}
+
+/** Avatar rond : photo de profil, ou initiales sur fond de marque (comme le dashboard). */
+function Avatar({ profile }: { profile: HeaderProfile }) {
+  const [broken, setBroken] = useState(false);
+  if (profile.avatarUrl && !broken) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img className="pub-avatar-img" src={profile.avatarUrl} alt="" aria-hidden="true" onError={() => setBroken(true)} />
+    );
+  }
+  return <span className="pub-avatar-txt" aria-hidden="true">{profile.initials}</span>;
+}
+
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -97,17 +132,44 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   const l = locale;
   const pathname = usePathname();
   const [authed, setAuthed] = useState(false);
+  const [profile, setProfile] = useState<HeaderProfile | null>(null);
   const [langOpen, setLangOpen] = useState(false);
+  const [profOpen, setProfOpen] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [topDismissed, setTopDismissed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const profRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sb = createClient();
     let on = true;
-    sb.auth.getSession().then(({ data }) => on && setAuthed(!!data.session));
-    const { data: sub } = sb.auth.onAuthStateChange((_e, s) => on && setAuthed(!!s));
+
+    const loadProfile = async (user: { id: string; email?: string | null }) => {
+      const { data } = await sb
+        .from('profiles')
+        .select('display_name, avatar_url, role')
+        .eq('id', user.id)
+        .single<{ display_name: string | null; avatar_url: string | null; role: string }>();
+      if (!on) return;
+      const name = data?.display_name ?? user.email?.split('@')[0] ?? 'Trader';
+      setProfile({
+        name,
+        initials: name.trim().slice(0, 2).toUpperCase(),
+        avatarUrl: data?.avatar_url ?? null,
+        staff: data ? STAFF_ROLES.has(data.role) : false,
+      });
+    };
+
+    const apply = (user: { id: string; email?: string | null } | null | undefined) => {
+      if (!on) return;
+      setAuthed(!!user);
+      if (user) loadProfile(user);
+      else setProfile(null);
+    };
+
+    sb.auth.getSession().then(({ data }) => apply(data.session?.user));
+    const { data: sub } = sb.auth.onAuthStateChange((_e, s) => apply(s?.user));
     return () => {
       on = false;
       sub.subscription.unsubscribe();
@@ -144,6 +206,20 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
     };
   }, [langOpen]);
 
+  useEffect(() => {
+    if (!profOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!profRef.current?.contains(e.target as Node)) setProfOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setProfOpen(false);
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [profOpen]);
+
   const dismissTop = () => {
     setTopDismissed(true);
     try {
@@ -155,11 +231,11 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
 
   const others = LOCALES.filter((x) => x !== l);
   const nav = navItems(l);
-  const ctaHref = authed ? '/app' : '/signup';
-  const ctaLabel = authed
-    ? l === 'fr' ? 'Mon journal' : 'My journal'
-    : l === 'fr' ? 'Commencer' : 'Get started';
+  const startHref = '/signup';
+  const startLabel = l === 'fr' ? 'Commencer' : 'Get started';
   const signinLabel = l === 'fr' ? 'Connexion' : 'Sign in';
+  const logoutLabel = l === 'fr' ? 'Déconnexion' : 'Sign out';
+  const menu = profile ? profileLinks(l, profile.staff) : [];
   const topMsg = l === 'fr' ? 'Données vérifiées à la source et datées.' : 'Data verified at source and dated.';
 
   return (
@@ -239,13 +315,51 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
             </div>
 
             {!authed ? (
-              <Link href="/login" className="control control--sm pub-signin">
-                {signinLabel}
-              </Link>
-            ) : null}
-            <Link href={ctaHref} className="control control--sm control--primary pub-cta">
-              {ctaLabel}
-            </Link>
+              <>
+                <Link href="/login" className="control control--sm pub-signin">
+                  {signinLabel}
+                </Link>
+                <Link href={startHref} className="control control--sm control--primary pub-cta">
+                  {startLabel}
+                </Link>
+              </>
+            ) : (
+              <div className="pub-prof" ref={profRef}>
+                <button
+                  type="button"
+                  className="pub-avatar"
+                  aria-haspopup="menu"
+                  aria-expanded={profOpen}
+                  aria-label={profile?.name ?? 'Profil'}
+                  onClick={() => setProfOpen((o) => !o)}
+                >
+                  {profile ? <Avatar profile={profile} /> : null}
+                </button>
+                {profOpen && profile ? (
+                  <div className="pub-prof-pop" role="menu">
+                    <div className="pub-prof-head">
+                      <span className="pub-prof-name">{profile.name}</span>
+                    </div>
+                    {menu.map((m) => (
+                      <Link
+                        key={m.href}
+                        href={m.href}
+                        className="pub-prof-item"
+                        role="menuitem"
+                        onClick={() => setProfOpen(false)}
+                      >
+                        {m.label}
+                      </Link>
+                    ))}
+                    <form action={signout}>
+                      <button type="submit" className="pub-prof-item pub-prof-out" role="menuitem">
+                        {logoutLabel}
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </div>
+            )}
 
             <button
               type="button"
@@ -273,13 +387,28 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
             </Link>
           ))}
           {!authed ? (
-            <Link href="/login" className="control pub-drawer-signin" onClick={() => setDrawer(false)}>
-              {signinLabel}
-            </Link>
-          ) : null}
-          <Link href={ctaHref} className="control control--primary pub-drawer-cta" onClick={() => setDrawer(false)}>
-            {ctaLabel}
-          </Link>
+            <>
+              <Link href="/login" className="control pub-drawer-signin" onClick={() => setDrawer(false)}>
+                {signinLabel}
+              </Link>
+              <Link href={startHref} className="control control--primary pub-drawer-cta" onClick={() => setDrawer(false)}>
+                {startLabel}
+              </Link>
+            </>
+          ) : (
+            <>
+              {menu.map((m) => (
+                <Link key={m.href} href={m.href} className="pub-drawer-link" onClick={() => setDrawer(false)}>
+                  {m.label}
+                </Link>
+              ))}
+              <form action={signout}>
+                <button type="submit" className="control pub-drawer-signin" style={{ width: '100%' }}>
+                  {logoutLabel}
+                </button>
+              </form>
+            </>
+          )}
         </nav>
       </div>
     </>

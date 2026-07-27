@@ -7,11 +7,32 @@ import { comparatorHref, type Locale } from '@/lib/i18n/comparator';
 /**
  * Recherche du header. Cherche dans les prop firms PUBLIÉES et VÉRIFIÉES
  * (via `/api/public/search-index`) — jamais les brouillons, non-vérifiées, ni
- * Alpha Futures. Résultats en liste déroulante ; un résultat mène au comparateur
- * filtré sur la firm. Index chargé une fois, au premier focus.
+ * Alpha Futures. Chaque résultat montre le logo de la firm (initiales en
+ * fallback), son nom, le plan de l'offre la moins chère et son prix TTC ; un
+ * clic mène au comparateur filtré sur la firm. Index chargé une fois, au focus.
  */
 
-type Firm = { name: string; slug: string; sizes: number[] };
+interface Firm {
+  name: string;
+  slug: string;
+  logo: string | null;
+  plan: string | null;
+  priceTtc: number | null;
+  currency: string;
+}
+
+/** Pastille de logo : image de la firm, ou ses initiales sur fond de marque. */
+function FirmMark({ firm }: { firm: Firm }) {
+  const [broken, setBroken] = useState(false);
+  const initials = firm.name.trim().slice(0, 2).toUpperCase();
+  if (firm.logo && !broken) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img className="pub-search-logo" src={firm.logo} alt="" aria-hidden="true" onError={() => setBroken(true)} />
+    );
+  }
+  return <span className="pub-search-logo pub-search-logo--txt" aria-hidden="true">{initials}</span>;
+}
 
 export default function SearchBar({
   locale,
@@ -74,7 +95,17 @@ export default function SearchBar({
   };
 
   const placeholder = locale === 'fr' ? 'Rechercher une prop firm…' : 'Search a prop firm…';
-  const sizesLabel = (n: number) => (locale === 'fr' ? `${n} taille${n > 1 ? 's' : ''}` : `${n} size${n > 1 ? 's' : ''}`);
+  const money = (v: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+      }).format(v);
+    } catch {
+      return `${Math.round(v)} ${currency}`;
+    }
+  };
 
   return (
     <div className={`pub-search pub-search--${variant}`} ref={rootRef}>
@@ -116,8 +147,14 @@ export default function SearchBar({
                 go(f);
               }}
             >
-              <span className="pub-search-name">{f.name}</span>
-              <span className="pub-search-meta num">{sizesLabel(f.sizes.length)}</span>
+              <FirmMark firm={f} />
+              <span className="pub-search-lines">
+                <span className="pub-search-name">{f.name}</span>
+                {f.plan ? <span className="pub-search-plan">{f.plan}</span> : null}
+              </span>
+              {f.priceTtc !== null ? (
+                <span className="pub-search-price num">{money(f.priceTtc, f.currency)}</span>
+              ) : null}
             </li>
           ))}
         </ul>

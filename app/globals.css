@@ -1328,32 +1328,54 @@ body::before {
    (`--elev-1-shadow`). Aucun backdrop-filter. */
 .pub-header {
   width: min(1160px, calc(100vw - 28px)); margin: 12px auto 0;
-  display: flex; align-items: center; gap: 14px;
-  padding: 8px 8px 8px 18px;
+  /* space-between : les 4 groupes (logo · recherche · nav · actions) sont
+     répartis avec des gouttières ÉGALES ; `gap` fixe l'espacement minimum. */
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 8px 10px 8px 18px;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015)), var(--bg);
   box-shadow: var(--elev-1-shadow), 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Logo à gauche. */
+/* Logo à gauche — affirmé. */
 .pub-brand { flex: none; display: inline-flex; align-items: center; }
-.pub-logo-img { height: 28px; width: auto; display: block; }
-.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.25rem; letter-spacing: -.4px; }
+.pub-logo-img { height: 34px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.45rem; letter-spacing: -.5px; }
 
-/* Recherche au centre — prend l'espace. Le SEUL creux de la capsule (inset). */
-.pub-search { flex: 1; min-width: 0; position: relative; display: flex; align-items: center; gap: 8px; }
-.pub-search-icon { width: 16px; height: 16px; flex: none; color: var(--ink3); }
+/* Recherche : resserrée et aérée (largeur fixe + marges auto), pas pleine largeur.
+   Champ en RELIEF, comme les saisies du journal (arête haute claire, arête basse
+   sombre) — jamais un rectangle plat. */
 .pub-search {
-  height: 38px; padding: 0 14px; border-radius: var(--r-pill);
-  background: rgba(0, 0, 0, .22);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .5), inset 0 -1px 0 rgba(255, 255, 255, .04);
+  flex: 0 1 320px; min-width: 0;
+  position: relative; display: flex; align-items: center; gap: 8px;
+  height: var(--h-control); padding: 0 14px; border-radius: var(--r-pill);
+  background: var(--input-bg);
+  /* Champ en relief, idiome du journal : arête haute claire, arête basse
+     sombre, léger creusement — jamais un rectangle plat. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    inset 0 -1px 0 rgba(0, 0, 0, .26),
+    inset 0 2px 4px rgba(0, 0, 0, .20),
+    0 1px 2px rgba(0, 0, 0, .30);
+  transition: box-shadow .16s, background .16s;
 }
+/* Focus : AUCUN violet, aucun anneau. Le champ se signale par un fond un peu
+   plus clair et un relief renforcé (arête haute plus vive) — c'est tout. */
+.pub-search:focus-within {
+  background: var(--input-bg-focus);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .13),
+    inset 0 -1px 0 rgba(0, 0, 0, .28),
+    inset 0 2px 4px rgba(0, 0, 0, .16),
+    0 1px 2px rgba(0, 0, 0, .34);
+}
+.pub-search-icon { width: 16px; height: 16px; flex: none; color: var(--ink3); }
 .pub-search-input {
   flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
   color: var(--ink); font-family: inherit; font-size: 14px;
 }
 .pub-search-input::placeholder { color: var(--ink3); }
-/* Liste déroulante — même relief que les cartes. */
+/* Liste déroulante — même relief que la capsule, flotte au-dessus du contenu. */
 .pub-search-pop {
   position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 60;
   list-style: none; margin: 0; padding: 6px;
@@ -1362,23 +1384,76 @@ body::before {
   box-shadow: var(--elev-1-shadow), 0 16px 34px rgba(0, 0, 0, .5);
 }
 .pub-search-opt {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 9px 12px; border-radius: var(--r-sm); cursor: pointer; color: var(--ink2);
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-sm); cursor: pointer; color: var(--ink2);
 }
 .pub-search-opt.is-active { background: var(--ctl-active-bg); color: var(--ink); }
-.ui .pub-search-name { font-weight: 600; }
-.pub-search-meta { font-size: 12px; color: var(--ink3); white-space: nowrap; }
+/* Pastille de logo : image, ou initiales sur fond de marque (fallback). */
+.pub-search-logo {
+  width: 30px; height: 30px; flex: none; border-radius: var(--r-sm); object-fit: cover;
+  background: #14101f; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+}
+.pub-search-logo--txt {
+  display: grid; place-items: center; font-weight: 700; font-size: 11px; color: #fff;
+  background: var(--grad); box-shadow: var(--elev-3-shadow);
+}
+.pub-search-lines { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pub-search-name {
+  font-weight: 600; color: var(--ink); font-size: 13.5px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pub-search-plan {
+  font-size: 12px; color: var(--ink3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pub-search-price { flex: none; font-size: 12.5px; color: var(--ink2); white-space: nowrap; }
+
+/* Zone de session connectée : avatar rond en relief + menu déroulant. */
+.pub-prof { position: relative; flex: none; }
+.pub-avatar {
+  width: var(--h-control); height: var(--h-control); padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; overflow: hidden;
+  background: var(--grad); box-shadow: var(--elev-1-shadow);
+  transition: box-shadow .15s;
+}
+.pub-avatar:hover { box-shadow: var(--elev-1-shadow), 0 0 0 2px rgba(255, 255, 255, .16); }
+.pub-avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.pub-avatar-txt { font-weight: 700; font-size: 13px; color: #fff; }
+/* Menu profil — même relief/fond que le dropdown de recherche. */
+.pub-prof-pop {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 60; min-width: 210px;
+  padding: 6px; border-radius: var(--r-md);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .01)), #0c0a17;
+  box-shadow: var(--elev-1-shadow), 0 16px 34px rgba(0, 0, 0, .5);
+}
+.pub-prof-pop form { margin: 0; }
+.pub-prof-head { padding: 8px 12px 8px; margin-bottom: 4px; border-bottom: 1px solid var(--card-brd); }
+.pub-prof-name { font-weight: 600; color: var(--ink); font-size: 13.5px; }
+.pub-prof-item {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 12px; border: 0; background: transparent; border-radius: var(--r-sm);
+  color: var(--ink2); font-family: inherit; font-size: 13.5px; cursor: pointer;
+}
+.pub-prof-item:hover { background: var(--ctl-active-bg); color: var(--ink); }
+.pub-prof-out { margin-top: 4px; border-top: 1px solid var(--card-brd); border-radius: 0 0 var(--r-sm) var(--r-sm); }
 
 /* Nav — items `.control`, actif = `.control--active`, autres ghost. */
-.pub-nav { flex: none; display: flex; align-items: center; gap: 4px; }
+.pub-nav { flex: none; display: flex; align-items: center; gap: 6px; }
 
 /* Actions à droite. */
-.pub-header-actions { flex: none; display: flex; align-items: center; gap: 8px; }
+.pub-header-actions { flex: none; display: flex; align-items: center; gap: 10px; }
 
-/* Sélecteur de langue rond, pastille de drapeau SVG. */
-.pub-lang { position: relative; }
+/* Une seule ligne médiane : toutes les pilules de la capsule (nav, Connexion,
+   Commencer) passent à --h-control, comme la recherche, le drapeau et l'avatar.
+   Spécificité 0,3,0 pour battre `.ui .control--sm` (0,2,0). */
+.ui .pub-header .control--sm { height: var(--h-control); }
+
+/* Sélecteur de langue rond, pastille de drapeau SVG. `flex` évite le meneau de
+   ligne (inline-block) qui rendait l'enveloppe plus haute que le bouton et
+   décalait le drapeau de 3 px vers le haut. */
+.pub-lang { position: relative; display: flex; }
 .pub-lang-btn {
-  width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  width: var(--h-control); height: var(--h-control); padding: 0; border: 0; border-radius: 50%; cursor: pointer;
   overflow: hidden; background: transparent;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
   transition: box-shadow .15s;
@@ -1451,6 +1526,9 @@ body::before {
      langue + burger restent. Spécificité 0,3,0 pour battre `.ui .control`. */
   .pub-nav, .pub-search--header { display: none; }
   .ui .pub-header-actions .pub-cta, .ui .pub-header-actions .pub-signin { display: none; }
+  /* Connecté : l'avatar+menu passe dans le tiroir (le burger l'ouvre) ; la
+     capsule mobile reste logo + drapeau + hamburger. */
+  .pub-header-actions .pub-prof { display: none; }
   .pub-burger { display: flex; }
   /* Capsule compacte : le logo + les actions restantes suffisent. */
   .pub-header { gap: 10px; }
