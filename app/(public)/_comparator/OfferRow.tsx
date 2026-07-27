@@ -4,7 +4,7 @@ import { useId, useState } from 'react';
 import Badge from '@/components/ui/Badge';
 import type { ComparatorDict } from '@/lib/i18n/comparator';
 import type { PublicOffer, RuleStance } from '@/lib/catalog/public-offer';
-import { firmLogoUrl, platformLogoUrl, firmColor } from '@/lib/catalog/logos';
+import { firmLogo, platformLogo, firmColor } from '@/lib/catalog/logos';
 
 /**
  * Ligne d'offre dépliable — LE composant partagé par les deux onglets (Éval /
@@ -26,11 +26,15 @@ interface Fmt {
 function Logo({ offer }: { offer: PublicOffer }) {
   const [broken, setBroken] = useState(false);
   // Priorité au logo_url en base ; sinon le fichier déposé dans public/brand/.
-  const src = offer.firm.logo ?? firmLogoUrl(offer.firm.slug);
+  const meta = offer.firm.logo ? { url: offer.firm.logo, light: true, scale: 1 } : firmLogo(offer.firm.slug);
   const mono = offer.firm.name.trim().slice(0, 2).toUpperCase();
-  if (src && !broken) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img className="cmp-logo cmp-logo--img" src={src} alt="" aria-hidden="true" onError={() => setBroken(true)} />;
+  if (meta && !broken) {
+    return (
+      <span className={`cmp-logo cmp-logo--img ${meta.light ? 'on-dark' : 'on-light'}`} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
+      </span>
+    );
   }
   // Fallback : monogramme sur une teinte propre à la firm (jamais violet uniforme).
   return (
@@ -40,20 +44,30 @@ function Logo({ offer }: { offer: PublicOffer }) {
   );
 }
 
-/** Icône de plateforme : vrai logo, ou pastille texte propre en repli. */
+/** Icône de plateforme : vrai logo (agrandi, fond contrastant), ou glyphe en repli. */
 function PlatMark({ slug, name, variant }: { slug: string; name: string; variant: 'plat' | 'lic' }) {
   const [broken, setBroken] = useState(false);
-  const src = platformLogoUrl(slug);
+  const meta = platformLogo(slug);
   const cls = variant === 'lic' ? 'cmp-lic' : 'cmp-plat';
-  if (src && !broken) {
+  if (meta && !broken) {
     return (
-      <span className={cls} title={name}>
+      <span className={`${cls} ${meta.light ? 'on-dark' : 'on-light'}`} title={name}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" aria-hidden="true" onError={() => setBroken(true)} />
+        <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
     );
   }
-  return <span className={`${cls} ${cls}--txt`} title={name}>{name.slice(0, 3)}</span>;
+  // Pas de fichier de logo : glyphe générique « plateforme » (propre, jamais du
+  // texte tronqué), le nom complet reste dans l'infobulle.
+  return (
+    <span className={`${cls} ${cls}--gen`} title={name}>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.7" />
+        <path d="M6.5 14l3-3.5 2.5 2 3.5-4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 21h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
 }
 
 /* Drapeau pays : SVG pour les cas fréquents, sinon le code pays en pastille. */
@@ -262,7 +276,7 @@ export default function OfferRow({
             <span><PlatformStack slugs={o.platforms} names={platformNames} /></span>
             <span className="cmp-ddcell">
               <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.drawdown.type)}`}>{o.drawdown.type}</span><span className="num">{fmt.compact(o.drawdown.amount)}</span></span>
-              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : <span className="cmp-same" title={d.hardeningHint}>{d.ddUnchanged}</span>}
+              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
             </span>
             <span className="num">{o.profitTarget != null ? fmt.compact(o.profitTarget) : <span className="cmp-dash">—</span>}</span>
           </>
@@ -271,7 +285,7 @@ export default function OfferRow({
             <span>{o.funded.hasConsistency ? <span className="cmp-warnv num">{o.funded.consistencyPct} %</span> : <span className="cmp-okv">{d.noConsistencyValue}</span>}</span>
             <span className="cmp-ddcell">
               <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.funded.drawdown.type)}`}>{o.funded.drawdown.type}</span><span className="num">{fmt.compact(o.funded.drawdown.amount)}</span></span>
-              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : <span className="cmp-same" title={d.hardeningHint}>{d.ddUnchanged}</span>}
+              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
             </span>
             <span className="num">{o.funded.splitTiers.length ? o.funded.splitTiers.map((t) => `${t.splitPct}%`).join(' → ') : o.funded.profitSplit != null ? `${o.funded.profitSplit} %` : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
             <span className="num">{o.funded.firstCap.known ? (o.funded.firstCap.value === null ? <span className="cmp-okv">{d.noCap}</span> : fmt.money(o.funded.firstCap.value, o.currency)) : <span className="cmp-unknown">{d.unknownValue}</span>}</span>

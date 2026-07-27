@@ -1818,7 +1818,14 @@ body::before {
 .cmp-shell { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 24px; align-items: start; }
 .cmp-side {
   position: sticky; top: 110px; max-height: calc(100vh - 128px); overflow-y: auto;
-  display: flex; flex-direction: column; gap: 18px; padding-right: 6px;
+  display: flex; flex-direction: column; gap: 18px; padding: 18px 16px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .006)), #0c0a18;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    inset 0 -1px 0 rgba(0, 0, 0, .4),
+    0 1px 2px rgba(0, 0, 0, .5),
+    0 12px 28px rgba(0, 0, 0, .36);
 }
 .cmp-side::-webkit-scrollbar { width: 8px; }
 .cmp-side::-webkit-scrollbar-thumb { background: rgba(150, 110, 240, .22); border-radius: 8px; }
@@ -1846,7 +1853,7 @@ body::before {
   transition: background .15s, color .15s;
 }
 .ui .cmp-chip:hover { background: rgba(255,255,255,.08); color: var(--ink); }
-.ui .cmp-chip.is-on { color: #fff; background: var(--grad); box-shadow: none; }
+.ui .cmp-chip.is-on { color: #fff; background: var(--grad); box-shadow: 0 2px 12px rgba(120, 70, 255, .42), inset 0 1px 0 rgba(255, 255, 255, .25); }
 .ui .cmp-chip-sm { padding: 6px 12px; font-size: 12px; font-weight: 500; }
 
 .cmp-filters { padding: 18px 20px; }
@@ -2040,12 +2047,28 @@ body::before {
 /* ---- Ligne (carte solide) ---- */
 .cmp-orow {
   border-radius: var(--r-lg);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .022), rgba(255, 255, 255, .006)), #0c0a18;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 1px 2px rgba(0, 0, 0, .5), 0 8px 20px rgba(0, 0, 0, .3);
-  transition: box-shadow .2s;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .032), rgba(255, 255, 255, .008)), #0e0b1c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(0, 0, 0, .42),
+    0 1px 2px rgba(0, 0, 0, .55),
+    0 12px 28px rgba(0, 0, 0, .44);
+  transition: transform .16s, box-shadow .16s;
+}
+.cmp-orow:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    inset 0 -1px 0 rgba(0, 0, 0, .44),
+    0 1px 2px rgba(0, 0, 0, .6),
+    0 18px 38px rgba(0, 0, 0, .52);
 }
 .cmp-orow.is-open {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 1px 2px rgba(0, 0, 0, .55), 0 14px 34px rgba(0, 0, 0, .45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .13),
+    inset 0 -1px 0 rgba(0, 0, 0, .45),
+    0 1px 2px rgba(0, 0, 0, .62),
+    0 22px 44px rgba(0, 0, 0, .55);
 }
 /* Sélection pour comparaison = un ÉTAT actif → liseré violet admis (pas une donnée). */
 .cmp-orow.is-picked { box-shadow: inset 0 0 0 1px rgba(140, 90, 255, .45), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 26px rgba(0, 0, 0, .38); }
@@ -2070,15 +2093,20 @@ body::before {
 /* ---- Cellule firm ---- */
 .ui .cmp-firm { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .cmp-logo {
-  width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center;
-  font-weight: 800; font-size: 13px; color: #fff; overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), inset 0 -2px 4px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .4);
+  width: 42px; height: 42px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  font-weight: 800; font-size: 14px; color: #fff; overflow: hidden;
 }
-/* Vrai logo : CONTENU (jamais rogné) sur une pastille claire → tout logo, clair
-   ou sombre, reste lisible. */
-.cmp-logo--img { background: #f1eff7; object-fit: contain; padding: 4px; }
-/* Fallback monogramme : la teinte réelle de la firm arrive en style inline. */
-.cmp-logo--mono { background: var(--grad); }
+/* Vrai logo : agrandi pour REMPLIR la pastille (le vide transparent déborde et
+   est rogné), sur un fond qui le fait ressortir — sombre pour un tracé clair,
+   clair pour un tracé sombre (ex. Lucid). Fini les logos minuscules et blafards. */
+.cmp-logo--img.on-dark { background: rgba(255, 255, 255, .05); }
+.cmp-logo--img.on-light { background: #f2f0f7; }
+.cmp-logo--img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Fallback monogramme : pastille en relief, teinte réelle de la firm (style inline). */
+.cmp-logo--mono {
+  background: var(--grad);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -2px 4px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .4);
+}
 .cmp-firm-txt { min-width: 0; }
 .ui .cmp-firm-name { font-weight: 700; font-size: 14.5px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cmp-firm-sub { display: flex; align-items: center; gap: 7px; margin-top: 2px; color: var(--ink3); font-size: 12px; }
@@ -2098,10 +2126,13 @@ body::before {
 .cmp-promo code { font-family: var(--font-mono); font-size: 11px; }
 
 .cmp-plats { display: flex; gap: 5px; }
-.cmp-plat { width: 30px; height: 30px; flex: none; border-radius: 8px; overflow: hidden; display: grid; place-items: center; background: #f1eff7; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
-.cmp-plat img { width: 100%; height: 100%; object-fit: contain; padding: 4px; display: block; }
-/* Repli texte : pastille sombre, monogramme mono lisible (3 lettres). */
-.cmp-plat--txt { background: #1a1530; color: var(--ink2); font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: .2px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-plat { width: 30px; height: 30px; flex: none; border-radius: 8px; overflow: hidden; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-plat.on-light { background: #f2f0f7; }
+.cmp-plat.on-dark { background: rgba(255, 255, 255, .06); }
+.cmp-plat img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Repli sans fichier : glyphe générique « plateforme », pastille sombre. */
+.cmp-plat--gen { background: #1a1530; color: var(--ink3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-plat--gen svg { width: 17px; height: 17px; }
 
 .cmp-ddcell { display: flex; flex-direction: column; gap: 5px; align-items: flex-start; }
 .cmp-dd { display: flex; align-items: center; gap: 8px; }
@@ -2141,9 +2172,12 @@ body::before {
 .cmp-scalp { display: flex; flex-direction: column; gap: 4px; }
 .cmp-scalp-note { font-size: 12px; font-weight: 400; color: var(--ink3); line-height: 1.45; }
 .cmp-lics { display: flex; gap: 8px; }
-.cmp-lic { width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden; display: grid; place-items: center; background: #f1eff7; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
-.cmp-lic img { width: 100%; height: 100%; object-fit: contain; padding: 5px; display: block; }
-.cmp-lic--txt { background: #1a1530; color: var(--ink2); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .2px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-lic { width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-lic.on-light { background: #f2f0f7; }
+.cmp-lic.on-dark { background: rgba(255, 255, 255, .06); }
+.cmp-lic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cmp-lic--gen { background: #1a1530; color: var(--ink3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
+.cmp-lic--gen svg { width: 19px; height: 19px; }
 
 @media (prefers-reduced-motion: reduce) {
   .cmp-orow-detail, .cmp-chev { transition: none; }
