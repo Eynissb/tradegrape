@@ -1728,24 +1728,45 @@ body::before {
 .home-faq-a { margin: 0 0 16px; font-size: 14px; line-height: 1.65; color: var(--ink2); max-width: 72ch; }
 
 /* ---- Footer ---- */
-.home-footer {
-  margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--card-brd);
+/* ---- Pied de page premium (langage de la capsule : relief, drapeaux ronds) ---- */
+.pub-footer { margin-top: 96px; border-top: 1px solid var(--card-brd); }
+.pub-footer-inner { padding-top: 48px; }
+.pub-footer-top {
+  display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 40px; align-items: start;
 }
-.home-footer-top {
-  display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 32px; align-items: start;
+.pub-footer-brand { max-width: 36ch; }
+.pub-footer-logo { display: inline-flex; align-items: center; }
+.pub-footer-logo-img { height: 30px; width: auto; display: block; }
+.pub-footer-tag { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--ink3); }
+.pub-footer-col { display: flex; flex-direction: column; gap: 12px; }
+.pub-footer-ct {
+  font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--ink3);
 }
-.home-footer-logo { font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; }
-.home-footer-tag { margin-top: 8px; max-width: 34ch; font-size: 13.5px; color: var(--ink3); }
-.home-footer-col { display: flex; flex-direction: column; gap: 10px; }
-.home-footer-ct {
-  font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
+.ui .pub-footer-link { color: var(--ink2); font-size: 14px; text-decoration: none; width: fit-content; transition: color .15s; }
+.ui .pub-footer-link:hover { color: var(--ink); }
+/* Drapeaux ronds — mêmes pastilles SVG que le header. */
+.pub-footer-langs { display: flex; gap: 10px; }
+.pub-footer-lang {
+  width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .16); opacity: .6;
+  transition: opacity .15s, box-shadow .15s;
 }
-.ui .home-footer-link { color: var(--ink2); font-size: 14px; text-decoration: none; width: fit-content; }
-.ui .home-footer-link:hover { color: var(--ink); }
-.ui .home-footer-link.is-on { color: var(--ink); font-weight: 600; }
-.home-footer-bottom {
+.pub-footer-lang:hover { opacity: 1; box-shadow: 0 0 0 2px rgba(255, 255, 255, .34); }
+.pub-footer-lang.is-on { opacity: 1; box-shadow: 0 0 0 2px var(--c2); }
+.pub-footer-bottom {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: 12px; margin-top: 36px; padding: 20px 0 40px; font-size: 12.5px; color: var(--ink3);
+  gap: 12px; margin-top: 44px; padding: 22px 0 48px; border-top: 1px solid var(--card-brd);
+  font-size: 12.5px; color: var(--ink3);
+}
+.pub-footer-data { display: inline-flex; align-items: center; gap: 8px; }
+.pub-footer-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: var(--lime); box-shadow: 0 0 8px rgba(56, 255, 176, .6);
+}
+
+@media (max-width: 860px) {
+  .pub-footer-top { grid-template-columns: 1fr 1fr; gap: 30px; }
+  .pub-footer-brand { grid-column: 1 / -1; max-width: none; }
 }
 
 @media (max-width: 760px) {
@@ -1762,7 +1783,9 @@ body::before {
   /* Deux chiffres par ligne à l'étroit plutôt qu'un empilement trop haut. */
   .home-statcell:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--card-brd); }
   .home-section { margin-top: 52px; }
-  .home-footer-top { grid-template-columns: 1fr; gap: 26px; }
+  .pub-footer-top { grid-template-columns: 1fr; gap: 26px; }
+  .pub-footer { margin-top: 64px; }
+  .pub-footer-inner { padding-top: 36px; }
 }
 
 /* ---- Onglets de lecture (Éval / Financé) ---- */

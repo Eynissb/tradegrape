@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { signout } from '@/app/(auth)/actions';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 import SearchBar from './SearchBar';
+import { FlagRound } from './Flags';
 
 /* Rôles « staff » — dupliqués ici volontairement : `lib/auth/roles` importe le
    client Supabase SERVEUR (next/headers) et casserait le bundle client. */
@@ -33,52 +34,6 @@ interface HeaderProfile {
  * pas de liquid glass. Seule la barre de recherche est une surface creusée
  * (inset). Système Tradawave (violet-magenta). Drapeaux en SVG.
  */
-
-/* ---- Drapeaux ronds, SVG inline ---- */
-
-function FrFlag() {
-  return (
-    <svg viewBox="0 0 3 2" preserveAspectRatio="xMidYMid slice" className="flag-svg" aria-hidden="true">
-      <rect width="1" height="2" x="0" fill="#002654" />
-      <rect width="1" height="2" x="1" fill="#ffffff" />
-      <rect width="1" height="2" x="2" fill="#ce1126" />
-    </svg>
-  );
-}
-
-function GbFlag() {
-  const raw = useId().replace(/[:]/g, '');
-  const s = `s${raw}`;
-  const t = `t${raw}`;
-  return (
-    <svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" className="flag-svg" aria-hidden="true">
-      <clipPath id={s}>
-        <path d="M0,0 v30 h60 v-30 z" />
-      </clipPath>
-      <clipPath id={t}>
-        <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
-      </clipPath>
-      <g clipPath={`url(#${s})`}>
-        <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
-        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" strokeWidth="6" />
-        <path d="M0,0 L60,30 M60,0 L0,30" clipPath={`url(#${t})`} stroke="#c8102e" strokeWidth="4" />
-        <path d="M30,0 v30 M0,15 h60" stroke="#ffffff" strokeWidth="10" />
-        <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" strokeWidth="6" />
-      </g>
-    </svg>
-  );
-}
-
-const FLAGS: Record<Locale, () => ReactElement> = { fr: FrFlag, en: GbFlag };
-
-function FlagRound({ locale }: { locale: Locale }) {
-  const F = FLAGS[locale];
-  return (
-    <span className="flag-round">
-      <F />
-    </span>
-  );
-}
 
 /* ---- Logo ---- */
 
