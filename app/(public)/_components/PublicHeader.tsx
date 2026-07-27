@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
+import SearchBar from './SearchBar';
 
 /**
  * En-tête public — deux niveaux, façon PropFirmMatch mais ÉPURÉ.
@@ -187,6 +188,9 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
             <Logo />
           </Link>
 
+          {/* Recherche au centre — prend l'espace. */}
+          <SearchBar locale={l} />
+
           {/* Nav ; l'onglet actif en `.control--active` (repris du journal). */}
           <nav className="pub-nav" aria-label="Navigation principale">
             {nav.map((n) => {
@@ -263,6 +267,7 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
       <div className={`pub-drawer${drawer ? ' is-open' : ''}`} aria-hidden={!drawer}>
         <div className="pub-drawer-scrim" onClick={() => setDrawer(false)} />
         <nav className="pub-drawer-panel" aria-label="Navigation">
+          <SearchBar locale={l} variant="drawer" />
           {nav.map((n) => (
             <Link key={n.href} href={n.href} className="pub-drawer-link" onClick={() => setDrawer(false)}>
               {n.label}

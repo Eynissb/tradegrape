@@ -1322,18 +1322,17 @@ body::before {
 }
 .pub-topbar-close:hover { color: var(--ink); background: rgba(255, 255, 255, .08); }
 
-/* 2. UNE seule capsule liquid glass, tout sur une ligne, sous le bandeau.
-   Centrée, détachée, arête claire en haut, ombre douce dessous. */
+/* 2. UNE seule capsule, tout sur une ligne, sous le bandeau. RELIEF 3D façon
+   carte du journal — PAS de verre : dégradé vertical (haut clair → bas sombre),
+   arête haute lumineuse + arête basse sombre + ombres portées superposées
+   (`--elev-1-shadow`). Aucun backdrop-filter. */
 .pub-header {
-  width: min(1120px, calc(100vw - 28px)); margin: 12px auto 0;
-  display: flex; align-items: center; gap: 16px;
-  padding: 7px 8px 7px 18px;
+  width: min(1160px, calc(100vw - 28px)); margin: 12px auto 0;
+  display: flex; align-items: center; gap: 14px;
+  padding: 8px 8px 8px 18px;
   border-radius: 999px;
-  background: rgba(18, 13, 34, 0.6);
-  -webkit-backdrop-filter: blur(22px) saturate(1.7);
-  backdrop-filter: blur(22px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015)), var(--bg);
+  box-shadow: var(--elev-1-shadow), 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* Logo à gauche. */
@@ -1341,8 +1340,37 @@ body::before {
 .pub-logo-img { height: 28px; width: auto; display: block; }
 .ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.25rem; letter-spacing: -.4px; }
 
-/* Nav au centre — items `.control`, actif = `.control--active`, autres ghost. */
-.pub-nav { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
+/* Recherche au centre — prend l'espace. Le SEUL creux de la capsule (inset). */
+.pub-search { flex: 1; min-width: 0; position: relative; display: flex; align-items: center; gap: 8px; }
+.pub-search-icon { width: 16px; height: 16px; flex: none; color: var(--ink3); }
+.pub-search {
+  height: 38px; padding: 0 14px; border-radius: var(--r-pill);
+  background: rgba(0, 0, 0, .22);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .5), inset 0 -1px 0 rgba(255, 255, 255, .04);
+}
+.pub-search-input {
+  flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+  color: var(--ink); font-family: inherit; font-size: 14px;
+}
+.pub-search-input::placeholder { color: var(--ink3); }
+/* Liste déroulante — même relief que les cartes. */
+.pub-search-pop {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 60;
+  list-style: none; margin: 0; padding: 6px;
+  border-radius: var(--r-md);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .01)), #0c0a17;
+  box-shadow: var(--elev-1-shadow), 0 16px 34px rgba(0, 0, 0, .5);
+}
+.pub-search-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 12px; border-radius: var(--r-sm); cursor: pointer; color: var(--ink2);
+}
+.pub-search-opt.is-active { background: var(--ctl-active-bg); color: var(--ink); }
+.ui .pub-search-name { font-weight: 600; }
+.pub-search-meta { font-size: 12px; color: var(--ink3); white-space: nowrap; }
+
+/* Nav — items `.control`, actif = `.control--active`, autres ghost. */
+.pub-nav { flex: none; display: flex; align-items: center; gap: 4px; }
 
 /* Actions à droite. */
 .pub-header-actions { flex: none; display: flex; align-items: center; gap: 8px; }
@@ -1361,10 +1389,9 @@ body::before {
 .pub-lang-pop {
   position: absolute; top: calc(100% + 10px); right: 0; z-index: 60;
   display: flex; flex-direction: column; gap: 8px; padding: 8px;
-  border-radius: var(--r-lg); background: rgba(16, 12, 32, 0.9);
-  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .01)), #0c0a17;
+  box-shadow: var(--elev-1-shadow), 0 14px 34px rgba(0, 0, 0, 0.5);
 }
 .pub-lang-opt {
   display: block; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
@@ -1401,6 +1428,8 @@ body::before {
 }
 .pub-drawer.is-open .pub-drawer-panel { transform: translateX(0); }
 .ui .pub-drawer-link { padding: 12px 4px; font-size: 16px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--card-brd); }
+/* Recherche du tiroir : pleine largeur, en tête. */
+.pub-search--drawer { width: 100%; margin-bottom: 10px; }
 /* CTA / Connexion du tiroir : mêmes .control / .control--primary, pleine largeur. */
 .ui .pub-drawer-signin, .ui .pub-drawer-cta { width: 100%; }
 .ui .pub-drawer-signin { margin-top: 14px; }
@@ -1418,11 +1447,13 @@ body::before {
   .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
 }
 @media (max-width: 640px) {
-  /* Nav + Connexion + Commencer passent dans le tiroir ; logo + langue + burger
-     restent. Spécificité 0,3,0 pour battre `.ui .control`. */
-  .pub-nav { display: none; }
+  /* Recherche + nav + Connexion + Commencer passent dans le tiroir ; logo +
+     langue + burger restent. Spécificité 0,3,0 pour battre `.ui .control`. */
+  .pub-nav, .pub-search--header { display: none; }
   .ui .pub-header-actions .pub-cta, .ui .pub-header-actions .pub-signin { display: none; }
   .pub-burger { display: flex; }
+  /* Capsule compacte : le logo + les actions restantes suffisent. */
+  .pub-header { gap: 10px; }
 }
 .pub-head { max-width: 760px; margin-bottom: 26px; }
 .ui .pub-h1 { font-family: var(--font-title); font-weight: 800; font-size: 2.4rem; line-height: 1.1; letter-spacing: -1px; }
