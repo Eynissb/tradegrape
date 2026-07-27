@@ -2187,6 +2187,11 @@ body::before {
 .cmp-otable--funded {
   --ocols: 26px 24px minmax(212px, 1.9fr) minmax(56px, 0.7fr) minmax(88px, 0.95fr) minmax(122px, 1.4fr) minmax(80px, 0.95fr) minmax(98px, 1.15fr) minmax(84px, 0.95fr) minmax(84px, 0.95fr) minmax(52px, 0.62fr);
 }
+/* Chiffres du comparateur : police de CORPS (Inter) tabulaire au lieu du mono
+   JetBrains — s'intègre au texte, même rendu, pas de décalage visuel. On garde
+   tabular-nums (hérité de .num) pour l'alignement des colonnes de montants.
+   NB : remplace, pour ce module, la règle « chiffres en mono » du CLAUDE.md. */
+.ui .cmp-app .num { font-family: var(--font-body); }
 .cmp-ocols {
   display: grid; grid-template-columns: var(--ocols); gap: 11px; align-items: center;
   padding: 2px 18px; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--ink3);
@@ -2225,7 +2230,9 @@ body::before {
 .cmp-orow-head {
   display: grid; grid-template-columns: var(--ocols); gap: 11px; align-items: center;
   padding: 26px 18px; cursor: pointer; border-radius: var(--r-lg);
-  font-size: 15.5px;
+  /* Une seule taille pour TOUTES les valeurs de la ligne (prix, taille,
+     drawdown, objectif, activation) → même ligne de base, aucun décalage. */
+  font-size: 16px;
 }
 .cmp-orow-head > span { min-width: 0; }
 .cmp-orow-pick { justify-self: center; }
@@ -2265,18 +2272,20 @@ body::before {
 .cmp-flag svg { width: 100%; height: 100%; display: block; }
 .cmp-flag--txt { width: auto; height: auto; padding: 1px 5px; border-radius: 4px; font-size: 10px; letter-spacing: .3px; color: var(--ink2); background: rgba(255, 255, 255, .06); box-shadow: none; }
 
-.cmp-size { font-size: 16.5px; font-weight: 700; }
+.cmp-size { font-size: 16px; font-weight: 700; }
 
 /* Prix : la donnée qui RESSORT — plus gros, blanc pur. Jamais vert (c'est une
    donnée, pas un état) ni violet (l'accent n'habille pas une donnée). */
 .cmp-price { display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
-.ui .cmp-price b { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 800; letter-spacing: -.4px; color: #fff; }
+/* Prix = donnée principale, mais MÊME TAILLE que le reste : il ressort par le
+   gras et le blanc pur, pas par une taille qui casserait l'alignement. */
+.ui .cmp-price b { display: inline-flex; align-items: center; gap: 7px; font-size: 16px; font-weight: 800; letter-spacing: -.2px; color: #fff; }
 /* Prix remisé : vert « bon plan » (comme « Incluse » / « Gratuite »), étiquette
    verte à côté, prix normal barré en dessous. */
 .ui .cmp-price--promo b { color: var(--lime); }
-.cmp-price-tag { display: inline-grid; place-items: center; width: 25px; height: 25px; flex: none; border-radius: 7px; color: var(--lime); background: rgba(56, 255, 176, .08); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .34); }
-.cmp-price-tag svg { width: 14px; height: 14px; }
-.cmp-price s { font-size: 13px; color: var(--ink3); text-decoration: line-through; }
+.cmp-price-tag { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 6px; color: var(--lime); background: rgba(56, 255, 176, .08); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .34); }
+.cmp-price-tag svg { width: 12px; height: 12px; }
+.cmp-price s { font-size: 12.5px; color: var(--ink3); text-decoration: line-through; }
 
 .ui .cmp-promo { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-sm); font-size: 11.5px; font-weight: 700; letter-spacing: .3px; color: var(--amber); background: rgba(255, 180, 59, .10); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .28); }
 .cmp-promo code { font-family: var(--font-mono); font-size: 11px; }
@@ -2308,7 +2317,7 @@ body::before {
 .cmp-gauge { position: relative; width: 48px; height: 48px; display: inline-grid; place-items: center; }
 .cmp-gauge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .cmp-gauge-track { stroke: rgba(255, 255, 255, .08); }
-.cmp-gauge b { font-family: var(--font-mono); font-weight: 700; font-size: 16px; }
+.cmp-gauge b { font-family: var(--font-body); font-weight: 700; font-size: 16px; }
 
 /* Laptops (901–1400px) : le tableau agrandi ne rentre pas dans la colonne
    résultats plus étroite → scroll horizontal. On RÉCUPÈRE l'espace sur les
