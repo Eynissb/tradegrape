@@ -110,8 +110,12 @@ function makeFormat(locale: Locale) {
   const tag = locale === 'fr' ? 'fr-FR' : 'en-US';
   return {
     compact: (v: number) => v.toLocaleString(tag),
-    money: (v: number, currency: string) =>
-      `${v.toLocaleString(tag, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${currency}`,
+    // Symbole $ DEVANT le montant, format court (« $100 »). Les devises hors USD
+    // gardent leur code après le montant.
+    money: (v: number, currency: string) => {
+      const n = v.toLocaleString(tag, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+      return currency === 'USD' ? `$${n}` : `${n} ${currency}`;
+    },
   };
 }
 
@@ -358,7 +362,7 @@ export default function ComparatorView({
       </div>
 
       {/* ---------- Filtres ---------- */}
-      <section className="card cmp-filters" aria-label={d.filters}>
+      <section className="cmp-filters" aria-label={d.filters}>
         <div className="cmp-fgrid">
           {facets.firms.length > 1 ? (
             <SideFirms

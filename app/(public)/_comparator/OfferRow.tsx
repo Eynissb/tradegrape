@@ -268,7 +268,7 @@ export default function OfferRow({
             <span className="cmp-price">
               {o.totalPrice.known ? (
                 <>
-                  <b className="num">{o.totalPriceIsFloor ? `${d.priceFrom} ` : ''}{fmt.money(o.totalPrice.value, o.currency)}</b>
+                  <b className="num">{fmt.money(o.totalPrice.value, o.currency)}</b>
                   {o.priceRegular != null ? <s className="num">{fmt.money(o.priceRegular, o.currency)}</s> : null}
                 </>
               ) : <span className="cmp-unknown">{d.priceUnknown}</span>}

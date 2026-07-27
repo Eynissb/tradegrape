@@ -71,8 +71,8 @@ export default function SideFirms({
   const shown = open ? items : items.slice(0, LIMIT);
 
   return (
-    <fieldset className="cmp-fgroup cmp-sidegroup">
-      <legend>{label}</legend>
+    <div className="cmp-fgroup cmp-sidegroup" role="group" aria-label={label}>
+      <span className="cmp-side-ct">{label}</span>
       <div className="cmp-sidef-list">
         {shown.map((f) => {
           const on = selected.includes(f.slug);
@@ -96,6 +96,6 @@ export default function SideFirms({
           </svg>
         </button>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
