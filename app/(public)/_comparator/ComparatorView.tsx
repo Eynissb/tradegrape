@@ -556,39 +556,41 @@ export default function ComparatorView({
           haut + liste qui défile seule dessous. */}
       <div className="cmp-main">
         <div className="cmp-actionbar">
-          <p className="cmp-count">
-            <span className="cmp-count-lbl">{d.results}</span>
-            <strong className="num">{shown.length}</strong>
-            <span className="cmp-count-sep"> / </span>
-            <span className="num">{offers.length}</span>
-          </p>
+          <div className="cmp-actionbar-in">
+            <p className="cmp-count">
+              <span className="cmp-count-lbl">{d.results}</span>
+              <strong className="num">{shown.length}</strong>
+              <span className="cmp-count-sep"> / </span>
+              <span className="num">{offers.length}</span>
+            </p>
 
-          <div className="cmp-actionbar-mid">
-            <button
-              type="button"
-              className="cmp-abtn"
-              disabled={selected.length < COMPARE_MIN}
-              onClick={() => setCompareOpen(true)}
-            >
-              {d.compareOpen}{selected.length ? ` (${selected.length})` : ''}
-            </button>
-            <button type="button" className="cmp-abtn cmp-abtn--reset" onClick={reset} disabled={!active}>
-              {d.reset}
-            </button>
-          </div>
-
-          <div className="cmp-sortpills" role="group" aria-label={d.sort}>
-            {SORT_OPTIONS(d, tab).map((o) => (
+            <div className="cmp-actionbar-mid">
               <button
-                key={o.value}
                 type="button"
-                className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
-                aria-pressed={sort === o.value}
-                onClick={() => setSort(o.value as SortKey)}
+                className="cmp-abtn"
+                disabled={selected.length < COMPARE_MIN}
+                onClick={() => setCompareOpen(true)}
               >
-                {o.label}
+                {d.compareOpen}{selected.length ? ` (${selected.length})` : ''}
               </button>
-            ))}
+              <button type="button" className="cmp-abtn cmp-abtn--reset" onClick={reset} disabled={!active}>
+                {d.reset}
+              </button>
+            </div>
+
+            <div className="cmp-sortpills" role="group" aria-label={d.sort}>
+              {SORT_OPTIONS(d, tab).map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
+                  aria-pressed={sort === o.value}
+                  onClick={() => setSort(o.value as SortKey)}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
