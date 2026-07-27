@@ -425,6 +425,8 @@ export interface OfferFilters {
   fundedDrawdownTypes?: ('EOD' | 'TRAIL' | 'STATIC')[];
   kinds?: string[];
   firms?: string[];
+  /** Slugs de plateformes : l'offre passe si elle propose AU MOINS une des choisies. */
+  platforms?: string[];
   /** Plafond de prix TTC. Les offres SANS prix sont écartées (cf. tests). */
   maxTotalPrice?: number;
   /** Ne garder que les offres sans contrainte de cohérence. */
@@ -453,6 +455,7 @@ export function filterOffers(offers: PublicOffer[], f: OfferFilters): PublicOffe
       return false;
     if (f.kinds?.length && !f.kinds.includes(o.plan.kind)) return false;
     if (f.firms?.length && !f.firms.includes(o.firm.slug)) return false;
+    if (f.platforms?.length && !f.platforms.some((p) => o.platforms.includes(p))) return false;
     if (f.noConsistency && o.hasConsistency) return false;
     if (f.verifiedOnly && !o.trust.verified) return false;
     if (f.noFundedHardening && o.fundedHardening.differs) return false;
@@ -601,6 +604,8 @@ export function buildFacets(offers: PublicOffer[]) {
   const firms = [...new Map(offers.map((o) => [o.firm.slug, o.firm])).values()].sort((a, b) =>
     a.name.localeCompare(b.name),
   );
+  /* Plateformes présentes dans le jeu (slugs) — le nom se résout à l'affichage. */
+  const platforms = [...new Set(offers.flatMap((o) => o.platforms))].sort();
   /* Facettes de phase financée. Les paliers de split proposés sont ceux qui
      existent réellement dans le jeu, arrondis vers le bas au dizainier : un
      filtre « ≥ 87 % » n'aurait aucun sens pour un lecteur. */
@@ -618,6 +623,7 @@ export function buildFacets(offers: PublicOffer[]) {
     fundedDrawdownTypes,
     kinds,
     firms,
+    platforms,
     splitSteps,
     frequencies,
     withoutPrice: offers.filter((o) => !o.totalPrice.known).length,

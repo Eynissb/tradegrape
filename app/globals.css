@@ -1944,6 +1944,8 @@ body::before {
 .cmp-sidef-logo.lift { background: #2b2647; }
 .cmp-sidef-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .cmp-sidef-logo--mono { font-size: 10px; font-weight: 800; color: #fff; }
+.cmp-sidef-logo--gen { color: var(--ink3); }
+.cmp-sidef-logo--gen svg { width: 15px; height: 15px; }
 .ui .cmp-sidef-name { font-size: 13.5px; font-weight: 500; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cmp-sidef.is-on .cmp-sidef-name { color: var(--ink); }
 .cmp-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px; border: 0; background: transparent; color: var(--ink3); font: inherit; font-size: 13px; cursor: pointer; }

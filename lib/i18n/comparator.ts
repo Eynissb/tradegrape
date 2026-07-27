@@ -46,6 +46,7 @@ const fr = {
   hiddenNoPricePlural: 'masquées faute de prix publié',
 
   fFirm: 'Prop firm',
+  fPlatform: 'Plateforme',
   fSize: 'Taille de compte',
   fKind: 'Type de compte',
   fDrawdown: 'Type de drawdown',
@@ -242,6 +243,7 @@ const en: Dict = {
   hiddenNoPricePlural: 'hidden — price not published',
 
   fFirm: 'Prop firm',
+  fPlatform: 'Platform',
   fSize: 'Account size',
   fKind: 'Account type',
   fDrawdown: 'Drawdown type',

@@ -153,6 +153,8 @@ function readUrl(): UiState {
   if (kinds?.length) filters.kinds = kinds;
   const firms = list('firm');
   if (firms?.length) filters.firms = firms;
+  const plats = list('plat');
+  if (plats?.length) filters.platforms = plats;
   filters.maxTotalPrice = num('max');
   filters.minProfitSplit = num('split');
   filters.maxPayoutFrequencyDays = num('freq');
@@ -179,6 +181,7 @@ function writeUrl({ filters, sort, preset, tab }: UiState) {
     if (filters.fundedDrawdownTypes?.length) q.set('fdd', filters.fundedDrawdownTypes.join(','));
     if (filters.kinds?.length) q.set('kind', filters.kinds.join(','));
     if (filters.firms?.length) q.set('firm', filters.firms.join(','));
+    if (filters.platforms?.length) q.set('plat', filters.platforms.join(','));
     if (filters.maxTotalPrice != null) q.set('max', String(filters.maxTotalPrice));
     if (filters.minProfitSplit != null) q.set('split', String(filters.minProfitSplit));
     if (filters.maxPayoutFrequencyDays != null) q.set('freq', String(filters.maxPayoutFrequencyDays));
@@ -359,10 +362,22 @@ export default function ComparatorView({
         <div className="cmp-fgrid">
           {facets.firms.length > 1 ? (
             <SideFirms
-              firms={facets.firms}
+              items={facets.firms}
               selected={filters.firms ?? []}
               onToggle={(slug) => toggleIn('firms', slug)}
               label={d.fFirm}
+              seeAll={d.fSeeAll}
+              seeLess={d.fSeeLess}
+            />
+          ) : null}
+
+          {facets.platforms.length > 1 ? (
+            <SideFirms
+              kind="platform"
+              items={facets.platforms.map((p) => ({ slug: p, name: platformNames[p] ?? p }))}
+              selected={filters.platforms ?? []}
+              onToggle={(slug) => toggleIn('platforms', slug)}
+              label={d.fPlatform}
               seeAll={d.fSeeAll}
               seeLess={d.fSeeLess}
             />

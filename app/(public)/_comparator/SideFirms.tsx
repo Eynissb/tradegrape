@@ -1,22 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import { firmLogo, firmColor } from '@/lib/catalog/logos';
+import { firmLogo, platformLogo, firmColor } from '@/lib/catalog/logos';
 
 /**
- * Filtre « prop firm » de la colonne de gauche — liste VERTICALE, une firm par
- * ligne : case à cocher + logo + nom alignés (façon MAPROPFIRM), et non des
- * pilules tassées. « Voir tout » déroule au-delà de LIMIT.
+ * Filtre en LISTE VERTICALE de la colonne de gauche — une entrée par ligne :
+ * case à cocher + logo/icône coloré + nom alignés (façon MAPROPFIRM). Sert les
+ * prop firms (`kind="firm"`) ET les plateformes (`kind="platform"`). « Voir tout »
+ * déroule au-delà de LIMIT.
  */
 
-interface Firm {
+interface Item {
   slug: string;
   name: string;
 }
 
-function FirmMark({ slug, name }: Firm) {
+type Kind = 'firm' | 'platform';
+
+/** Glyphe générique « plateforme » (repli quand aucun fichier de logo). */
+function PlatformGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M6.5 14l3-3.5 2.5 2 3.5-4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 21h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ItemMark({ slug, name, kind }: Item & { kind: Kind }) {
   const [broken, setBroken] = useState(false);
-  const meta = firmLogo(slug);
+  const meta = kind === 'platform' ? platformLogo(slug) : firmLogo(slug);
   if (meta && !broken) {
     return (
       <span className={`cmp-sidef-logo ${meta.light ? '' : 'lift'}`} aria-hidden="true">
@@ -24,6 +38,9 @@ function FirmMark({ slug, name }: Firm) {
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
     );
+  }
+  if (kind === 'platform') {
+    return <span className="cmp-sidef-logo cmp-sidef-logo--gen" aria-hidden="true"><PlatformGlyph /></span>;
   }
   return (
     <span className="cmp-sidef-logo cmp-sidef-logo--mono" style={{ backgroundImage: firmColor(name) }} aria-hidden="true">
@@ -33,23 +50,25 @@ function FirmMark({ slug, name }: Firm) {
 }
 
 export default function SideFirms({
-  firms,
+  items,
   selected,
   onToggle,
   label,
   seeAll,
   seeLess,
+  kind = 'firm',
 }: {
-  firms: Firm[];
+  items: Item[];
   selected: string[];
   onToggle: (slug: string) => void;
   label: string;
   seeAll: string;
   seeLess: string;
+  kind?: Kind;
 }) {
   const [open, setOpen] = useState(false);
   const LIMIT = 6;
-  const shown = open ? firms : firms.slice(0, LIMIT);
+  const shown = open ? items : items.slice(0, LIMIT);
 
   return (
     <fieldset className="cmp-fgroup cmp-sidegroup">
@@ -63,13 +82,13 @@ export default function SideFirms({
               <span className="cmp-sidef-box">
                 <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8.5 6 12l7.5-8" /></svg>
               </span>
-              <FirmMark slug={f.slug} name={f.name} />
+              <ItemMark slug={f.slug} name={f.name} kind={kind} />
               <span className="cmp-sidef-name">{f.name}</span>
             </label>
           );
         })}
       </div>
-      {firms.length > LIMIT ? (
+      {items.length > LIMIT ? (
         <button type="button" className="cmp-seeall" onClick={() => setOpen((o) => !o)}>
           {open ? seeLess : seeAll}
           <svg viewBox="0 0 16 16" fill="none" className={open ? 'is-open' : ''} aria-hidden="true">
