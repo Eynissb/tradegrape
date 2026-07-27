@@ -287,16 +287,16 @@ export default function OfferRow({
             <span className={o.activationFee === 0 ? 'cmp-okv' : 'num'}>{o.activationFee === 0 ? d.activationIncluded : fmt.money(o.activationFee, o.currency)}</span>
             <span><PlatformStack slugs={o.platforms} names={platformNames} /></span>
             <span className="cmp-ddcell">
-              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.drawdown.type)}`}>{o.drawdown.type}</span><span className="num">{fmt.compact(o.drawdown.amount)}</span></span>
+              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.drawdown.type)}`}>{o.drawdown.type}</span><span className="num">{fmt.money(o.drawdown.amount, o.currency)}</span></span>
               {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
             </span>
-            <span className="num">{o.profitTarget != null ? fmt.compact(o.profitTarget) : <span className="cmp-dash">—</span>}</span>
+            <span className="num">{o.profitTarget != null ? fmt.money(o.profitTarget, o.currency) : <span className="cmp-dash">—</span>}</span>
           </>
         ) : (
           <>
             <span>{o.funded.hasConsistency ? <span className="cmp-warnv num">{o.funded.consistencyPct} %</span> : <span className="cmp-okv">{d.noConsistencyValue}</span>}</span>
             <span className="cmp-ddcell">
-              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.funded.drawdown.type)}`}>{o.funded.drawdown.type}</span><span className="num">{fmt.compact(o.funded.drawdown.amount)}</span></span>
+              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.funded.drawdown.type)}`}>{o.funded.drawdown.type}</span><span className="num">{fmt.money(o.funded.drawdown.amount, o.currency)}</span></span>
               {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
             </span>
             <span className="num">{o.funded.splitTiers.length ? o.funded.splitTiers.map((t) => `${t.splitPct}%`).join(' → ') : o.funded.profitSplit != null ? `${o.funded.profitSplit} %` : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
