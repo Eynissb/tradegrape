@@ -8,18 +8,17 @@ import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 import SearchBar from './SearchBar';
 
 /**
- * En-tête public — deux niveaux, façon PropFirmMatch mais ÉPURÉ.
+ * En-tête public — UNE capsule unique, tout sur une ligne.
  *
- *  1. Barre supérieure fine, discrète, FERMABLE (un message clé) — disparaît au
- *     scroll, se souvient de la fermeture (localStorage).
- *  2. Header principal : logo à gauche ; centre RÉSERVÉ au futur switch
- *     Futures/Forex/Crypto (pas encore affiché) ; à droite langue ronde,
- *     « Connexion » discret, « Commencer » en pilule primaire.
- *  3. Ligne de nav de contenu : Comparateur / Journal / Guides ; l'onglet actif
- *     en `.control--active` (repris du journal).
+ *  1. Barre supérieure fine, FERMABLE (un message clé) — disparaît au scroll,
+ *     se souvient de la fermeture (localStorage).
+ *  2. Capsule : logo · recherche (prend l'espace) · nav (actif en
+ *     `.control--active`, repris du journal) · langue ronde · boutons conscients
+ *     de la session (déconnecté = Connexion + Commencer ; connecté = Mon journal).
  *
- * Header sticky ; la barre supérieure peut disparaître, le header principal
- * reste. Système Tradawave (violet-magenta), liquid glass. Drapeaux en SVG.
+ * La capsule est posée sur le RELIEF 3D des cartes du journal (tokens `--elev`),
+ * pas de liquid glass. Seule la barre de recherche est une surface creusée
+ * (inset). Système Tradawave (violet-magenta). Drapeaux en SVG.
  */
 
 /* ---- Drapeaux ronds, SVG inline ---- */
