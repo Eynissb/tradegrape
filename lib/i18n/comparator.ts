@@ -29,8 +29,8 @@ const fr = {
   intro:
     'Prix de base, jamais promotionnels. Règles vérifiées à la source et datées. Ce que nous ignorons est affiché comme inconnu.',
 
-  tabEval: 'Évaluation',
-  tabFunded: 'Compte financé',
+  tabEval: 'Éval',
+  tabFunded: 'Financé',
 
   presets: 'Filtres rapides',
   preset_budget: 'Budget',
@@ -225,8 +225,8 @@ const en: Dict = {
   intro:
     'Base prices, never promotional. Rules verified at source and dated. What we do not know is shown as unknown.',
 
-  tabEval: 'Evaluation',
-  tabFunded: 'Funded account',
+  tabEval: 'Eval',
+  tabFunded: 'Funded',
 
   presets: 'Quick filters',
   preset_budget: 'Budget',

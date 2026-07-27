@@ -260,8 +260,8 @@ export default function OfferRow({
           </span>
         </span>
 
-        {/* Taille */}
-        <span className="cmp-size num">{fmt.compact(o.size)}</span>
+        {/* Taille — format court « 25k ». */}
+        <span className="cmp-size num">{o.size >= 1000 ? `${o.size / 1000}k` : o.size}</span>
 
         {tab === 'eval' ? (
           <>

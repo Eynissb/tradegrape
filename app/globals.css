@@ -1309,7 +1309,7 @@ body::before {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   height: 36px; overflow: hidden;
   background: linear-gradient(180deg, rgba(91, 63, 255, .16), rgba(192, 75, 255, .10));
-  border-bottom: 1px solid rgba(150, 110, 240, .16);
+  border-bottom: 1px solid rgba(255, 255, 255, .11);
   font-size: 12.5px; color: var(--ink2);
   transition: height .3s ease, opacity .3s ease, border-color .3s ease;
 }
@@ -1817,20 +1817,33 @@ body::before {
 /* =====================================================================
    Comparateur — APP PLEIN ÉCRAN (plus une page marketing).
    ===================================================================== */
-.cmp-app { width: 100%; padding: 0 clamp(16px, 3vw, 34px) 44px; display: flex; flex-direction: column; }
-
-/* Barre de marque : retour home + journal. */
-.cmp-topnav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0 12px; }
-.cmp-home { display: inline-flex; align-items: center; }
-.cmp-home-logo { height: 30px; width: auto; display: block; }
-
-/* Barre d'actions : compteur · comparer/réinitialiser · tri en pilules. */
-.cmp-actionbar {
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-  padding: 12px 16px; margin-bottom: 16px; border-radius: var(--r-lg);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .006)), #0c0a18;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 24px rgba(0, 0, 0, .32);
+/* Grille plein écran : colonne filtres 300px collée à gauche + colonne
+   résultats. Chaque colonne défile seule (overflow hidden ici). */
+.cmp-app {
+  height: 100vh; width: 100%;
+  display: grid; grid-template-columns: 300px minmax(0, 1fr);
+  overflow: hidden;
 }
+.cmp-main { min-width: 0; height: 100vh; display: flex; flex-direction: column; }
+
+/* Barre d'actions FIGÉE en haut de la colonne résultats. */
+.cmp-actionbar {
+  flex: none; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 13px clamp(14px, 2vw, 28px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .028), rgba(255, 255, 255, .005)), #0b0916;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06), 0 3px 14px rgba(0, 0, 0, .4);
+}
+/* Liste qui défile seule sous la barre d'actions ; scroll horizontal contenu ICI
+   (jamais sur la page), scrollbar fine. */
+.cmp-listscroll {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto;
+  padding: 16px clamp(14px, 2vw, 28px) 44px;
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent;
+}
+.cmp-listscroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.cmp-listscroll::-webkit-scrollbar-track { background: transparent; }
+.cmp-listscroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .11); border-radius: 8px; border: 3px solid transparent; background-clip: padding-box; }
+.cmp-listscroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .2); background-clip: padding-box; }
 .ui .cmp-count { margin: 0; display: flex; align-items: baseline; gap: 8px; }
 .cmp-count-lbl { font-size: 10.5px; letter-spacing: .7px; text-transform: uppercase; color: var(--ink3); }
 .ui .cmp-count strong { font-size: 26px; font-weight: 800; letter-spacing: -.5px; color: var(--ink); }
@@ -1855,28 +1868,32 @@ body::before {
 .cmp-sortpill.is-on { color: #fff; background: var(--ctl-active-bg); box-shadow: var(--ctl-active-shadow), inset 0 0 0 1px var(--ctl-active-border); }
 
 /* En-tête de la colonne filtres + switch Éval/Financé. */
-.cmp-side-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--card-brd); }
+.cmp-side-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--card-brd); }
 .ui .cmp-side-title { font-size: 19px; font-weight: 800; letter-spacing: -.3px; color: var(--ink); }
-.cmp-side-head .cmp-tabs { margin: 0; }
+/* Switch Éval/Financé = contrôle segmenté compact (jamais tronqué). */
+.cmp-side-head .cmp-tabs { margin: 0; gap: 0; padding: 3px; border-radius: var(--r-pill); background: rgba(0, 0, 0, .3); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); }
+.ui .cmp-side-head .cmp-tab { padding: 6px 13px; font-size: 12.5px; font-weight: 600; color: var(--ink3); background: transparent; box-shadow: none; }
+.ui .cmp-side-head .cmp-tab.is-on { color: #fff; background: var(--ctl-active-bg); box-shadow: inset 0 0 0 1px var(--ctl-active-border); }
 .cmp-side-foot { margin: 6px 0 0; font-size: 11.5px; color: var(--ink3); }
 .cmp-hidden-note { margin: 0 0 12px; font-size: 12.5px; color: var(--ink3); }
 
-/* ---- Layout deux colonnes : filtres fixes à gauche, liste à droite ---- */
-.cmp-shell { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 24px; align-items: start; }
+/* Tailles de compte : boutons compacts « 25k » alignés sur une ligne. */
+.cmp-side .cmp-fgroup--sizes .cmp-chips { gap: 6px; }
+.ui .cmp-side .cmp-fgroup--sizes .cmp-chip { flex: 1 1 auto; min-width: 36px; padding: 8px 4px; font-size: 12px; }
+
+/* ---- Colonne de filtres : PLEINE HAUTEUR, collée au bord gauche ---- */
 .cmp-side {
-  position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto;
-  display: flex; flex-direction: column; gap: 18px; padding: 18px 16px;
-  border-radius: var(--r-lg);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .006)), #0c0a18;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    inset 0 -1px 0 rgba(0, 0, 0, .4),
-    0 1px 2px rgba(0, 0, 0, .5),
-    0 12px 28px rgba(0, 0, 0, .36);
+  height: 100vh; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 18px; padding: 20px 18px 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .028), rgba(255, 255, 255, .005)), #0a0714;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, .05), 6px 0 26px rgba(0, 0, 0, .42);
+  /* Scrollbar FINE et discrète (jamais la barre brute violette). */
+  scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent;
 }
 .cmp-side::-webkit-scrollbar { width: 8px; }
-.cmp-side::-webkit-scrollbar-thumb { background: rgba(150, 110, 240, .22); border-radius: 8px; }
-.cmp-results { min-width: 0; }
+.cmp-side::-webkit-scrollbar-track { background: transparent; }
+.cmp-side::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .11); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.cmp-side::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .2); background-clip: padding-box; }
 /* Presets détachés en haut, titrés, séparés des filtres par un trait. */
 .cmp-side .cmp-presets-group { padding-bottom: 16px; border-bottom: 1px solid var(--card-brd); }
 .cmp-side .cmp-presets { margin: 0; }
@@ -1935,9 +1952,12 @@ body::before {
 .cmp-seeall svg.is-open { transform: rotate(180deg); }
 
 @media (max-width: 900px) {
-  .cmp-shell { grid-template-columns: 1fr; gap: 16px; }
-  .cmp-side { position: static; max-height: none; overflow: visible; }
-  .cmp-side .cmp-fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+  /* Sous 900px : on empile et on rend le défilement normal (plus d'app 100vh). */
+  .cmp-app { grid-template-columns: 1fr; height: auto; overflow: visible; }
+  .cmp-side { height: auto; overflow: visible; }
+  .cmp-main { height: auto; }
+  .cmp-listscroll { overflow: visible; padding: 14px; }
+  .cmp-side .cmp-fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
   .cmp-side .cmp-toggles { flex-direction: row; flex-wrap: wrap; gap: 10px 20px; }
 }
 
@@ -2126,7 +2146,7 @@ body::before {
    réservé aux sous-cartes du déplié. Accent violet jamais sur une donnée.
    ===================================================================== */
 .cmp-oscroll { overflow-x: auto; }
-.cmp-otable { min-width: 980px; display: flex; flex-direction: column; gap: 12px; }
+.cmp-otable { min-width: 900px; display: flex; flex-direction: column; gap: 12px; }
 /* Une seule grille partagée par l'en-tête ET chaque ligne → colonnes alignées. */
 .cmp-otable--eval {
   --ocols: 26px 26px minmax(190px, 2.1fr) 74px 1.2fr 104px 92px 96px 1fr 84px 54px;

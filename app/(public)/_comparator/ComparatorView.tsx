@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import {
   filterOffers,
   hiddenByUnknownPrice,
@@ -40,6 +39,9 @@ import SideFirms from './SideFirms';
  */
 
 type Tab = 'eval' | 'funded';
+
+/** Format court d'une taille de compte : 25000 → « 25k » (boutons filtres compacts). */
+const shortSize = (n: number): string => (n >= 1000 ? `${n / 1000}k` : String(n));
 
 const KIND_LABELS = (d: ComparatorDict): Record<string, string> => ({
   evaluation: d.kindEvaluation,
@@ -310,56 +312,8 @@ export default function ComparatorView({
 
   return (
     <div className="cmp-app">
-      {/* Barre de marque : logo (retour home) + accès journal — jamais enfermé. */}
-      <div className="cmp-topnav">
-        <Link href={`/${locale}`} className="cmp-home" aria-label="Tradegrape">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo.svg" alt="Tradegrape" className="cmp-home-logo" />
-        </Link>
-        <Link href="/app" className="control control--sm cmp-journal-link">{d.journal}</Link>
-      </div>
-
-      {/* Barre d'actions : compteur · comparer / réinitialiser · tri en pilules. */}
-      <div className="cmp-actionbar">
-        <p className="cmp-count">
-          <span className="cmp-count-lbl">{d.results}</span>
-          <strong className="num">{shown.length}</strong>
-          <span className="cmp-count-sep"> / </span>
-          <span className="num">{offers.length}</span>
-        </p>
-
-        <div className="cmp-actionbar-mid">
-          <button
-            type="button"
-            className="cmp-abtn"
-            disabled={selected.length < COMPARE_MIN}
-            onClick={() => setCompareOpen(true)}
-          >
-            {d.compareOpen}{selected.length ? ` (${selected.length})` : ''}
-          </button>
-          <button type="button" className="cmp-abtn cmp-abtn--reset" onClick={reset} disabled={!active}>
-            {d.reset}
-          </button>
-        </div>
-
-        <div className="cmp-sortpills" role="group" aria-label={d.sort}>
-          {SORT_OPTIONS(d, tab).map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
-              aria-pressed={sort === o.value}
-              onClick={() => setSort(o.value as SortKey)}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ---------- Layout deux colonnes : filtres à gauche, résultats à droite ---------- */}
-      <div className="cmp-shell">
-        <aside className="cmp-side" aria-label={d.filters}>
+      {/* Colonne de filtres — pleine hauteur, collée au bord gauche (col 1). */}
+      <aside className="cmp-side" aria-label={d.filters}>
           {/* En-tête filtres + switch Éval / Financé (haut de colonne, image 3). */}
           <div className="cmp-side-head">
             <span className="cmp-side-title">{d.filters}</span>
@@ -414,7 +368,7 @@ export default function ComparatorView({
             />
           ) : null}
 
-          <fieldset className="cmp-fgroup">
+          <fieldset className="cmp-fgroup cmp-fgroup--sizes">
             <legend>{d.fSize}</legend>
             <div className="cmp-chips">
               {facets.sizes.map((s) => (
@@ -425,7 +379,7 @@ export default function ComparatorView({
                   aria-pressed={!!filters.sizes?.includes(s)}
                   onClick={() => toggleIn('sizes', s)}
                 >
-                  {compact(s)}
+                  {shortSize(s)}
                 </button>
               ))}
             </div>
@@ -579,7 +533,47 @@ export default function ComparatorView({
           </p>
         </aside>
 
-        <div className="cmp-results">
+      {/* Colonne résultats — pleine hauteur (col 2) : barre d'actions figée en
+          haut + liste qui défile seule dessous. */}
+      <div className="cmp-main">
+        <div className="cmp-actionbar">
+          <p className="cmp-count">
+            <span className="cmp-count-lbl">{d.results}</span>
+            <strong className="num">{shown.length}</strong>
+            <span className="cmp-count-sep"> / </span>
+            <span className="num">{offers.length}</span>
+          </p>
+
+          <div className="cmp-actionbar-mid">
+            <button
+              type="button"
+              className="cmp-abtn"
+              disabled={selected.length < COMPARE_MIN}
+              onClick={() => setCompareOpen(true)}
+            >
+              {d.compareOpen}{selected.length ? ` (${selected.length})` : ''}
+            </button>
+            <button type="button" className="cmp-abtn cmp-abtn--reset" onClick={reset} disabled={!active}>
+              {d.reset}
+            </button>
+          </div>
+
+          <div className="cmp-sortpills" role="group" aria-label={d.sort}>
+            {SORT_OPTIONS(d, tab).map((o) => (
+              <button
+                key={o.value}
+                type="button"
+                className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
+                aria-pressed={sort === o.value}
+                onClick={() => setSort(o.value as SortKey)}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="cmp-listscroll">
 
       {/* Offres masquées faute de prix publié : une information, pas une alerte. */}
       {hiddenPrice > 0 ? (
