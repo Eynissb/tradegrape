@@ -204,6 +204,8 @@ const fr = {
   scMonitored: 'Surveillé',
   // Signal positif qu'aucun concurrent n'affiche : les règles ne durcissent pas.
   ddUnchanged: '= en financé',
+  fSeeAll: 'Voir tout',
+  fSeeLess: 'Réduire',
 } as const;
 
 /**
@@ -393,6 +395,8 @@ const en: Dict = {
   scForbidden: 'Forbidden',
   scMonitored: 'Monitored',
   ddUnchanged: '= when funded',
+  fSeeAll: 'See all',
+  fSeeLess: 'Show less',
 };
 
 export const DICTS: Record<Locale, Dict> = { fr, en };

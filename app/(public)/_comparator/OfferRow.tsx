@@ -30,7 +30,7 @@ function Logo({ offer }: { offer: PublicOffer }) {
   const mono = offer.firm.name.trim().slice(0, 2).toUpperCase();
   if (meta && !broken) {
     return (
-      <span className={`cmp-logo cmp-logo--img ${meta.light ? 'on-dark' : 'on-light'}`} aria-hidden="true">
+      <span className={`cmp-logo cmp-logo--img ${meta.light ? '' : 'is-inv'}`} aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>
@@ -51,7 +51,7 @@ function PlatMark({ slug, name, variant }: { slug: string; name: string; variant
   const cls = variant === 'lic' ? 'cmp-lic' : 'cmp-plat';
   if (meta && !broken) {
     return (
-      <span className={`${cls} ${meta.light ? 'on-dark' : 'on-light'}`} title={name}>
+      <span className={`${cls} ${meta.light ? '' : 'is-inv'}`} title={name}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={meta.url} alt="" style={{ transform: `scale(${meta.scale})` }} onError={() => setBroken(true)} />
       </span>

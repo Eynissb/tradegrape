@@ -1830,13 +1830,50 @@ body::before {
 .cmp-side::-webkit-scrollbar { width: 8px; }
 .cmp-side::-webkit-scrollbar-thumb { background: rgba(150, 110, 240, .22); border-radius: 8px; }
 .cmp-results { min-width: 0; }
-/* Presets + filtres empilés verticalement dans la colonne (plus de bande horizontale). */
-.cmp-side .cmp-presets { margin: 0; }
+/* Presets détachés en haut, séparés des filtres par un trait. */
+.cmp-side .cmp-presets { margin: 0; padding-bottom: 16px; border-bottom: 1px solid var(--card-brd); }
 .cmp-side .cmp-filters { padding: 0; background: none; box-shadow: none; border: 0; }
-.cmp-side .cmp-fgrid { display: flex; flex-direction: column; gap: 18px; }
-.cmp-side .cmp-toggles { flex-direction: column; gap: 12px; margin-top: 4px; }
+/* Groupes empilés, nettement séparés et titrés (de l'air entre chaque). */
+.cmp-side .cmp-fgrid { display: flex; flex-direction: column; gap: 0; }
+.cmp-side .cmp-fgroup { padding: 16px 0; border-top: 1px solid var(--card-brd); }
+.cmp-side .cmp-fgrid > :first-child { border-top: 0; padding-top: 4px; }
+.ui .cmp-side .cmp-fgroup > legend { font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--ink3); margin-bottom: 12px; }
+.cmp-side .cmp-toggles { flex-direction: column; gap: 13px; margin-top: 0; padding: 16px 0 2px; border-top: 1px solid var(--card-brd); }
 .cmp-side .cmp-price-input { max-width: none; width: 100%; }
 .cmp-results .cmp-bar { margin-top: 0; }
+
+/* Options en boutons LISIBLES (plus de micro-pilules serrées). */
+.cmp-side .cmp-chips { gap: 8px; }
+.ui .cmp-side .cmp-chip { padding: 9px 15px; font-size: 13px; font-weight: 600; }
+/* Filtre actif : relief `.control--active` (fond quasi noir + liseré violet). */
+.ui .cmp-side .cmp-chip.is-on {
+  color: #fff; background: var(--ctl-active-bg);
+  box-shadow: var(--ctl-active-shadow), inset 0 0 0 1px var(--ctl-active-border);
+}
+
+/* Prop firms en LISTE VERTICALE : case à cocher + logo + nom alignés. */
+.cmp-sidef-list { display: flex; flex-direction: column; gap: 2px; }
+.cmp-sidef { display: flex; align-items: center; gap: 11px; padding: 7px 8px; border-radius: var(--r-sm); cursor: pointer; position: relative; }
+.cmp-sidef:hover { background: rgba(255, 255, 255, .04); }
+.cmp-sidef.is-on { background: var(--ctl-active-bg); box-shadow: inset 0 0 0 1px var(--ctl-active-border); }
+.cmp-sidef input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cmp-sidef-box {
+  width: 18px; height: 18px; flex: none; border-radius: 5px; display: grid; place-items: center;
+  background: rgba(0, 0, 0, .35); box-shadow: inset 0 0 0 1px rgba(150, 110, 240, .3);
+}
+.cmp-sidef-box svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.cmp-sidef.is-on .cmp-sidef-box { background: var(--grad); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4); }
+.cmp-sidef.is-on .cmp-sidef-box svg { opacity: 1; }
+.cmp-sidef-logo { width: 26px; height: 26px; flex: none; border-radius: 7px; overflow: hidden; display: grid; place-items: center; background: #0a0714; }
+.cmp-sidef-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cmp-sidef-logo.is-inv img { filter: brightness(0) invert(1); }
+.cmp-sidef-logo--mono { font-size: 10px; font-weight: 800; color: #fff; }
+.ui .cmp-sidef-name { font-size: 13.5px; font-weight: 500; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmp-sidef.is-on .cmp-sidef-name { color: var(--ink); }
+.cmp-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px; border: 0; background: transparent; color: var(--ink3); font: inherit; font-size: 13px; cursor: pointer; }
+.cmp-seeall:hover { color: var(--ink); }
+.cmp-seeall svg { width: 12px; height: 12px; transition: transform .2s; }
+.cmp-seeall svg.is-open { transform: rotate(180deg); }
 
 @media (max-width: 900px) {
   .cmp-shell { grid-template-columns: 1fr; gap: 16px; }
@@ -2030,7 +2067,7 @@ body::before {
    réservé aux sous-cartes du déplié. Accent violet jamais sur une donnée.
    ===================================================================== */
 .cmp-oscroll { overflow-x: auto; }
-.cmp-otable { min-width: 980px; display: flex; flex-direction: column; gap: 10px; }
+.cmp-otable { min-width: 980px; display: flex; flex-direction: column; gap: 12px; }
 /* Une seule grille partagée par l'en-tête ET chaque ligne → colonnes alignées. */
 .cmp-otable--eval {
   --ocols: 26px 26px minmax(190px, 2.1fr) 74px 1.2fr 104px 92px 96px 1fr 84px 54px;
@@ -2075,7 +2112,7 @@ body::before {
 
 .cmp-orow-head {
   display: grid; grid-template-columns: var(--ocols); gap: 12px; align-items: center;
-  padding: 13px 16px; cursor: pointer; border-radius: var(--r-lg);
+  padding: 20px 18px; cursor: pointer; border-radius: var(--r-lg);
 }
 .cmp-orow-head > span { min-width: 0; }
 .cmp-orow-pick { justify-self: center; }
@@ -2096,12 +2133,12 @@ body::before {
   width: 42px; height: 42px; flex: none; border-radius: 11px; display: grid; place-items: center;
   font-weight: 800; font-size: 14px; color: #fff; overflow: hidden;
 }
-/* Vrai logo : agrandi pour REMPLIR la pastille (le vide transparent déborde et
-   est rogné), sur un fond qui le fait ressortir — sombre pour un tracé clair,
-   clair pour un tracé sombre (ex. Lucid). Fini les logos minuscules et blafards. */
-.cmp-logo--img.on-dark { background: rgba(255, 255, 255, .05); }
-.cmp-logo--img.on-light { background: #f2f0f7; }
+/* Fond SOMBRE derrière chaque logo (jamais blanc), agrandi pour REMPLIR la
+   pastille (le vide transparent déborde et est rogné). Un tracé sombre
+   (Lucid, plateformes) est inversé en blanc pour rester visible sur le noir. */
+.cmp-logo--img { background: #0a0714; }
 .cmp-logo--img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cmp-logo--img.is-inv img { filter: brightness(0) invert(1); }
 /* Fallback monogramme : pastille en relief, teinte réelle de la firm (style inline). */
 .cmp-logo--mono {
   background: var(--grad);
@@ -2126,10 +2163,9 @@ body::before {
 .cmp-promo code { font-family: var(--font-mono); font-size: 11px; }
 
 .cmp-plats { display: flex; gap: 5px; }
-.cmp-plat { width: 30px; height: 30px; flex: none; border-radius: 8px; overflow: hidden; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
-.cmp-plat.on-light { background: #f2f0f7; }
-.cmp-plat.on-dark { background: rgba(255, 255, 255, .06); }
+.cmp-plat { width: 30px; height: 30px; flex: none; border-radius: 8px; overflow: hidden; display: grid; place-items: center; background: #0a0714; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 5px rgba(0, 0, 0, .45); }
 .cmp-plat img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cmp-plat.is-inv img { filter: brightness(0) invert(1); }
 /* Repli sans fichier : glyphe générique « plateforme », pastille sombre. */
 .cmp-plat--gen { background: #1a1530; color: var(--ink3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
 .cmp-plat--gen svg { width: 17px; height: 17px; }
@@ -2172,10 +2208,9 @@ body::before {
 .cmp-scalp { display: flex; flex-direction: column; gap: 4px; }
 .cmp-scalp-note { font-size: 12px; font-weight: 400; color: var(--ink3); line-height: 1.45; }
 .cmp-lics { display: flex; gap: 8px; }
-.cmp-lic { width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 5px rgba(0, 0, 0, .45); }
-.cmp-lic.on-light { background: #f2f0f7; }
-.cmp-lic.on-dark { background: rgba(255, 255, 255, .06); }
+.cmp-lic { width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden; display: grid; place-items: center; background: #0a0714; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 5px rgba(0, 0, 0, .45); }
 .cmp-lic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cmp-lic.is-inv img { filter: brightness(0) invert(1); }
 .cmp-lic--gen { background: #1a1530; color: var(--ink3); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 2px 5px rgba(0, 0, 0, .45); }
 .cmp-lic--gen svg { width: 19px; height: 19px; }
 

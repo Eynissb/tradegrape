@@ -23,6 +23,7 @@ import {
 import type { ComparatorDict, Locale } from '@/lib/i18n/comparator';
 import Select from '@/components/ui/Select';
 import OfferRow from './OfferRow';
+import SideFirms from './SideFirms';
 
 /**
  * Comparateur — deux jeux de colonnes commutables (évaluation / compte financé)
@@ -351,22 +352,14 @@ export default function ComparatorView({
       <section className="card cmp-filters" aria-label={d.filters}>
         <div className="cmp-fgrid">
           {facets.firms.length > 1 ? (
-            <fieldset className="cmp-fgroup">
-              <legend>{d.fFirm}</legend>
-              <div className="cmp-chips">
-                {facets.firms.map((f) => (
-                  <button
-                    key={f.slug}
-                    type="button"
-                    className={`cmp-chip cmp-chip-sm${filters.firms?.includes(f.slug) ? ' is-on' : ''}`}
-                    aria-pressed={!!filters.firms?.includes(f.slug)}
-                    onClick={() => toggleIn('firms', f.slug)}
-                  >
-                    {f.name}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+            <SideFirms
+              firms={facets.firms}
+              selected={filters.firms ?? []}
+              onToggle={(slug) => toggleIn('firms', slug)}
+              label={d.fFirm}
+              seeAll={d.fSeeAll}
+              seeLess={d.fSeeLess}
+            />
           ) : null}
 
           <fieldset className="cmp-fgroup">
