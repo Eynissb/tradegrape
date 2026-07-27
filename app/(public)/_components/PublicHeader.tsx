@@ -1,28 +1,83 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactElement } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
 
 /**
- * En-tête public — fondu dans le hero.
+ * En-tête public — CAPSULE flottante façon iOS.
  *
- * En HAUT de page : transparent, aucun fond, aucune bordure, aucun
- * `backdrop-filter`. Il flotte sur l'image de la grappe, on ne voit aucune
- * limite avec le hero.
+ * Pilule arrondie, détachée du haut (marge tout autour), verre liquide (fond
+ * translucide + backdrop-filter, arête claire en haut, ombre douce dessous),
+ * centrée sur une largeur maximale. Sticky au scroll ; se densifie légèrement
+ * (`.is-solid`) pour rester lisible sur le contenu clair, sans perdre sa forme.
  *
- * AU SCROLL : dès que le hero n'est plus derrière (IntersectionObserver), la
- * barre prend un fond translucide sombre + `backdrop-filter` pour rester lisible
- * sur le contenu. Sur une page SANS hero (comparateur…), pas de hero à observer
- * → la barre est solide d'emblée.
+ * Le contenu du hero commence SOUS la capsule (offset `--header-h`) : elle ne
+ * chevauche jamais le titre.
  *
- * Contenu : logo (grappe + nom, fallback texte), nav, sélecteur de langue rond
- * à drapeaux, CTA conscient de la session. Mobile : nav dans un tiroir, le
- * sélecteur reste visible.
+ * Drapeaux en SVG inline (jamais d'emoji : rendus en lettres sur Windows) →
+ * rendu identique partout.
  */
 
-const FLAG: Record<Locale, string> = { fr: '🇫🇷', en: '🇬🇧' };
+/* ---- Drapeaux ronds, SVG inline ---- */
+
+function FrFlag() {
+  return (
+    <svg viewBox="0 0 3 2" preserveAspectRatio="xMidYMid slice" className="flag-svg" aria-hidden="true">
+      <rect width="1" height="2" x="0" fill="#002654" />
+      <rect width="1" height="2" x="1" fill="#ffffff" />
+      <rect width="1" height="2" x="2" fill="#ce1126" />
+    </svg>
+  );
+}
+
+function GbFlag() {
+  const raw = useId().replace(/[:]/g, '');
+  const s = `s${raw}`;
+  const t = `t${raw}`;
+  return (
+    <svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" className="flag-svg" aria-hidden="true">
+      <clipPath id={s}>
+        <path d="M0,0 v30 h60 v-30 z" />
+      </clipPath>
+      <clipPath id={t}>
+        <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+      </clipPath>
+      <g clipPath={`url(#${s})`}>
+        <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" strokeWidth="6" />
+        <path d="M0,0 L60,30 M60,0 L0,30" clipPath={`url(#${t})`} stroke="#c8102e" strokeWidth="4" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#ffffff" strokeWidth="10" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" strokeWidth="6" />
+      </g>
+    </svg>
+  );
+}
+
+const FLAGS: Record<Locale, () => ReactElement> = { fr: FrFlag, en: GbFlag };
+
+function FlagRound({ locale }: { locale: Locale }) {
+  const F = FLAGS[locale];
+  return (
+    <span className="flag-round">
+      <F />
+    </span>
+  );
+}
+
+/* ---- Logo ---- */
+
+function Logo() {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <span className="pub-brand-text grad-text">Tradegrape</span>;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/brand/logo.svg" alt="Tradegrape" className="pub-logo-img" onError={() => setFailed(true)} />
+  );
+}
+
+/* ---- Nav ---- */
 
 function navItems(l: Locale) {
   return [
@@ -30,23 +85,6 @@ function navItems(l: Locale) {
     { label: 'Journal', href: '/app' },
     { label: 'Guides', href: `/${l}/guides` },
   ];
-}
-
-function Logo() {
-  const [failed, setFailed] = useState(false);
-  if (failed) {
-    // Fallback texte si l'asset manque — jamais de logo cassé.
-    return <span className="pub-brand-text grad-text">Tradegrape</span>;
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/brand/logo.svg"
-      alt="Tradegrape"
-      className="pub-logo-img"
-      onError={() => setFailed(true)}
-    />
-  );
 }
 
 export default function PublicHeader({ locale }: { locale: Locale }) {
@@ -69,19 +107,12 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
     };
   }, []);
 
-  // Fond au scroll : solide quand le hero n'est plus derrière. Pas de hero → solide.
+  // Densification au scroll : la capsule reste une capsule, fond plus opaque.
   useEffect(() => {
-    const hero = document.querySelector('.home-hero');
-    if (!hero) {
-      setSolid(true);
-      return;
-    }
-    const io = new IntersectionObserver(([e]) => setSolid(!e.isIntersecting), {
-      rootMargin: '-72px 0px 0px 0px',
-      threshold: 0,
-    });
-    io.observe(hero);
-    return () => io.disconnect();
+    const onScroll = () => setSolid(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   // Fermeture du popover langue au clic extérieur / Échap.
@@ -109,73 +140,69 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   return (
     <>
       <header className={`pub-header${solid ? ' is-solid' : ''}`}>
-        <div className="pub-header-inner">
-          <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
-            <Logo />
-          </Link>
+        <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
+          <Logo />
+        </Link>
 
-          <nav className="pub-nav" aria-label="Navigation principale">
-            {nav.map((n) => (
-              <Link key={n.href} href={n.href} className="pub-navlink">
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="pub-header-right">
-            {/* Sélecteur de langue rond, à drapeaux. */}
-            <div className="pub-lang" ref={langRef}>
-              <button
-                type="button"
-                className="pub-lang-btn"
-                aria-haspopup="true"
-                aria-expanded={langOpen}
-                aria-label={`Langue : ${l.toUpperCase()}`}
-                onClick={() => setLangOpen((o) => !o)}
-              >
-                <span aria-hidden="true">{FLAG[l]}</span>
-              </button>
-              {langOpen ? (
-                <div className="pub-lang-pop" role="menu">
-                  {others.map((x) => (
-                    <Link
-                      key={x}
-                      href={`/${x}`}
-                      hrefLang={x}
-                      className="pub-lang-opt"
-                      role="menuitem"
-                      onClick={() => setLangOpen(false)}
-                    >
-                      <span aria-hidden="true">{FLAG[x]}</span>
-                      <span className="sr-only">{x.toUpperCase()}</span>
-                    </Link>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            {/* CTA conscient de la session. */}
-            <Link href={ctaHref} className="pub-cta">
-              {ctaLabel}
+        <nav className="pub-nav" aria-label="Navigation principale">
+          {nav.map((n) => (
+            <Link key={n.href} href={n.href} className="pub-navlink">
+              {n.label}
             </Link>
+          ))}
+        </nav>
 
-            {/* Ouverture du tiroir mobile. */}
+        <div className="pub-header-right">
+          {/* Sélecteur de langue rond, à drapeaux SVG. */}
+          <div className="pub-lang" ref={langRef}>
             <button
               type="button"
-              className="pub-burger"
-              aria-label="Menu"
-              aria-expanded={drawer}
-              onClick={() => setDrawer((d) => !d)}
+              className="pub-lang-btn"
+              aria-haspopup="true"
+              aria-expanded={langOpen}
+              aria-label={`Langue : ${l.toUpperCase()}`}
+              onClick={() => setLangOpen((o) => !o)}
             >
-              <span />
-              <span />
-              <span />
+              <FlagRound locale={l} />
             </button>
+            {langOpen ? (
+              <div className="pub-lang-pop" role="menu">
+                {others.map((x) => (
+                  <Link
+                    key={x}
+                    href={`/${x}`}
+                    hrefLang={x}
+                    className="pub-lang-opt"
+                    role="menuitem"
+                    aria-label={x.toUpperCase()}
+                    onClick={() => setLangOpen(false)}
+                  >
+                    <FlagRound locale={x} />
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
+
+          <Link href={ctaHref} className="pub-cta">
+            {ctaLabel}
+          </Link>
+
+          <button
+            type="button"
+            className="pub-burger"
+            aria-label="Menu"
+            aria-expanded={drawer}
+            onClick={() => setDrawer((d) => !d)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </header>
 
-      {/* Tiroir mobile : la nav (un seul système). */}
+      {/* Tiroir mobile : la nav + le CTA (un seul système). */}
       <div className={`pub-drawer${drawer ? ' is-open' : ''}`} aria-hidden={!drawer}>
         <div className="pub-drawer-scrim" onClick={() => setDrawer(false)} />
         <nav className="pub-drawer-panel" aria-label="Navigation">

@@ -1295,71 +1295,87 @@ body::before {
 /* `overflow-x: clip` rogne le décor qui déborde (glows ambiants) sans créer de
    conteneur de défilement — donc sans casser un futur `position: sticky`
    (ce que ferait `hidden`). */
-.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 66px; }
-/* ---- Header fondu dans le hero ----
-   Fixe et TRANSPARENT en haut : aucun fond, aucune bordure, aucun blur — il
-   flotte sur la grappe. Au scroll (`.is-solid`, posé en JS quand le hero n'est
-   plus derrière) : fond translucide + backdrop-filter pour rester lisible. */
+/* `--header-h` = espace réservé sous la capsule (marge haute + hauteur + jeu) :
+   le contenu du hero et des pages commence dessous, la capsule ne chevauche rien. */
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 88px; }
+
+/* ---- Header : CAPSULE flottante iOS ----
+   Pilule arrondie détachée du haut (marge tout autour), verre liquide : fond
+   translucide + backdrop-filter, arête claire en haut, ombre douce dessous.
+   Centrée sur une largeur maximale. Sticky ; se densifie au scroll (.is-solid). */
 .pub-header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-  background: transparent;
-  transition: background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease;
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 50;
+  width: min(1080px, calc(100vw - 28px));
+  display: flex; align-items: center; gap: 18px;
+  padding: 8px 8px 8px 20px;
+  border-radius: 999px;
+  background: rgba(18, 13, 34, 0.55);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: background .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
+/* Densification au scroll : plus opaque, ombre/arête un peu plus marquées. */
 .pub-header.is-solid {
-  background: rgba(9, 7, 20, 0.72);
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  box-shadow: 0 1px 0 rgba(150, 110, 240, 0.12);
+  background: rgba(18, 13, 34, 0.82);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 42px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
-.pub-header-inner {
-  display: flex; align-items: center; gap: 28px;
-  width: var(--container); margin: 0 auto; height: var(--header-h);
-}
-/* Logo : grappe + nom (asset), fallback texte. */
-.pub-brand { display: inline-flex; align-items: center; }
-.pub-logo-img { height: 30px; width: auto; display: block; }
-.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; letter-spacing: -.4px; }
-.pub-nav { display: flex; gap: 22px; margin-left: 8px; }
+
+/* Logo à gauche */
+.pub-brand { flex: none; display: inline-flex; align-items: center; }
+.pub-logo-img { height: 26px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.2rem; letter-spacing: -.4px; }
+
+/* Nav au centre */
+.pub-nav { flex: 1; display: flex; justify-content: center; gap: 26px; }
 .ui .pub-navlink { font-size: 14px; font-weight: 500; color: var(--ink2); transition: color .15s; }
 .ui .pub-navlink:hover { color: var(--ink); }
-.pub-header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 
-/* Sélecteur de langue rond, à drapeaux. */
+/* Actions à droite */
+.pub-header-right { flex: none; display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+/* Sélecteur de langue rond, pastille de drapeau SVG. */
 .pub-lang { position: relative; }
 .pub-lang-btn {
-  width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
-  display: grid; place-items: center; font-size: 17px; line-height: 1;
-  background: rgba(255, 255, 255, .09); color: var(--ink);
-  transition: background .15s;
+  width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  overflow: hidden; background: transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  transition: box-shadow .15s;
 }
-.pub-lang-btn:hover { background: rgba(255, 255, 255, .16); }
+.pub-lang-btn:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4); }
+.flag-round { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; }
+.flag-svg { display: block; width: 100%; height: 100%; }
 .pub-lang-pop {
-  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
-  display: flex; flex-direction: column; gap: 6px; padding: 6px;
-  border-radius: var(--r-md); background: rgba(9, 7, 20, 0.92);
-  backdrop-filter: blur(18px); box-shadow: var(--elev-2-shadow), 0 12px 28px rgba(0,0,0,.5);
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 60;
+  display: flex; flex-direction: column; gap: 8px; padding: 8px;
+  border-radius: var(--r-lg); background: rgba(16, 12, 32, 0.9);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
 }
 .pub-lang-opt {
-  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 17px; background: rgba(255, 255, 255, .06);
+  display: block; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
-.pub-lang-opt:hover { background: rgba(255, 255, 255, .14); }
+.pub-lang-opt:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.34); }
 
-/* CTA session — pilule en verre, lisible sur l'image comme sur le fond solide. */
+/* CTA session — pilule en verre. */
 .ui .pub-cta {
-  padding: 8px 16px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 600;
-  color: #fff; background: rgba(255, 255, 255, .11); white-space: nowrap;
+  padding: 8px 16px; border-radius: var(--r-pill); font-size: 13px; font-weight: 600;
+  color: #fff; background: rgba(255, 255, 255, 0.12); white-space: nowrap;
   transition: background .15s;
 }
-.ui .pub-cta:hover { background: rgba(255, 255, 255, .2); }
+.ui .pub-cta:hover { background: rgba(255, 255, 255, 0.2); }
 
 /* Bouton tiroir (mobile). */
 .pub-burger {
-  display: none; width: 40px; height: 40px; border: 0; border-radius: var(--r-md);
-  background: rgba(255, 255, 255, .09); cursor: pointer;
+  display: none; width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, .1); cursor: pointer;
   flex-direction: column; align-items: center; justify-content: center; gap: 4px;
 }
-.pub-burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--ink); }
+.pub-burger span { display: block; width: 16px; height: 2px; border-radius: 2px; background: var(--ink); }
 
 /* Tiroir mobile — un seul système de nav. */
 .pub-drawer { position: fixed; inset: 0; z-index: 45; visibility: hidden; }
