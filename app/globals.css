@@ -2261,7 +2261,12 @@ body::before {
 /* Prix : la donnée qui RESSORT — plus gros, blanc pur. Jamais vert (c'est une
    donnée, pas un état) ni violet (l'accent n'habille pas une donnée). */
 .cmp-price { display: flex; flex-direction: column; line-height: 1.12; min-width: 0; }
-.ui .cmp-price b { font-size: 17px; font-weight: 800; letter-spacing: -.3px; color: #fff; }
+.ui .cmp-price b { display: inline-flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 800; letter-spacing: -.3px; color: #fff; }
+/* Prix remisé : vert « bon plan » (comme « Incluse » / « Gratuite »), étiquette
+   verte à côté, prix normal barré en dessous. */
+.ui .cmp-price--promo b { color: var(--lime); }
+.cmp-price-tag { display: inline-grid; place-items: center; width: 21px; height: 21px; flex: none; border-radius: 6px; color: var(--lime); background: rgba(56, 255, 176, .08); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .34); }
+.cmp-price-tag svg { width: 12px; height: 12px; }
 .cmp-price s { font-size: 11.5px; color: var(--ink3); text-decoration: line-through; }
 
 .ui .cmp-promo { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-sm); font-size: 11.5px; font-weight: 700; letter-spacing: .3px; color: var(--amber); background: rgba(255, 180, 59, .10); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .28); }

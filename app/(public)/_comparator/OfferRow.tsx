@@ -265,10 +265,20 @@ export default function OfferRow({
 
         {tab === 'eval' ? (
           <>
-            <span className="cmp-price">
+            <span className={`cmp-price${o.priceRegular != null ? ' cmp-price--promo' : ''}`}>
               {o.totalPrice.known ? (
                 <>
-                  <b className="num">{fmt.money(o.totalPrice.value, o.currency)}</b>
+                  <b className="num">
+                    {fmt.money(o.totalPrice.value, o.currency)}
+                    {o.priceRegular != null ? (
+                      <span className="cmp-price-tag" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M13.4 3H6.5A2.5 2.5 0 0 0 4 5.5v6.9a2 2 0 0 0 .586 1.414l7 7a2 2 0 0 0 2.828 0l6.5-6.5a2 2 0 0 0 0-2.828l-7-7A2 2 0 0 0 13.4 3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                          <circle cx="8.6" cy="8.6" r="1.5" fill="currentColor" />
+                        </svg>
+                      </span>
+                    ) : null}
+                  </b>
                   {o.priceRegular != null ? <s className="num">{fmt.money(o.priceRegular, o.currency)}</s> : null}
                 </>
               ) : <span className="cmp-unknown">{d.priceUnknown}</span>}
