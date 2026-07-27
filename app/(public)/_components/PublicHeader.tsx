@@ -181,72 +181,14 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
           </div>
         ) : null}
 
-        {/* 2 + 3 : header principal (glass) et ligne de nav. */}
+        {/* UNE seule capsule : tout sur une ligne. */}
         <header className="pub-header">
-          <div className="pub-header-main">
-            <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
-              <Logo />
-            </Link>
+          <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
+            <Logo />
+          </Link>
 
-            {/* Centre RÉSERVÉ au futur switch Futures/Forex/Crypto — pas affiché. */}
-            <div className="pub-header-center" aria-hidden="true" />
-
-            <div className="pub-header-actions">
-              <div className="pub-lang" ref={langRef}>
-                <button
-                  type="button"
-                  className="pub-lang-btn"
-                  aria-haspopup="true"
-                  aria-expanded={langOpen}
-                  aria-label={`Langue : ${l.toUpperCase()}`}
-                  onClick={() => setLangOpen((o) => !o)}
-                >
-                  <FlagRound locale={l} />
-                </button>
-                {langOpen ? (
-                  <div className="pub-lang-pop" role="menu">
-                    {others.map((x) => (
-                      <Link
-                        key={x}
-                        href={`/${x}`}
-                        hrefLang={x}
-                        className="pub-lang-opt"
-                        role="menuitem"
-                        aria-label={x.toUpperCase()}
-                        onClick={() => setLangOpen(false)}
-                      >
-                        <FlagRound locale={x} />
-                      </Link>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-
-              {!authed ? (
-                <Link href="/login" className="control control--sm pub-signin">
-                  {signinLabel}
-                </Link>
-              ) : null}
-              <Link href={ctaHref} className="control control--sm control--primary pub-cta">
-                {ctaLabel}
-              </Link>
-
-              <button
-                type="button"
-                className="pub-burger"
-                aria-label="Menu"
-                aria-expanded={drawer}
-                onClick={() => setDrawer((d) => !d)}
-              >
-                <span />
-                <span />
-                <span />
-              </button>
-            </div>
-          </div>
-
-          {/* 3. Ligne de nav de contenu. */}
-          <nav className="pub-header-nav" aria-label="Navigation principale">
+          {/* Nav ; l'onglet actif en `.control--active` (repris du journal). */}
+          <nav className="pub-nav" aria-label="Navigation principale">
             {nav.map((n) => {
               const active = isActive(pathname, n.href);
               return (
@@ -261,6 +203,59 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
               );
             })}
           </nav>
+
+          <div className="pub-header-actions">
+            <div className="pub-lang" ref={langRef}>
+              <button
+                type="button"
+                className="pub-lang-btn"
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+                aria-label={`Langue : ${l.toUpperCase()}`}
+                onClick={() => setLangOpen((o) => !o)}
+              >
+                <FlagRound locale={l} />
+              </button>
+              {langOpen ? (
+                <div className="pub-lang-pop" role="menu">
+                  {others.map((x) => (
+                    <Link
+                      key={x}
+                      href={`/${x}`}
+                      hrefLang={x}
+                      className="pub-lang-opt"
+                      role="menuitem"
+                      aria-label={x.toUpperCase()}
+                      onClick={() => setLangOpen(false)}
+                    >
+                      <FlagRound locale={x} />
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {!authed ? (
+              <Link href="/login" className="control control--sm pub-signin">
+                {signinLabel}
+              </Link>
+            ) : null}
+            <Link href={ctaHref} className="control control--sm control--primary pub-cta">
+              {ctaLabel}
+            </Link>
+
+            <button
+              type="button"
+              className="pub-burger"
+              aria-label="Menu"
+              aria-expanded={drawer}
+              onClick={() => setDrawer((d) => !d)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
         </header>
       </div>
 

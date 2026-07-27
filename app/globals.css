@@ -1297,7 +1297,7 @@ body::before {
    (ce que ferait `hidden`). */
 /* `--header-h` = espace réservé sous le header (barre + main + nav) : le contenu
    du hero et des pages commence dessous, rien n'est chevauché. */
-.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 138px; }
+.pub-shell { position: relative; min-height: 100vh; overflow-x: clip; --header-h: 102px; }
 
 /* ---- Header à DEUX niveaux, épuré (façon PropFirmMatch, notre violet) ---- */
 .pub-headwrap { position: fixed; top: 0; left: 0; right: 0; z-index: 50; }
@@ -1322,32 +1322,30 @@ body::before {
 }
 .pub-topbar-close:hover { color: var(--ink); background: rgba(255, 255, 255, .08); }
 
-/* 2 + 3. Header principal + nav : une surface glass, deux rangées. */
+/* 2. UNE seule capsule liquid glass, tout sur une ligne, sous le bandeau.
+   Centrée, détachée, arête claire en haut, ombre douce dessous. */
 .pub-header {
-  background: rgba(11, 8, 24, 0.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.5);
-  backdrop-filter: blur(20px) saturate(1.5);
-  border-bottom: 1px solid var(--card-brd);
+  width: min(1120px, calc(100vw - 28px)); margin: 12px auto 0;
+  display: flex; align-items: center; gap: 16px;
+  padding: 7px 8px 7px 18px;
+  border-radius: 999px;
+  background: rgba(18, 13, 34, 0.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  backdrop-filter: blur(22px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-/* Rangée principale : logo · centre réservé · actions. */
-.pub-header-main {
-  display: flex; align-items: center; gap: 20px;
-  width: var(--container); margin: 0 auto; height: 56px;
-}
-.pub-brand { display: inline-flex; align-items: center; }
-.pub-logo-img { height: 32px; width: auto; display: block; }
-.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.35rem; letter-spacing: -.4px; }
-/* Centre réservé au futur switch Futures/Forex/Crypto — occupe l'espace. */
-.pub-header-center { flex: 1; }
-.pub-header-actions { display: flex; align-items: center; gap: 10px; }
+/* Logo à gauche. */
+.pub-brand { flex: none; display: inline-flex; align-items: center; }
+.pub-logo-img { height: 28px; width: auto; display: block; }
+.ui .pub-brand-text { font-family: var(--font-title); font-weight: 800; font-size: 1.25rem; letter-spacing: -.4px; }
 
-/* Rangée de nav de contenu, séparée par un filet. */
-.pub-header-nav {
-  display: flex; align-items: center; gap: 4px;
-  width: var(--container); margin: 0 auto; height: 44px;
-  border-top: 1px solid rgba(255, 255, 255, .05);
-}
+/* Nav au centre — items `.control`, actif = `.control--active`, autres ghost. */
+.pub-nav { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+/* Actions à droite. */
+.pub-header-actions { flex: none; display: flex; align-items: center; gap: 8px; }
 
 /* Sélecteur de langue rond, pastille de drapeau SVG. */
 .pub-lang { position: relative; }
@@ -1420,9 +1418,9 @@ body::before {
   .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
 }
 @media (max-width: 640px) {
-  /* Rangée de nav + Connexion + Commencer passent dans le tiroir ; logo + langue
-     + burger restent. Spécificité 0,3,0 pour battre `.ui .control`. */
-  .pub-header-nav { display: none; }
+  /* Nav + Connexion + Commencer passent dans le tiroir ; logo + langue + burger
+     restent. Spécificité 0,3,0 pour battre `.ui .control`. */
+  .pub-nav { display: none; }
   .ui .pub-header-actions .pub-cta, .ui .pub-header-actions .pub-signin { display: none; }
   .pub-burger { display: flex; }
 }
