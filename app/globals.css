@@ -1826,11 +1826,13 @@ body::before {
      document + vide en bas. `fixed` retire la coquille du flux : la page ne peut
      plus défiler, seules les colonnes défilent DEDANS. */
   position: fixed; inset: 0;
-  display: grid; grid-template-columns: 300px minmax(0, 1fr);
+  /* Plein écran, aucune marge : la sidebar est collée au bord gauche, les
+     résultats vont jusqu'au bord droit. */
+  display: grid; grid-template-columns: 340px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
 }
-.cmp-main { --cmp-cw: 1280px; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.cmp-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Barre d'actions FIGÉE en haut de la colonne résultats. */
 .cmp-actionbar {
@@ -1843,8 +1845,7 @@ body::before {
    écran large, compteur/tri s'alignent sur les bords du tableau au lieu de
    filer aux extrémités. */
 .cmp-actionbar-in {
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-  width: 100%; max-width: var(--cmp-cw); margin-inline: auto;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap; width: 100%;
 }
 /* Liste qui défile seule sous la barre d'actions ; scroll horizontal contenu ICI
    (jamais sur la page), scrollbar fine. */
@@ -1889,7 +1890,7 @@ body::before {
 .ui .cmp-side-head .cmp-tab.is-on { color: #fff; background: var(--ctl-active-bg); box-shadow: inset 0 0 0 1px var(--ctl-active-border); }
 /* Poussée en bas : la colonne remplit toute la hauteur, plus d'espace mort. */
 .cmp-side-foot { margin-top: auto; padding-top: 22px; font-size: 11.5px; color: var(--ink3); }
-.cmp-hidden-note { max-width: var(--cmp-cw); margin: 0 auto 12px; font-size: 12.5px; color: var(--ink3); }
+.cmp-hidden-note { margin: 0 0 12px; font-size: 12.5px; color: var(--ink3); }
 
 /* Tailles de compte : boutons compacts « 25k » alignés sur une ligne. */
 .cmp-side .cmp-fgroup--sizes .cmp-chips { gap: 6px; }
@@ -2172,7 +2173,7 @@ body::before {
    Le seul conteneur de défilement (X et Y) est .cmp-listscroll — deux conteneurs
    imbriqués faisaient fuir la hauteur du tableau hors du cadre 100vh. */
 .cmp-oscroll { display: contents; }
-.cmp-otable { min-width: 900px; max-width: var(--cmp-cw); margin-inline: auto; display: flex; flex-direction: column; gap: 14px; }
+.cmp-otable { min-width: 900px; display: flex; flex-direction: column; gap: 14px; }
 /* Une seule grille partagée par l'en-tête ET chaque ligne → colonnes alignées. */
 /* Colonnes équilibrées : firm flexible (1fr, plus dominante), le reste en largeurs
    fixes calibrées sur le contenu — drawdown large pour son badge + le durcissement,
@@ -2181,10 +2182,10 @@ body::before {
    colonnes proportionnellement (plus de « firm » qui absorbe tout et laisse un
    vide au milieu). Sur écran large, tout reste équilibré. */
 .cmp-otable--eval {
-  --ocols: 26px 24px minmax(158px, 1.8fr) minmax(50px, 0.7fr) minmax(108px, 1.2fr) minmax(60px, 0.8fr) minmax(70px, 0.95fr) minmax(156px, 1.5fr) minmax(114px, 1.3fr) minmax(60px, 0.85fr) minmax(52px, 0.62fr);
+  --ocols: 26px 24px minmax(212px, 1.6fr) minmax(50px, 0.7fr) minmax(108px, 1.2fr) minmax(60px, 0.8fr) minmax(70px, 0.95fr) minmax(156px, 1.5fr) minmax(114px, 1.3fr) minmax(60px, 0.85fr) minmax(52px, 0.62fr);
 }
 .cmp-otable--funded {
-  --ocols: 26px 24px minmax(168px, 2.3fr) minmax(56px, 0.7fr) minmax(88px, 0.95fr) minmax(122px, 1.4fr) minmax(80px, 0.95fr) minmax(98px, 1.15fr) minmax(84px, 0.95fr) minmax(84px, 0.95fr) minmax(52px, 0.62fr);
+  --ocols: 26px 24px minmax(212px, 1.9fr) minmax(56px, 0.7fr) minmax(88px, 0.95fr) minmax(122px, 1.4fr) minmax(80px, 0.95fr) minmax(98px, 1.15fr) minmax(84px, 0.95fr) minmax(84px, 0.95fr) minmax(52px, 0.62fr);
 }
 .cmp-ocols {
   display: grid; grid-template-columns: var(--ocols); gap: 11px; align-items: center;
@@ -2258,7 +2259,7 @@ body::before {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), inset 0 -2px 4px rgba(0, 0, 0, .3), 0 2px 6px rgba(0, 0, 0, .4);
 }
 .cmp-firm-txt { min-width: 0; }
-.ui .cmp-firm-name { font-weight: 700; font-size: 17px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui .cmp-firm-name { display: block; font-weight: 700; font-size: 17px; letter-spacing: -.2px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cmp-firm-sub { display: flex; align-items: center; gap: 8px; margin-top: 3px; color: var(--ink3); font-size: 13px; }
 .cmp-flag { width: 17px; height: 12px; border-radius: 2.5px; overflow: hidden; flex: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); display: inline-block; }
 .cmp-flag svg { width: 100%; height: 100%; display: block; }
@@ -2305,7 +2306,7 @@ body::before {
 /* Jauge de note — lime/ambre/rouge, JAMAIS violette. */
 .cmp-notecell { justify-self: end; }
 .cmp-gauge { position: relative; width: 48px; height: 48px; display: inline-grid; place-items: center; }
-.cmp-gauge svg { position: absolute; inset: 0; }
+.cmp-gauge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .cmp-gauge-track { stroke: rgba(255, 255, 255, .08); }
 .cmp-gauge b { font-family: var(--font-mono); font-weight: 700; font-size: 16px; }
 
@@ -2315,12 +2316,14 @@ body::before {
    grandes polices et logos. Au-dessus de 1400px, l'échelle pleine s'applique ;
    sous 901px, l'empilement mobile prend le relais (non touché ici). */
 @media (min-width: 901px) and (max-width: 1400px) {
+  /* Sidebar ramenée à 300px à ces largeurs pour laisser la place au tableau. */
+  .cmp-app { grid-template-columns: 300px minmax(0, 1fr); }
   .cmp-otable { min-width: 0; }
   .cmp-otable--eval {
-    --ocols: 22px 22px minmax(150px, 1.8fr) minmax(46px, 0.7fr) minmax(96px, 1.2fr) minmax(52px, 0.8fr) minmax(62px, 0.95fr) minmax(140px, 1.5fr) minmax(104px, 1.3fr) minmax(56px, 0.85fr) minmax(48px, 0.62fr);
+    --ocols: 22px 22px minmax(190px, 1.7fr) minmax(46px, 0.7fr) minmax(96px, 1.2fr) minmax(52px, 0.8fr) minmax(62px, 0.95fr) minmax(140px, 1.5fr) minmax(104px, 1.3fr) minmax(56px, 0.85fr) minmax(48px, 0.62fr);
   }
   .cmp-otable--funded {
-    --ocols: 22px 22px minmax(150px, 2fr) minmax(46px, 0.7fr) minmax(78px, 0.95fr) minmax(104px, 1.4fr) minmax(72px, 0.95fr) minmax(86px, 1.15fr) minmax(74px, 0.95fr) minmax(74px, 0.95fr) minmax(48px, 0.62fr);
+    --ocols: 22px 22px minmax(190px, 1.8fr) minmax(46px, 0.7fr) minmax(78px, 0.95fr) minmax(104px, 1.4fr) minmax(72px, 0.95fr) minmax(86px, 1.15fr) minmax(74px, 0.95fr) minmax(74px, 0.95fr) minmax(48px, 0.62fr);
   }
   .cmp-ocols { gap: 8px; padding-left: 14px; padding-right: 14px; }
   .cmp-orow-head { gap: 8px; padding-left: 14px; padding-right: 14px; }
