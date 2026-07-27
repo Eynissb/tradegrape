@@ -94,7 +94,11 @@ export default function SearchBar({
     }
   };
 
-  const placeholder = locale === 'fr' ? 'Rechercher une prop firm…' : 'Search a prop firm…';
+  // Placeholder court au repos (champ compact), complet une fois étendu au focus.
+  const placeholder =
+    open || variant === 'drawer'
+      ? locale === 'fr' ? 'Rechercher une prop firm…' : 'Search a prop firm…'
+      : locale === 'fr' ? 'Rechercher…' : 'Search…';
   const money = (v: number, currency: string) => {
     try {
       return new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-US', {

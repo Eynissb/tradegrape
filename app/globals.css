@@ -1346,7 +1346,7 @@ body::before {
    Champ en RELIEF, comme les saisies du journal (arête haute claire, arête basse
    sombre) — jamais un rectangle plat. */
 .pub-search {
-  flex: 0 1 320px; min-width: 0;
+  min-width: 0;
   position: relative; display: flex; align-items: center; gap: 8px;
   height: var(--h-control); padding: 0 14px; border-radius: var(--r-pill);
   background: var(--input-bg);
@@ -1359,6 +1359,17 @@ body::before {
     0 1px 2px rgba(0, 0, 0, .30);
   transition: box-shadow .16s, background .16s;
 }
+/* Recherche du HEADER : compacte au repos, s'étend en douceur au focus
+   (comportement des barres premium). La capsule reste symétrique et la nav garde
+   de l'air tant qu'on ne cherche pas. `flex-shrink: 1` empêche tout débordement
+   quand la capsule est étroite. Scopé au header : dans le tiroir (colonne),
+   `flex-basis` piloterait la HAUTEUR — d'où `flex: none` sur la variante drawer. */
+.pub-search--header {
+  flex: 0 1 200px;
+  transition: flex-basis .3s cubic-bezier(.22, 1, .36, 1), box-shadow .16s, background .16s;
+}
+.pub-search--header:focus-within { flex-basis: 390px; }
+.pub-search--drawer { flex: none; }
 /* Focus : AUCUN violet, aucun anneau. Le champ se signale par un fond un peu
    plus clair et un relief renforcé (arête haute plus vive) — c'est tout. */
 .pub-search:focus-within {
@@ -1525,7 +1536,7 @@ body::before {
 .pub-main.home { padding-top: 8px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pub-header, .pub-drawer-scrim, .pub-drawer-panel { transition: none; }
+  .pub-header, .pub-drawer-scrim, .pub-drawer-panel, .pub-search--header { transition: none; }
 }
 @media (max-width: 640px) {
   /* Recherche + nav + Connexion + Commencer passent dans le tiroir ; logo +
