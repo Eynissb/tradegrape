@@ -1374,6 +1374,12 @@ body::before {
   flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
   color: var(--ink); font-family: inherit; font-size: 14px;
 }
+/* Le champ hérite sinon de l'anneau violet clavier `.ui input:focus-visible`
+   (design-tokens). On le retire ICI : le focus est déjà signalé par le relief
+   renforcé de `.pub-search:focus-within`. Spécificité 0,3,0 pour battre le 0,2,1
+   de `.ui input:focus-visible`. */
+.ui .pub-search-input:focus,
+.ui .pub-search-input:focus-visible { outline: none; }
 .pub-search-input::placeholder { color: var(--ink3); }
 /* Liste déroulante — même relief que la capsule, flotte au-dessus du contenu. */
 .pub-search-pop {
