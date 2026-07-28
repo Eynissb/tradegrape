@@ -211,6 +211,7 @@ const fr = {
   fSeeAll: 'Voir tout',
   fSeeLess: 'Réduire',
   journal: 'Journal',
+  home: 'Accueil',
 } as const;
 
 /**
@@ -407,6 +408,7 @@ const en: Dict = {
   fSeeAll: 'See all',
   fSeeLess: 'Show less',
   journal: 'Journal',
+  home: 'Home',
 };
 
 export const DICTS: Record<Locale, Dict> = { fr, en };

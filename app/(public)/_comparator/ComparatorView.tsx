@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   filterOffers,
@@ -353,6 +354,14 @@ export default function ComparatorView({
     <div className="cmp-app">
       {/* Colonne de filtres — pleine hauteur, collée au bord gauche (col 1). */}
       <aside className="cmp-side" aria-label={d.filters}>
+          {/* Retour discret vers l'accueil (l'app plein écran n'a pas de header —
+              cette échappatoire vit DANS la colonne filtres, pas au-dessus). */}
+          <Link href={`/${locale}`} className="cmp-home">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {d.home}
+          </Link>
           {/* En-tête filtres + switch Éval / Financé (haut de colonne, image 3). */}
           <div className="cmp-side-head">
             <span className="cmp-side-title">{d.filters}</span>
