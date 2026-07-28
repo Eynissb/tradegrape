@@ -862,8 +862,8 @@ h1, h2, h3 {
 body::before {
   content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(60% 45% at 8% -5%, rgba(91, 63, 255, .16), transparent 60%),
-    radial-gradient(50% 40% at 100% 4%, rgba(192, 75, 255, .1), transparent 60%),
+    radial-gradient(55% 40% at 6% -8%, rgba(91, 63, 255, .08), transparent 60%),
+    radial-gradient(45% 35% at 100% 2%, rgba(192, 75, 255, .05), transparent 60%),
     #070510;
 }
 .app-side {
@@ -1310,10 +1310,10 @@ body::before {
 .pub-topbar {
   position: relative;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  height: 36px; overflow: hidden;
-  background: linear-gradient(180deg, rgba(91, 63, 255, .16), rgba(192, 75, 255, .10));
-  border-bottom: 1px solid rgba(255, 255, 255, .11);
-  font-size: 12.5px; color: var(--ink2);
+  height: 34px; overflow: hidden;
+  background: #05040c;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  font-size: 12px; color: var(--ink3);
   transition: height .3s ease, opacity .3s ease, border-color .3s ease;
 }
 .pub-topbar.is-hidden { height: 0; opacity: 0; border-bottom-color: transparent; }
@@ -1569,50 +1569,44 @@ body::before {
    .pub-shell → largeur 100 % = bord à bord. Aucune marge, bordure ni radius.
    Un seul plan : grappe en fond plein, voile dégradé, texte au-dessus à gauche.
    Le texte reste dans un conteneur centré aligné sur les sections. */
-/* Hero COMPACT et CENTRÉ (plus de grappe) : titre + preuve + CTA + chiffres, puis
-   le comparatif juste dessous. Glows ambiants indigo→fuchsia en fond. */
+/* Hero SOBRE et CENTRÉ (réf. propfirmmatch) : titre serré + preuve + CTA + chiffres,
+   puis la donnée prend le relais tout de suite. Fond PLAT — aucun glow ambiant.
+   Le contraste vient du noir plat et des accents saturés, pas d'un voile violet. */
 .home-hero {
-  position: relative; overflow: hidden; width: 100%;
-  padding: calc(var(--header-h) + 36px) 0 56px;
+  position: relative; width: 100%;
+  padding: calc(var(--header-h) + 24px) 0 26px;
 }
-/* Glows AMBIANTS qui dérivent lentement. */
-.home-hero::before, .home-hero::after {
-  content: ''; position: absolute; z-index: 0; border-radius: 50%;
-  filter: blur(96px); opacity: .5; pointer-events: none;
-  animation: heroGlow 17s ease-in-out infinite alternate;
-}
-.home-hero::before { width: 680px; height: 680px; top: -30%; left: -8%; background: radial-gradient(circle, rgba(91, 63, 255, .6), transparent 70%); }
-.home-hero::after  { width: 620px; height: 620px; top: -12%; right: -8%; background: radial-gradient(circle, rgba(255, 59, 166, .42), transparent 70%); animation-delay: -8s; }
-@keyframes heroGlow { from { transform: translate(0, 0) scale(1); } to { transform: translate(34px, 22px) scale(1.12); } }
 .home-hero-inner {
   position: relative; z-index: 2;
-  width: var(--container-content, min(1440px, 92vw)); margin: 0 auto;
+  /* MÊME largeur que .pub-main (les sections) → hero et tableau alignés bord à
+     bord, plus d'îlot étroit centré avec de grands vides sur les côtés. */
+  width: var(--container); margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-.home-hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 52px; align-items: center; }
-.home-hero-text { min-width: 0; }
 .home-live {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 15px; border-radius: var(--r-pill);
-  background: var(--card); box-shadow: inset 0 0 0 1px var(--card-brd);
+  background: rgba(255, 255, 255, .04); box-shadow: inset 0 0 0 1px var(--card-brd);
   font-size: 12.5px; font-weight: 600; color: var(--ink2);
 }
 .home-live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); animation: dotPulse 2s ease-in-out infinite; }
 @keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 .ui .home-title {
-  margin-top: 22px; font-family: var(--font-title); font-weight: 800;
-  font-size: clamp(2.1rem, 3.8vw, 3.5rem); line-height: 1.05; letter-spacing: -1.5px; color: var(--ink);
+  margin-top: 16px; font-family: var(--font-title); font-weight: 800;
+  font-size: clamp(1.65rem, 2.3vw, 2.25rem); line-height: 1.08; letter-spacing: -1px; color: var(--ink);
+  max-width: 26ch;
 }
 .ui .home-sub {
-  margin: 20px 0 0; max-width: 520px; font-size: clamp(15px, 1.3vw, 17px);
-  line-height: 1.6; color: var(--ink2);
+  margin: 12px auto 0; max-width: 540px; font-size: clamp(14.5px, 1.1vw, 16px);
+  line-height: 1.55; color: var(--ink2);
 }
-.home-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.home-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 20px; }
 .home-statbar {
-  display: grid; grid-template-columns: repeat(3, 1fr); margin: 32px 0 0; max-width: 540px;
+  display: inline-grid; grid-template-columns: repeat(3, auto); margin: 24px auto 0;
   border: 1px solid var(--card-brd); border-radius: var(--r-lg);
-  background: var(--card); overflow: hidden;
+  background: rgba(255, 255, 255, .02); overflow: hidden;
 }
-.home-statcell { padding: 16px 18px; min-width: 0; }
+.home-statcell { padding: 14px 28px; min-width: 0; text-align: center; }
 .home-statcell + .home-statcell { border-left: 1px solid var(--card-brd); }
 .ui .home-stat-num {
   margin: 0; font-family: var(--font-title); font-weight: 800; font-size: clamp(1.4rem, 2vw, 1.85rem);
@@ -1621,74 +1615,14 @@ body::before {
 .home-stat-label { display: block; margin-top: 7px; font-size: 12px; color: var(--ink2); }
 .home-stat-note { color: var(--ink3); }
 
-/* ---- Visualisation VIVANTE (le produit qui s'anime) ---- */
-.home-viz { position: relative; min-height: 360px; display: grid; place-items: center; }
-.home-viz-card {
-  position: relative; z-index: 1; width: 100%; max-width: 430px; padding: 20px; border-radius: 20px;
-  background: linear-gradient(180deg, rgba(28, 20, 48, .74), rgba(14, 11, 28, .92));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 30px 70px rgba(0, 0, 0, .55);
-  backdrop-filter: blur(14px);
-  animation: vizFloat 7s ease-in-out infinite;
-}
-/* Bordure IRIDESCENTE qui tourne. */
-.home-viz-card::before {
-  content: ''; position: absolute; inset: -1px; border-radius: 21px; padding: 1px; z-index: -1;
-  background: conic-gradient(from 0deg, #5b3fff, #c04bff, #ff3ba6, #38ffb0, #5b3fff);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  opacity: .55; animation: vizSpin 9s linear infinite;
-}
-@keyframes vizFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-@keyframes vizSpin { to { transform: rotate(360deg); } }
-.home-viz-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.ui .home-viz-title { font-size: 12.5px; font-weight: 700; color: var(--ink); }
-.home-viz-live { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: .6px; color: var(--lime); }
-.home-viz-live i { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 6px var(--lime); animation: dotPulse 1.6s ease-in-out infinite; }
-.home-viz-chart { width: 100%; height: 150px; display: block; }
-.home-viz-grid { stroke: rgba(255, 255, 255, .06); stroke-width: 1; }
-.home-viz-floor { stroke: rgba(255, 77, 94, .6); stroke-width: 1.5; stroke-dasharray: 5 5; }
-.home-viz-fill { opacity: 0; animation: vizFill 1.1s ease-out .9s forwards; }
-@keyframes vizFill { to { opacity: 1; } }
-.home-viz-eq {
-  fill: none; stroke-width: 3; stroke-linecap: round;
-  stroke-dasharray: 440; stroke-dashoffset: 440;
-  filter: drop-shadow(0 0 6px rgba(192, 75, 255, .6));
-  animation: vizDraw 1.8s cubic-bezier(.4, 0, .2, 1) forwards;
-}
-@keyframes vizDraw { to { stroke-dashoffset: 0; } }
-.home-viz-dot { fill: #ff3ba6; opacity: 0; animation: vizDotIn .3s ease 1.7s forwards, dotGlow 2s ease-in-out 2s infinite; }
-@keyframes vizDotIn { to { opacity: 1; } }
-@keyframes dotGlow { 0%, 100% { filter: drop-shadow(0 0 4px #ff3ba6); } 50% { filter: drop-shadow(0 0 13px #ff3ba6); } }
-.home-viz-payout { margin-top: 16px; padding: 13px 15px; border-radius: 13px; background: var(--grad); box-shadow: 0 12px 30px rgba(120, 70, 255, .38); }
-.home-viz-plabel { display: block; font-size: 11px; color: rgba(255, 255, 255, .85); }
-.ui .home-viz-pval { display: block; margin-top: 3px; font-family: var(--font-title); font-weight: 800; font-size: 1.05rem; color: #fff; }
-/* Chips flottantes de comparaison. */
-.home-viz-chip {
-  position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 12px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap;
-  background: linear-gradient(180deg, rgba(40, 32, 64, .92), rgba(20, 15, 36, .94));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 12px 28px rgba(0, 0, 0, .5);
-  backdrop-filter: blur(8px);
-}
-.home-viz-chip b { color: #fff; }
-.home-viz-chip--a { top: 5%; left: -7%; animation: chipFloat 6s ease-in-out infinite; }
-.home-viz-chip--a b { color: var(--lime); }
-.home-viz-chip--b { bottom: 22%; right: -9%; animation: chipFloat 7s ease-in-out infinite .8s; }
-.home-viz-chip--b { color: var(--amber); }
-.home-viz-chip--c { bottom: 3%; left: 3%; animation: chipFloat 5.4s ease-in-out infinite .4s; }
-.home-viz-chip--c b { color: var(--lime); }
-
 @media (prefers-reduced-motion: reduce) {
-  .home-hero::before, .home-hero::after, .home-viz-card, .home-viz-card::before,
-  .home-viz-eq, .home-viz-fill, .home-viz-dot, .home-live-dot, .home-viz-live i, .home-viz-chip {
-    animation: none !important;
-  }
-  .home-viz-eq { stroke-dashoffset: 0; }
-  .home-viz-fill, .home-viz-dot { opacity: 1; }
+  .home-live-dot { animation: none !important; }
 }
 
 /* ---- Sections ---- */
 .home-section { margin-top: 72px; }
+/* La 1re section (le classement) colle au hero compact : la donnée près du fold. */
+.pub-main.home > .home-section:first-of-type { margin-top: 20px; }
 /* Titre de section avec une PASTILLE D'ICÔNE COLORÉE (couleur propre à la
    section) — plus visuel, moins monochrome. */
 .home-h2-row { display: flex; align-items: center; gap: 14px; }
@@ -1999,24 +1933,24 @@ body::before {
   .pub-footer-brand { grid-column: 1 / -1; max-width: none; }
 }
 
-@media (max-width: 980px) {
-  /* Héros : on empile (texte puis visualisation). */
-  .home-hero-grid { grid-template-columns: 1fr; gap: 40px; }
-  .home-viz { min-height: 300px; }
-}
 @media (max-width: 760px) {
   .home-journal { grid-template-columns: 1fr; gap: 28px; }
 }
 @media (max-width: 640px) {
-  /* Mobile : parallaxe coupée (pointeur grossier), image fixe. */
-  .home-hero-img { transform: scale(1.06); }
+  /* Hero mobile : rien ne déborde. La barre de chiffres passe pleine largeur en
+     3 colonnes égales (plus de `auto` qui somme au-delà du viewport). */
+  .home-hero-inner { max-width: 100%; }
+  .ui .home-title { font-size: clamp(1.5rem, 6.5vw, 1.9rem); max-width: none; letter-spacing: -.6px; }
+  .ui .home-sub { max-width: none; }
+  .home-statbar { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; max-width: 100%; }
+  .home-statcell { padding: 13px 10px; }
+  .ui .home-stat-num { font-size: 1.35rem; }
+  .home-stat-note { display: none; }
 }
 @media (max-width: 520px) {
-  .home-hero { min-height: 500px; padding: 28px 0; }
+  .home-hero { padding: calc(var(--header-h) + 18px) 0 20px; }
+  .home-cta { width: 100%; }
   .home-cta .btn { width: 100%; }
-  .home-statbar { max-width: none; }
-  /* Deux chiffres par ligne à l'étroit plutôt qu'un empilement trop haut. */
-  .home-statcell:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--card-brd); }
   .home-section { margin-top: 52px; }
   .pub-footer-top { grid-template-columns: 1fr; gap: 26px; }
   .pub-footer { margin-top: 64px; }

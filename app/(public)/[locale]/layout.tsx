@@ -23,9 +23,8 @@ export default async function PublicLayout({
 
   return (
     <div className="ui pub-shell">
-      {/* Glows ambiants — décor, jamais porteur de donnée. */}
-      <div className="glow glow-a" style={{ top: '-10%', left: '-8%' }} aria-hidden="true" />
-      <div className="glow glow-b" style={{ bottom: '-14%', right: '-10%' }} aria-hidden="true" />
+      {/* Canvas PLAT (réf. propfirmmatch) : le noir domine, le contraste vient des
+          accents saturés — plus de blobs violets qui lavent la page. */}
 
       {/* Header fondu dans le hero : transparent en haut, solide au scroll. */}
       <PublicHeader locale={l} />
