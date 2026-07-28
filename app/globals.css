@@ -1855,8 +1855,18 @@ body::before {
    (jamais sur la page), scrollbar fine. */
 .cmp-listscroll {
   flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto;
+  display: flex; flex-direction: column;
   padding: 16px clamp(14px, 2vw, 28px) 44px;
   scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent;
+}
+/* Repère de fin de liste. flex:1 → il OCCUPE l'espace restant quand la liste est
+   courte (le texte se centre dans ce qui serait un vide), et se réduit à sa
+   hauteur propre quand la liste défile. Plus de grand vide « qui fait bug ». */
+.cmp-listend {
+  flex: 1 0 auto; display: grid; place-items: center; min-height: 40px;
+  margin: 0; padding: 30px 0 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase;
+  color: var(--ink3); opacity: .5;
 }
 .cmp-listscroll::-webkit-scrollbar { width: 10px; height: 10px; }
 .cmp-listscroll::-webkit-scrollbar-track { background: transparent; }

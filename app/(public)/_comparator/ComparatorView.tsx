@@ -686,6 +686,13 @@ export default function ComparatorView({
               />
             ))}
           </div>
+          {/* Terminus explicite : sur un écran plein, une liste courte laissait un
+              grand vide sombre qui « faisait bug ». Ce repère marque clairement la
+              fin de la liste ; l'espace en dessous se lit alors comme du fond. */}
+          <p className="cmp-listend">
+            {shown.length}{' '}
+            {shown.length > 1 ? d.listEndMany : d.listEndOne}
+          </p>
         </div>
       )}
         </div>

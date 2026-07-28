@@ -112,6 +112,8 @@ const fr = {
 
   emptyTitle: 'Aucune offre ne correspond',
   emptyBody: 'Élargis tes filtres, ou réinitialise-les.',
+  listEndOne: 'offre affichée',
+  listEndMany: 'offres affichées',
   noneTitle: 'Aucune offre publiée pour l’instant',
   noneBody:
     'Le catalogue est en cours de vérification. Une offre n’est publiée qu’une fois ses règles confirmées à la source.',
@@ -310,6 +312,8 @@ const en: Dict = {
 
   emptyTitle: 'No offer matches',
   emptyBody: 'Widen your filters, or reset them.',
+  listEndOne: 'offer shown',
+  listEndMany: 'offers shown',
   noneTitle: 'No offer published yet',
   noneBody:
     'The catalogue is being verified. An offer is only published once its rules are confirmed at source.',
