@@ -78,6 +78,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { offers, generatedAt } = await loadPublicCatalog();
   const stats = buildHomeStats(offers);
   const preview = sortOffers(offers, 'total_price').slice(0, 8);
+  // Meilleure note par firm (nos notes sont au niveau du plan) — pour le carrousel.
+  const firmRatings = new Map<string, number>();
+  for (const o of offers) {
+    if (o.plan.rating != null) {
+      const cur = firmRatings.get(o.firm.slug);
+      if (cur == null || o.plan.rating > cur) firmRatings.set(o.firm.slug, o.plan.rating);
+    }
+  }
 
   const nf = (n: number) => n.toLocaleString(l === 'fr' ? 'fr-FR' : 'en-US');
   const shortSize = (n: number) => (n >= 1000 ? `${n / 1000}k` : String(n));
@@ -254,6 +262,63 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       <main className="pub-main home">
+      {/* -------------------------- 0. OFFRES (carrousel, signature propfirmmatch) */}
+      <section id="offres" className="home-section">
+        <div className="home-h2-row">
+          <span className="home-ic home-ic--magenta"><Hic name="tag" /></span>
+          <div>
+            <h2 className="home-h2">{d.offersTitle}</h2>
+            <p className="home-section-sub">{d.offersSub}</p>
+          </div>
+        </div>
+        <div className="home-offers">
+          {stats.firms.map((f) => {
+            const logo = firmLogo(f.slug);
+            const accent = firmColor(f.name);
+            const rating = firmRatings.get(f.slug);
+            return (
+              <Link
+                key={f.slug}
+                href={comparatorHref(l)}
+                className="home-offer"
+                style={{ '--firm-accent': accent } as React.CSSProperties}
+              >
+                <span
+                  className={`home-offer-logo${logo && !logo.light ? ' lift' : ''}`}
+                  style={logo ? undefined : { background: accent }}
+                  aria-hidden="true"
+                >
+                  {logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logo.url} alt="" style={{ transform: `scale(${logo.scale})` }} />
+                  ) : (
+                    f.name.trim().slice(0, 2).toUpperCase()
+                  )}
+                </span>
+                <span className="home-offer-txt">
+                  <span className="home-offer-name">{f.name}</span>
+                  <span className="home-offer-rating">
+                    {rating != null ? <><b className="num">★ {rating}</b>/10</> : d.offersNew}
+                  </span>
+                </span>
+                <span className="home-offer-deal">
+                  {f.promo ? (
+                    <>
+                      {f.promo.discountPct != null ? <b className="num">−{f.promo.discountPct}%</b> : null}
+                      <code>{f.promo.code}</code>
+                    </>
+                  ) : f.entryPrice !== null ? (
+                    <><span className="home-offer-from">{d.firmsFrom}</span> <b className="num">{money(f.entryPrice, f.currency)}</b></>
+                  ) : (
+                    <span className="home-muted">—</span>
+                  )}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
       {/* -------------------------- 1. COMPARATIF (pièce maîtresse) */}
       <section id="apercu" className="home-section">
         <div className="home-section-head">
