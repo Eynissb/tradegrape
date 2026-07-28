@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { loadPublicCatalog } from '@/lib/catalog/query';
-import { firmLogo } from '@/lib/catalog/logos';
+import { firmLogo, firmColor } from '@/lib/catalog/logos';
 import { buildHomeStats } from '@/lib/catalog/home-stats';
 import { sortOffers } from '@/lib/catalog/public-offer';
 import { HOME_DICTS } from '@/lib/i18n/home';
@@ -24,6 +24,25 @@ import SiteFooter from '@/app/(public)/_home/SiteFooter';
 export const revalidate = 3600;
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tradegrape.com';
+
+/* Icônes de section (trait, héritent la couleur de la pastille). */
+function Hic({ name }: { name: 'compare' | 'firms' | 'journal' | 'shield' | 'help' | 'tag' | 'calendar' | 'bell' }) {
+  const paths: Record<string, React.ReactNode> = {
+    compare: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 4v16" /></>,
+    firms: <><path d="M4 21V8l5-3 5 3v13" /><path d="M14 21V11l6 3v7" /><path d="M8 12h1.5M8 16h1.5" /></>,
+    journal: <><path d="M6 3h10a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2z" /><path d="M9 8h6M9 12h6" /></>,
+    shield: <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" />,
+    help: <><circle cx="12" cy="12" r="9" /><path d="M9.5 9.2a2.5 2.5 0 1 1 3.5 2.3c-.9.5-1.3 1-1.3 1.9M12 17h.01" /></>,
+    tag: <><path d="M12.6 3H6a3 3 0 0 0-3 3v6.6a2 2 0 0 0 .6 1.4l7 7a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8l-7-7A2 2 0 0 0 12.6 3Z" /><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" /></>,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4M8.5 15l2 2 4-4" /></>,
+    bell: <><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" /><path d="M10 20a2 2 0 0 0 4 0" /></>,
+  };
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[name]}
+    </svg>
+  );
+}
 
 export function generateStaticParams() {
   return [{ locale: 'fr' }, { locale: 'en' }];
@@ -139,9 +158,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     { n: 3, t: d.journalStep3Title, b: d.journalStep3Body },
   ];
   const facts = [
-    { t: d.honesty1Title, b: d.honesty1Body },
-    { t: d.honesty2Title, b: d.honesty2Body },
-    { t: d.honesty3Title, b: d.honesty3Body },
+    { t: d.honesty1Title, b: d.honesty1Body, ic: 'tag' as const, c: 'lime' },
+    { t: d.honesty2Title, b: d.honesty2Body, ic: 'calendar' as const, c: 'amber' },
+    { t: d.honesty3Title, b: d.honesty3Body, ic: 'bell' as const, c: 'magenta' },
   ];
 
   return (
@@ -201,9 +220,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* -------------------------- 1. COMPARATIF (pièce maîtresse) */}
       <section id="apercu" className="home-section">
         <div className="home-section-head">
-          <div>
-            <h2 className="home-h2">{d.previewTitle}</h2>
-            <p className="home-section-sub">{d.previewSub}</p>
+          <div className="home-h2-row">
+            <span className="home-ic home-ic--indigo"><Hic name="compare" /></span>
+            <div>
+              <h2 className="home-h2">{d.previewTitle}</h2>
+              <p className="home-section-sub">{d.previewSub}</p>
+            </div>
           </div>
           <span className="home-live home-live--sm">
             <span className="home-live-dot" aria-hidden="true" />
@@ -287,16 +309,26 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* --------------------------------------------------- 2. FIRMS */}
       <section id="firms" className="home-section">
-        <h2 className="home-h2">{d.firmsTitle}</h2>
-        <p className="home-section-sub">{d.firmsSub}</p>
+        <div className="home-h2-row">
+          <span className="home-ic home-ic--lime"><Hic name="firms" /></span>
+          <div>
+            <h2 className="home-h2">{d.firmsTitle}</h2>
+            <p className="home-section-sub">{d.firmsSub}</p>
+          </div>
+        </div>
 
         <ul className="home-firms">
           {stats.firms.map((f) => {
             const logo = firmLogo(f.slug);
+            const accent = firmColor(f.name);
             return (
-            <li key={f.slug} className="home-firm">
+            <li key={f.slug} className="home-firm" style={{ '--firm-accent': accent } as React.CSSProperties}>
               <span className="home-firm-head">
-                <span className={`home-firm-logo${logo && !logo.light ? ' lift' : ''}`} aria-hidden="true">
+                <span
+                  className={`home-firm-logo${logo && !logo.light ? ' lift' : ''}`}
+                  style={logo ? undefined : { background: accent }}
+                  aria-hidden="true"
+                >
                   {logo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={logo.url} alt="" style={{ transform: `scale(${logo.scale})` }} />
@@ -334,8 +366,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {/* ------------------------------------------------- 3. JOURNAL */}
       <section id="journal" className="home-section home-journal">
         <div className="home-journal-text">
-          <h2 className="home-h2">{d.journalTitle}</h2>
-          <p className="home-section-sub">{d.journalIntro}</p>
+          <div className="home-h2-row">
+            <span className="home-ic home-ic--magenta"><Hic name="journal" /></span>
+            <div>
+              <h2 className="home-h2">{d.journalTitle}</h2>
+              <p className="home-section-sub">{d.journalIntro}</p>
+            </div>
+          </div>
 
           <ol className="home-steps">
             {steps.map((s) => (
@@ -389,10 +426,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ----------------------------------------------- 4. HONNÊTETÉ */}
       <section id="honnetete" className="home-section">
-        <h2 className="home-h2">{d.honestyTitle}</h2>
+        <div className="home-h2-row">
+          <span className="home-ic home-ic--amber"><Hic name="shield" /></span>
+          <h2 className="home-h2">{d.honestyTitle}</h2>
+        </div>
         <div className="home-facts">
           {facts.map((f) => (
             <div key={f.t} className="home-fact">
+              <span className={`home-ic home-ic--${f.c}`}><Hic name={f.ic} /></span>
               <h3 className="home-fact-t">{f.t}</h3>
               <p className="home-fact-b">{f.b}</p>
             </div>
@@ -402,7 +443,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ------------------------------------------------------ 5. FAQ */}
       <section id="faq" className="home-section">
-        <h2 className="home-h2">{d.faqTitle}</h2>
+        <div className="home-h2-row">
+          <span className="home-ic home-ic--indigo"><Hic name="help" /></span>
+          <h2 className="home-h2">{d.faqTitle}</h2>
+        </div>
         <div className="home-faq">
           {faq.map((f) => (
             <details key={f.q} className="home-faq-item">
