@@ -1670,19 +1670,60 @@ body::before {
 .home-tbadge-bad { color: var(--red); background: rgba(255, 77, 94, .12); }
 .home-tbadge-warn { color: var(--amber); background: rgba(255, 180, 59, .12); }
 
+/* Lignes du comparatif en RELIEF 3D (verre + profondeur + survol), pas plates. */
+.home-preview.data-list { gap: 10px; }
+.ui .home-preview .data-row {
+  min-height: 62px; padding: 12px 18px; border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .032), rgba(255, 255, 255, .006)), #0e0b1c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -1px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 24px rgba(0, 0, 0, .34);
+  transition: transform .16s, box-shadow .16s, background .16s;
+}
+.ui .home-preview .data-row:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .012)), #100c20;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .11), 0 1px 2px rgba(0, 0, 0, .6), 0 18px 38px rgba(0, 0, 0, .5);
+}
+/* Meilleur prix (1re ligne, tri par prix) : liseré dégradé + halo de marque. */
+.ui .home-preview .data-row:first-of-type {
+  box-shadow: inset 0 0 0 1px rgba(150, 110, 240, .42), inset 0 1px 0 rgba(255, 255, 255, .09), 0 1px 2px rgba(0, 0, 0, .5), 0 16px 36px rgba(120, 70, 255, .22);
+}
+.ui .home-preview .data-row:first-of-type::after {
+  content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--grad);
+}
+.home-best {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; padding: 2px 8px;
+  border-radius: var(--r-pill); font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  color: #fff; background: var(--grad); box-shadow: 0 2px 10px rgba(120, 70, 255, .4);
+  width: fit-content;
+}
+
 /* ---- 2. Firms ---- */
 .home-firms {
   list-style: none; margin: 24px 0 0; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 16px;
 }
+/* Cartes de firms RICHES : verre, liseré dégradé en haut, logo, survol qui lève. */
 .home-firm {
-  display: flex; flex-direction: column; gap: 4px; padding: 18px 20px;
-  border-radius: var(--r-lg); background: var(--elev-2-bg); box-shadow: var(--elev-2-shadow);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 4px; padding: 20px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .032), rgba(255, 255, 255, .006)), #0e0b1c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 24px rgba(0, 0, 0, .34);
+  transition: transform .18s, box-shadow .18s;
 }
+.home-firm::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--grad); opacity: .85; }
+.home-firm:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .11), 0 1px 2px rgba(0, 0, 0, .6), 0 20px 42px rgba(120, 70, 255, .2); }
+.home-firm-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.home-firm-logo {
+  width: 42px; height: 42px; flex: none; border-radius: 11px; overflow: hidden;
+  display: grid; place-items: center; background: #100c20; font-size: 13px; font-weight: 800; color: #fff;
+}
+.home-firm-logo.lift { background: #2b2647; }
+.home-firm-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .ui .home-firm-name { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; color: var(--ink); }
-.home-firm-price { font-size: 15px; color: var(--ink); font-weight: 600; }
+.home-firm-price { font-size: 16px; color: var(--ink); font-weight: 800; }
 .home-firm-from { font-size: 12px; font-weight: 400; color: var(--ink3); }
-.home-firm-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink3); }
+.home-firm-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12.5px; color: var(--ink3); }
 .home-firm-promo {
   padding: 1px 8px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700;
   color: var(--amber); background: rgba(255, 180, 59, .12);

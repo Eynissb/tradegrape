@@ -224,7 +224,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <span role="columnheader">{d.previewColDrawdown}</span>
                 <span role="columnheader">{d.previewColPromo}</span>
               </div>
-              {preview.map((o) => {
+              {preview.map((o, idx) => {
                 const logo = firmLogo(o.firm.slug);
                 return (
                   <div key={o.id} className="data-row" role="row">
@@ -240,6 +240,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       <span className="home-tfirm-txt">
                         <span className="home-tfirm-name">{o.firm.name}</span>
                         <span className="home-tfirm-plan">{o.plan.name}</span>
+                        {idx === 0 ? <span className="home-best">{d.bestPrice}</span> : null}
                       </span>
                     </span>
                     <span role="cell" data-label={d.previewColNote}>
@@ -290,9 +291,21 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <p className="home-section-sub">{d.firmsSub}</p>
 
         <ul className="home-firms">
-          {stats.firms.map((f) => (
+          {stats.firms.map((f) => {
+            const logo = firmLogo(f.slug);
+            return (
             <li key={f.slug} className="home-firm">
-              <span className="home-firm-name">{f.name}</span>
+              <span className="home-firm-head">
+                <span className={`home-firm-logo${logo && !logo.light ? ' lift' : ''}`} aria-hidden="true">
+                  {logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logo.url} alt="" style={{ transform: `scale(${logo.scale})` }} />
+                  ) : (
+                    f.name.trim().slice(0, 2).toUpperCase()
+                  )}
+                </span>
+                <span className="home-firm-name">{f.name}</span>
+              </span>
               <span className="home-firm-price num">
                 {f.entryPrice !== null ? (
                   <>
@@ -313,7 +326,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 ) : null}
               </span>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
 
