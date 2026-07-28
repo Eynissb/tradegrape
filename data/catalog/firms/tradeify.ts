@@ -33,6 +33,9 @@ export const tradeify: FirmSeed = {
   slug: 'tradeify',
   name: 'Tradeify',
   collectedAt: '2026-07-21',
+  founded_year: 2024, // vérifié 2026-07-29 : Boca Raton, FL — lancé en juin 2024
+  country: 'US',
+  hq_city: 'Boca Raton',
   max_funded_accounts: 5, // « Max Accounts : 5 » confirmé
 
   platforms: [

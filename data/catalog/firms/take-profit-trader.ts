@@ -47,6 +47,9 @@ export const takeProfitTrader: FirmSeed = {
   slug: 'take-profit-trader',
   name: 'Take Profit Trader',
   collectedAt: '2026-07-21',
+  founded_year: 2021, // vérifié 2026-07-29 : Orlando, FL — fondée en mars 2021 (James Sixsmith)
+  country: 'US',
+  hq_city: 'Orlando',
   daily_flat_time: '16:59 America/New_York',
 
   platforms: [

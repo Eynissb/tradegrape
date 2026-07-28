@@ -58,6 +58,9 @@ export const bulenox: FirmSeed = {
   slug: 'bulenox',
   name: 'Bulenox',
   collectedAt: '2026-07-21',
+  founded_year: 2022, // vérifié 2026-07-29 : Bulenox LLC (Wilmington, DE) — fondée en 2022
+  country: 'US',
+  hq_city: 'Wilmington',
   max_funded_accounts: 11,
   daily_flat_time: '15:59 America/Chicago',
 

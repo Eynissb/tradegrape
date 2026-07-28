@@ -32,6 +32,9 @@ export const lucid: FirmSeed = {
   slug: 'lucid-trading',
   name: 'Lucid Trading',
   collectedAt: '2026-07-21',
+  founded_year: 2025, // vérifié 2026-07-29 : Lucid Trading Group LLC (Dover, DE) — lancé début 2025
+  country: 'US',
+  hq_city: 'Dover',
   daily_flat_time: '16:45 America/New_York',
   trustpilot_rating: 4.8,
 

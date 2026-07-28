@@ -108,10 +108,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     })
     .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || b.offerCount - a.offerCount || a.name.localeCompare(b.name));
 
-  const flagEmoji = (code: string | null) =>
-    code && code.length === 2
-      ? String.fromCodePoint(...[...code.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)))
-      : '🏳';
   const compactMoney = (v: number, c: string) => {
     const loc = l === 'fr' ? 'fr-FR' : 'en-US';
     const n =
@@ -417,10 +413,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     </span>
                     <span role="cell" data-label={d.colCountry} className="home-rank-flag">
                       {f.country ? (
-                        <>
-                          <span className="home-flag" aria-hidden="true">{flagEmoji(f.country)}</span>
-                          <span className="home-rank-cc">{f.country.toUpperCase()}</span>
-                        </>
+                        <span className="home-rank-cc">{f.country.toUpperCase()}</span>
                       ) : (
                         <span className="home-muted">—</span>
                       )}
