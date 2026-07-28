@@ -369,7 +369,7 @@ select.input { cursor: pointer; }
 .dp-day {
   height: 36px; border: 1px solid transparent; border-radius: var(--r-sm);
   background: none; color: var(--text-1); cursor: pointer;
-  font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .85rem;
+  font-family: var(--font-body); font-variant-numeric: tabular-nums; font-size: .85rem;
   display: inline-flex; align-items: center; justify-content: center;
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
@@ -483,7 +483,7 @@ fieldset.radio-group legend { padding: 0; margin-bottom: .3rem; font-size: .85re
 .card-footer { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
 .stat { display: flex; flex-direction: column; gap: .15rem; }
 .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); }
-.stat-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.25rem; color: var(--text-1); font-weight: 500; }
+.stat-value { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-size: 1.25rem; color: var(--text-1); font-weight: 500; }
 .stat-value.up { color: var(--ok); }
 .stat-value.down { color: var(--danger); }
 
@@ -494,7 +494,7 @@ fieldset.radio-group legend { padding: 0; margin-bottom: .3rem; font-size: .85re
 .table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: .9rem; }
 .table th, .table td { padding: .85rem 1rem; text-align: left; }
 .table td.num, .table th.num { text-align: right; }
-.table td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-1); }
+.table td.num { font-family: var(--font-body); font-variant-numeric: tabular-nums; color: var(--text-1); }
 .table thead th {
   font-family: var(--font-mono); font-size: .75rem; font-weight: 500;
   text-transform: uppercase; letter-spacing: .09em; color: var(--text-3);
@@ -639,7 +639,7 @@ th[aria-sort="ascending"] .th-sort .lucide, th[aria-sort="descending"] .th-sort 
   min-width: var(--h-md); height: var(--h-md); padding: 0 .6rem;
   display: inline-flex; align-items: center; justify-content: center;
   background: none; border: 1px solid transparent; border-radius: var(--r-pill);
-  color: var(--text-2); font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  color: var(--text-2); font-family: var(--font-body); font-variant-numeric: tabular-nums;
   font-size: .88rem; cursor: pointer;
   transition: color var(--transition), background var(--transition), border-color var(--transition);
 }
@@ -725,7 +725,7 @@ th[aria-sort="ascending"] .th-sort .lucide, th[aria-sort="descending"] .th-sort 
 .progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .progress-label { font-size: .85rem; font-weight: 500; color: var(--text-1); display: inline-flex; align-items: center; gap: .4rem; }
 .progress-label .lucide { width: 1em; height: 1em; }
-.progress-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: .85rem; color: var(--text-2); }
+.progress-value { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-size: .85rem; color: var(--text-2); }
 .progress-track { height: 8px; border-radius: var(--r-pill); background: rgba(11, 8, 24, .8); border: 1px solid var(--border); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55); overflow: hidden; }
 .progress-bar { height: 100%; border-radius: var(--r-pill); background: var(--grad-brand); transition: width .4s cubic-bezier(.4,0,.2,1); }
 .progress-ok .progress-bar { background: var(--ok); box-shadow: 0 0 12px rgba(56,255,176,.4); }
@@ -750,7 +750,7 @@ th[aria-sort="ascending"] .th-sort .lucide, th[aria-sort="descending"] .th-sort 
 .gauge-warn .bar { stroke: var(--warn); }
 .gauge-danger .bar { stroke: var(--danger); }
 .gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; }
-.gauge-center .val { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 600; color: var(--text-1); }
+.gauge-center .val { font-family: var(--font-body); font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 600; color: var(--text-1); }
 .gauge-center .unit { font-size: .75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
 .gauge-label { font-size: .82rem; color: var(--text-2); display: inline-flex; align-items: center; gap: .35rem; }
 .gauge-label .lucide { width: 1em; height: 1em; }

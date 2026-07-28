@@ -62,7 +62,10 @@ Une base unique alimente trois faces : comparateur public (SEO), journal authent
 ```
 
 Dark glassmorphism vibrant : glows ambiants, cartes en verre, dégradés indigo→fuchsia.
-Typo : Sora (titres 700-800), Inter (corps), JetBrains Mono (chiffres, `tabular-nums`).
+Typo : Sora (titres 700-800), Inter (corps **et chiffres**, en `tabular-nums`).
+JetBrains Mono **réservé au vrai code et aux codes promo à copier** — plus pour les
+chiffres de données (le mono faisait « technique », il ne collait pas au design ;
+décision révisée après essai sur les vrais écrans). `.num`/`.tabular` = Inter tabulaire.
 
 **Jamais de bleu/cyan** — direction testée et rejetée.
 Les **états** (ok/warning/danger) restent lime/amber/red, jamais l'accent de marque :
@@ -504,7 +507,8 @@ couche de navigation flottante (header, menus, dropdowns, modales, panneaux) —
 le contenu** ; les tableaux d'offres, jauges de règles et chiffres financiers restent sur
 surface **solide** et chirurgicalement lisibles. Échelle de rayons unique (`--r-xs`→`--r-pill`),
 hauteurs de contrôle (`--h-sm/md/lg`), focus double anneau, états **lime/amber/red** (jamais
-l'accent de marque pour un état), chiffres en **JetBrains Mono tabulaire**.
+l'accent de marque pour un état), chiffres en **Inter tabulaire** (`tabular-nums` ;
+le mono JetBrains ne sert plus qu'au code / codes promo — cf. §2 Typo).
 
 Transposition : tokens + classes dans `app/design-system.css` (importé par `globals.css`),
 composants React dans `components/ui/`. **Cette référence reste susceptible d'évoluer** — les
