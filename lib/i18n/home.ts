@@ -16,11 +16,15 @@ const fr = {
     'Compare les prop firms futures sur leur prix TTC réel et leurs règles vérifiées, puis journalise tes comptes gratuitement. Sache si ton challenge va passer — avant de payer.',
 
   heroKicker: 'Comparateur · Journal · Futures',
+  heroLive: 'Données vérifiées à la source, prix TTC réels',
   // Titre orienté SEO : les mots-clés qui font ranker.
   heroTitle: 'Comparateur de prop firms futures — prix TTC réels, règles vérifiées',
   // Sous-titre : la boucle complète, ce que nous sommes seuls à faire.
   heroSubtitle:
     'Compare les offres sur leur prix TTC réel et leurs règles vérifiées, journalise tes comptes, et découvre si tu aurais validé ton challenge ailleurs. Gratuit.',
+  previewLive: 'Données à jour',
+  previewColNote: 'Note',
+  previewColPromo: 'Promo',
   ctaCompare: 'Comparer les prop firms',
   ctaJournal: 'Ouvrir le journal gratuit',
   ctaJournalSignedIn: 'Ouvrir mon journal',
@@ -131,9 +135,13 @@ const en: Dict = {
     'Compare futures prop firms on real total price and verified rules, then journal your accounts for free. Know whether your challenge will pass — before you pay.',
 
   heroKicker: 'Comparison · Journal · Futures',
+  heroLive: 'Source-verified data, real total prices',
   heroTitle: 'Futures prop firm comparison — real total prices, verified rules',
   heroSubtitle:
     'Compare offers on real total price and verified rules, journal your accounts, and find out whether you’d have passed your challenge elsewhere. Free.',
+  previewLive: 'Data up to date',
+  previewColNote: 'Rating',
+  previewColPromo: 'Promo',
   ctaCompare: 'Compare prop firms',
   ctaJournal: 'Open the free journal',
   ctaJournalSignedIn: 'Open my journal',

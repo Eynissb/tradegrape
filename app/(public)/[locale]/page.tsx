@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { loadPublicCatalog } from '@/lib/catalog/query';
+import { firmLogo } from '@/lib/catalog/logos';
 import { buildHomeStats } from '@/lib/catalog/home-stats';
 import { sortOffers } from '@/lib/catalog/public-offer';
 import { HOME_DICTS } from '@/lib/i18n/home';
@@ -8,7 +9,6 @@ import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
 import JournalCta from '@/app/(public)/_home/JournalCta';
 import SiteFooter from '@/app/(public)/_home/SiteFooter';
-import HeroGrape from '@/app/(public)/_home/HeroGrape';
 
 /**
  * Page d'accueil publique, une par langue (`/fr`, `/en`). Porte d'entrée SEO :
@@ -58,10 +58,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const { offers, generatedAt } = await loadPublicCatalog();
   const stats = buildHomeStats(offers);
-  const preview = sortOffers(offers, 'total_price').slice(0, 5);
+  const preview = sortOffers(offers, 'total_price').slice(0, 8);
 
   const nf = (n: number) => n.toLocaleString(l === 'fr' ? 'fr-FR' : 'en-US');
-  const money = (v: number, c: string) => `${nf(v)} ${c}`;
+  const shortSize = (n: number) => (n >= 1000 ? `${n / 1000}k` : String(n));
+  const reviewedDate = (() => {
+    const dt = new Date(generatedAt);
+    return Number.isNaN(dt.getTime())
+      ? generatedAt
+      : dt.toLocaleDateString(l === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  })();
+  const ddTone = (t: string) => (t === 'TRAIL' ? 'bad' : t === 'EOD' ? 'warn' : 'ok');
+  const noteTone = (r: number | null) => (r == null ? 'na' : r >= 8 ? 'ok' : r >= 4 ? 'warn' : 'bad');
+  // Symbole $ devant pour l'USD (cohérent avec le comparateur), sinon code après.
+  const money = (v: number, c: string) => (c === 'USD' ? `$${nf(v)}` : `${nf(v)} ${c}`);
   const fill = (tpl: string, map: Record<string, string>) =>
     Object.entries(map).reduce((s, [k, v]) => s.replace(`{${k}}`, v), tpl);
   /** « A, B et C » / « A, B and C ». */
@@ -142,15 +152,13 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* ---- HERO — pleine largeur (full-bleed), HORS du conteneur .pub-main.
-             Le fond (grappe + voile) touche les bords ; le texte reste dans un
-             conteneur centré aligné sur les sections. ---- */}
+      {/* ---- HERO compact, orienté DONNÉES (plus de grappe : l'accent passe au
+             comparatif juste en dessous, à la propfirmmatch mais en notre style).
+             Centré, glows ambiants via .home-hero. ---- */}
       <section className="home-hero">
-        {/* La grappe en fond plein + voile dégradé, sous le texte. */}
-        <HeroGrape />
         <div className="home-hero-inner">
         <div className="home-hero-text">
-          <span className="home-kicker">{d.heroKicker}</span>
+          <span className="home-live"><span className="home-live-dot" aria-hidden="true" />{d.heroLive}</span>
           <h1 className="home-title">{d.heroTitle}</h1>
           <p className="home-sub">{d.heroSubtitle}</p>
 
@@ -190,10 +198,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       <main className="pub-main home">
-      {/* -------------------------------------- 1. APERÇU COMPARATEUR */}
+      {/* -------------------------- 1. COMPARATIF (pièce maîtresse) */}
       <section id="apercu" className="home-section">
-        <h2 className="home-h2">{d.previewTitle}</h2>
-        <p className="home-section-sub">{d.previewSub}</p>
+        <div className="home-section-head">
+          <div>
+            <h2 className="home-h2">{d.previewTitle}</h2>
+            <p className="home-section-sub">{d.previewSub}</p>
+          </div>
+          <span className="home-live home-live--sm">
+            <span className="home-live-dot" aria-hidden="true" />
+            {d.previewLive} · {reviewedDate}
+          </span>
+        </div>
 
         {preview.length === 0 ? (
           <p className="home-muted">{d.previewEmpty}</p>
@@ -202,35 +218,61 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="data-list home-preview" role="table" aria-label={d.previewTitle}>
               <div className="data-head" role="row">
                 <span role="columnheader">{d.previewColFirm}</span>
-                <span role="columnheader">{d.previewColPlan}</span>
+                <span role="columnheader">{d.previewColNote}</span>
                 <span role="columnheader">{d.previewColSize}</span>
                 <span role="columnheader">{d.previewColPrice}</span>
                 <span role="columnheader">{d.previewColDrawdown}</span>
-                <span role="columnheader">{d.previewColReviewed}</span>
+                <span role="columnheader">{d.previewColPromo}</span>
               </div>
-              {preview.map((o) => (
-                <div key={o.id} className="data-row" role="row">
-                  <span role="cell" data-label={d.previewColFirm} className="home-tfirm">
-                    {o.firm.name}
-                  </span>
-                  <span role="cell" data-label={d.previewColPlan}>{o.plan.name}</span>
-                  <span role="cell" data-label={d.previewColSize} className="num">{nf(o.size)}</span>
-                  <span role="cell" data-label={d.previewColPrice} className="num home-tprice">
-                    {o.totalPrice.known ? money(o.totalPrice.value, o.currency) : '—'}
-                  </span>
-                  <span role="cell" data-label={d.previewColDrawdown}>
-                    <span className="num">{o.drawdown.type} {nf(o.drawdown.amount)}</span>
-                    {o.fundedHardening.differs ? (
-                      <span className="home-tbadge home-tbadge-bad">{d.previewHardening}</span>
-                    ) : null}
-                  </span>
-                  <span role="cell" data-label={d.previewColReviewed} className="num home-treviewed">
-                    {o.trust.reviewedAt ?? (
-                      <span className="home-tbadge home-tbadge-warn">{d.previewNotVerified}</span>
-                    )}
-                  </span>
-                </div>
-              ))}
+              {preview.map((o) => {
+                const logo = firmLogo(o.firm.slug);
+                return (
+                  <div key={o.id} className="data-row" role="row">
+                    <span role="cell" data-label={d.previewColFirm} className="home-tfirm">
+                      <span className={`home-tlogo${logo && !logo.light ? ' lift' : ''}`} aria-hidden="true">
+                        {logo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={logo.url} alt="" style={{ transform: `scale(${logo.scale})` }} />
+                        ) : (
+                          o.firm.name.trim().slice(0, 2).toUpperCase()
+                        )}
+                      </span>
+                      <span className="home-tfirm-txt">
+                        <span className="home-tfirm-name">{o.firm.name}</span>
+                        <span className="home-tfirm-plan">{o.plan.name}</span>
+                      </span>
+                    </span>
+                    <span role="cell" data-label={d.previewColNote}>
+                      <span className={`home-note home-note--${noteTone(o.plan.rating)}`}>
+                        {o.plan.rating ?? '–'}
+                      </span>
+                    </span>
+                    <span role="cell" data-label={d.previewColSize} className="num">{shortSize(o.size)}</span>
+                    <span role="cell" data-label={d.previewColPrice} className="num home-tprice">
+                      {o.totalPrice.known ? money(o.totalPrice.value, o.currency) : '—'}
+                    </span>
+                    <span role="cell" data-label={d.previewColDrawdown} className="home-tdd">
+                      <span className={`home-dd-badge home-dd-badge--${ddTone(o.drawdown.type)}`}>{o.drawdown.type}</span>
+                      <span className="num">{nf(o.drawdown.amount)}</span>
+                      {o.fundedHardening.differs ? (
+                        <span className="home-tbadge home-tbadge-bad">{d.previewHardening}</span>
+                      ) : null}
+                    </span>
+                    <span role="cell" data-label={d.previewColPromo} className="home-tpromo">
+                      {o.trust.promo ? (
+                        <>
+                          <code>{o.trust.promo.code}</code>
+                          {o.trust.promo.discountPct != null ? (
+                            <span className="home-tpromo-pct num"> −{o.trust.promo.discountPct}%</span>
+                          ) : null}
+                        </>
+                      ) : (
+                        <span className="home-muted">—</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -1570,38 +1570,44 @@ body::before {
    .pub-shell → largeur 100 % = bord à bord. Aucune marge, bordure ni radius.
    Un seul plan : grappe en fond plein, voile dégradé, texte au-dessus à gauche.
    Le texte reste dans un conteneur centré aligné sur les sections. */
+/* Hero COMPACT et CENTRÉ (plus de grappe) : titre + preuve + CTA + chiffres, puis
+   le comparatif juste dessous. Glows ambiants indigo→fuchsia en fond. */
 .home-hero {
-  position: relative; overflow: hidden; width: 100%;
-  display: flex; align-items: center;
-  min-height: clamp(460px, 68vh, 620px);
-  /* Le header fixe passe DEVANT le haut du hero (grappe derrière) : le contenu
-     du hero est décalé pour ne pas passer sous le header. */
-  padding: calc(var(--header-h) + 28px) 0 40px;
+  position: relative; overflow: hidden; width: 100%; text-align: center;
+  padding: calc(var(--header-h) + 46px) 0 54px;
 }
+.home-hero::before, .home-hero::after {
+  content: ''; position: absolute; z-index: 0; border-radius: 50%;
+  filter: blur(94px); opacity: .5; pointer-events: none;
+}
+.home-hero::before { width: 640px; height: 640px; top: -26%; left: -6%; background: radial-gradient(circle, rgba(91, 63, 255, .55), transparent 70%); }
+.home-hero::after  { width: 560px; height: 560px; top: -18%; right: -4%; background: radial-gradient(circle, rgba(192, 75, 255, .40), transparent 70%); }
 .home-hero-inner {
   position: relative; z-index: 2;
-  width: var(--container); margin: 0 auto;
+  width: var(--container-content, min(1440px, 92vw)); margin: 0 auto;
 }
-.home-hero-text { width: 100%; max-width: 600px; }
-.home-kicker {
-  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--ink3);
+.home-hero-text { width: 100%; max-width: 880px; margin: 0 auto; }
+/* Pilule de preuve : point lime + « données vérifiées ». */
+.home-live {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 15px; border-radius: var(--r-pill);
+  background: var(--card); box-shadow: inset 0 0 0 1px var(--card-brd);
+  font-size: 12.5px; font-weight: 600; color: var(--ink2);
 }
-/* Titre XL, aligné à gauche. */
+.home-live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--lime); box-shadow: 0 0 8px var(--lime); }
 .ui .home-title {
-  margin-top: 18px; font-family: var(--font-title); font-weight: 800;
-  font-size: clamp(2.6rem, 6.2vw, 5.4rem); line-height: 1.02; letter-spacing: -2px; color: var(--ink);
+  margin-top: 24px; font-family: var(--font-title); font-weight: 800;
+  font-size: clamp(2.3rem, 5vw, 4.4rem); line-height: 1.04; letter-spacing: -1.5px; color: var(--ink);
 }
 .ui .home-sub {
-  margin-top: 20px; max-width: 560px; font-size: clamp(15px, 1.4vw, 18px);
+  margin: 20px auto 0; max-width: 640px; font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.6; color: var(--ink2);
 }
-.home-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.home-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
 
-/* Bloc encadré de 3 chiffres, sous les CTA. Surfaces solides, chiffres
-   tabulaires, jamais l'accent de marque sur la donnée. */
+/* Bloc de 3 chiffres réels, centré. Surfaces solides, chiffres tabulaires. */
 .home-statbar {
-  display: grid; grid-template-columns: repeat(3, 1fr); margin: 34px 0 0; max-width: 560px;
+  display: grid; grid-template-columns: repeat(3, 1fr); margin: 36px auto 0; max-width: 620px;
   border: 1px solid var(--card-brd); border-radius: var(--r-lg);
   background: var(--card); overflow: hidden;
 }
@@ -1613,24 +1619,6 @@ body::before {
 }
 .home-stat-label { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink2); }
 .home-stat-note { color: var(--ink3); }
-
-/* Fond du hero : image pleine + voile. */
-.home-hero-bg { position: absolute; inset: 0; z-index: 0; }
-/* L'image : cover, ancrée à droite (la grappe y est). Débord + scale pour que
-   la parallaxe ne montre jamais de bord. Nom de fichier EXACT (casse sensible
-   en prod). Image absente = hero sombre, texte lisible : rien ne casse. */
-/* Image DÉTOURÉE à fond transparent : la grappe se pose directement sur le fond
-   de page, sans masque ni blend. Plus aucun bloc noir, donc aucune arête. */
-.home-hero-img {
-  position: absolute; inset: -5%; z-index: 0;
-  background: url(/brand/hero-tradegrape.png) right center / contain no-repeat;
-  transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.06);
-  transition: transform .4s cubic-bezier(.22, 1, .36, 1);
-  will-change: transform;
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-hero-img { transition: none; transform: scale(1.06); }
-}
 
 /* ---- Sections ---- */
 .home-section { margin-top: 72px; }
@@ -1647,15 +1635,38 @@ body::before {
 /* ---- 1. Aperçu comparateur (mini-tableau réel, mécanisme .data-list) ---- */
 /* Réutilise .data-list : grille via --cols, empilement mobile en fiches via
    data-label. Seules les colonnes changent. */
-.home-preview { --cols: minmax(120px,1.3fr) minmax(110px,1fr) 74px 118px minmax(140px,1.1fr) 104px; }
-.home-preview { margin-top: 20px; }
-.ui .home-tfirm { font-weight: 700; color: var(--ink); }
-.ui .home-tprice { font-weight: 700; color: var(--ink); }
-.home-treviewed { font-size: 12px; color: var(--ink3); }
-.home-tbadge {
-  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--r-pill);
-  font-size: 10.5px; font-weight: 600;
+/* En-tête de section : titre à gauche, indicateur « données à jour » à droite. */
+.home-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.home-live--sm { padding: 5px 12px; font-size: 11.5px; }
+
+.home-preview { --cols: minmax(180px, 1.7fr) 54px 60px 96px minmax(122px, 1fr) minmax(100px, .9fr); margin-top: 22px; }
+/* Cellule firm : logo + nom/plan empilés. */
+.ui .home-tfirm { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.home-tlogo {
+  width: 34px; height: 34px; flex: none; border-radius: 9px; overflow: hidden;
+  display: grid; place-items: center; background: #100c20; font-size: 11px; font-weight: 800; color: #fff;
 }
+.home-tlogo.lift { background: #2b2647; }
+.home-tlogo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.home-tfirm-txt { min-width: 0; display: flex; flex-direction: column; }
+.ui .home-tfirm-name { font-weight: 700; font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-tfirm-plan { font-size: 12px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ui .home-tprice { font-weight: 800; font-size: 15px; color: var(--ink); }
+/* Note : pastille colorée (vert ≥8 / ambre 4-7 / rouge ≤3), grise si absente. */
+.home-note { display: inline-grid; place-items: center; min-width: 26px; height: 24px; padding: 0 7px; border-radius: 7px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.home-note--ok { color: var(--lime); background: rgba(56, 255, 176, .12); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .3); }
+.home-note--warn { color: var(--amber); background: rgba(255, 180, 59, .12); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .3); }
+.home-note--bad { color: var(--red); background: rgba(255, 77, 94, .12); box-shadow: inset 0 0 0 1px rgba(255, 77, 94, .3); }
+.home-note--na { color: var(--ink3); background: rgba(255, 255, 255, .05); }
+/* Drawdown : badge type coloré + montant. */
+.home-tdd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.home-dd-badge { font-size: 10px; font-weight: 800; letter-spacing: .5px; padding: 3px 7px; border-radius: 6px; }
+.home-dd-badge--ok { color: var(--lime); background: rgba(56, 255, 176, .12); box-shadow: inset 0 0 0 1px rgba(56, 255, 176, .3); }
+.home-dd-badge--warn { color: var(--amber); background: rgba(255, 180, 59, .12); box-shadow: inset 0 0 0 1px rgba(255, 180, 59, .3); }
+.home-dd-badge--bad { color: #fff; background: rgba(255, 77, 94, .9); }
+.home-tpromo code { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink); }
+.home-tpromo-pct { color: var(--lime); font-weight: 700; }
+.home-tbadge { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: var(--r-pill); font-size: 10px; font-weight: 600; }
 .home-tbadge-bad { color: var(--red); background: rgba(255, 77, 94, .12); }
 .home-tbadge-warn { color: var(--amber); background: rgba(255, 180, 59, .12); }
 
