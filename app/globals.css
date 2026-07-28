@@ -1858,6 +1858,11 @@ body::before {
   display: flex; flex-direction: column;
   padding: 16px clamp(14px, 2vw, 28px) 44px;
   scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .14) transparent;
+  /* Couche GPU dédiée : force Edge/Chromium à repeindre la liste après un
+     changement de filtre (sinon, sur certains GPU, la partie basse d'un conteneur
+     dans un élément `fixed` reste en rendu périmé → « page coupée » alors que la
+     structure est correcte). */
+  transform: translateZ(0);
 }
 /* Repère de fin de liste. flex:1 → il OCCUPE l'espace restant quand la liste est
    courte (le texte se centre dans ce qui serait un vide), et se réduit à sa
@@ -1919,6 +1924,8 @@ body::before {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, .05), 6px 0 26px rgba(0, 0, 0, .42);
   /* Scrollbar MASQUÉE (colonne toujours scrollable à la molette) — plus de barre. */
   scrollbar-width: none;
+  /* Couche GPU dédiée (repaint correct après changement d'onglet/filtre). */
+  transform: translateZ(0);
 }
 .cmp-side::-webkit-scrollbar { width: 0; height: 0; }
 /* Aucun encadré : les fieldsets (PROP FIRM, PLATEFORME…) ne portent AUCUNE
