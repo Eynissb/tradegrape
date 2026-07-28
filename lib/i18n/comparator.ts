@@ -104,6 +104,7 @@ const fr = {
   hardening: 'Règles durcies en financé',
   hardeningHint:
     'Cette offre change de règles une fois le compte financé — c’est la première cause de perte de compte.',
+  hardened: 'durci',
   notLocked: 'plancher non figé',
   notLockedHint:
     'Le plancher de drawdown continue de monter au-dessus du capital initial : il ne se verrouille jamais.',
@@ -301,6 +302,7 @@ const en: Dict = {
   hardening: 'Rules harden when funded',
   hardeningHint:
     'This offer changes its rules once the account is funded — the leading cause of losing a funded account.',
+  hardened: 'tightened',
   notLocked: 'floor never locks',
   notLockedHint:
     'The drawdown floor keeps rising above the starting balance: it never locks.',

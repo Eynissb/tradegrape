@@ -2259,6 +2259,21 @@ body::before {
 .cmp-chev svg { width: 15px; height: 15px; }
 .cmp-chev:focus-visible { outline: 2px solid rgba(120, 90, 255, .6); outline-offset: 1px; }
 
+/* Focus clavier VISIBLE et cohérent sur tous les contrôles du comparateur
+   (avant : anneau par défaut du navigateur, incohérent). */
+.ui .cmp-tab:focus-visible,
+.ui .cmp-chip:focus-visible,
+.ui .cmp-sortpill:focus-visible,
+.ui .cmp-abtn:focus-visible,
+.cmp-seeall:focus-visible {
+  outline: 2px solid rgba(120, 90, 255, .65); outline-offset: 2px;
+}
+/* Cases à cocher firm/plateforme : l'input réel est réduit à 0×0 → l'anneau par
+   défaut est invisible. On le porte sur la ligne entière. */
+.cmp-sidef:has(input:focus-visible) {
+  outline: 2px solid rgba(120, 90, 255, .65); outline-offset: 2px; border-radius: var(--r-sm);
+}
+
 /* ---- Cellule firm ---- */
 .ui .cmp-firm { display: flex; align-items: center; gap: 13px; min-width: 0; }
 .cmp-logo {

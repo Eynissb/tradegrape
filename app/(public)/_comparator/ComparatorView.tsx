@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   filterOffers,
   hiddenByUnknownPrice,
@@ -159,7 +159,12 @@ function readUrl(): UiState {
   if (firms?.length) filters.firms = firms;
   const plats = list('plat');
   if (plats?.length) filters.platforms = plats;
-  filters.maxTotalPrice = num('max');
+  // `max` accepte 0 (offres gratuites uniquement) ; split/freq restent > 0.
+  const maxRaw = q.get('max');
+  if (maxRaw !== null) {
+    const mv = Number(maxRaw);
+    if (Number.isFinite(mv) && mv >= 0) filters.maxTotalPrice = mv;
+  }
   filters.minProfitSplit = num('split');
   filters.maxPayoutFrequencyDays = num('freq');
   if (q.get('nocons') === '1') filters.noConsistency = true;
@@ -169,8 +174,11 @@ function readUrl(): UiState {
   if (q.get('news') === '1') filters.newsAllowed = true;
 
   const s = q.get('sort');
-  const sort: SortKey =
+  let sort: SortKey =
     s === 'total_price' || s === 'size' || s === 'rating' || s === 'split' ? s : 'health';
+  // `split` n'existe pas en Éval (colonne financée) : jamais de tri fantôme sans
+  // pastille active pour le défaire.
+  if (tab === 'eval' && sort === 'split') sort = 'health';
   return { filters, sort, preset: null, tab };
 }
 
@@ -239,6 +247,12 @@ export default function ComparatorView({
     writeUrl({ filters, sort, preset, tab });
   }, [filters, sort, preset, tab]);
 
+  // La sélection retombée sous le minimum ferme le panneau — sinon re-sélectionner
+  // 2 offres le rouvrirait sans que l'utilisateur l'ait demandé.
+  useEffect(() => {
+    if (selected.length < COMPARE_MIN) setCompareOpen(false);
+  }, [selected]);
+
   const facets = useMemo(() => buildFacets(offers), [offers]);
   const shown = useMemo(
     () => sortOffers(filterOffers(offers, filters), sort),
@@ -261,6 +275,7 @@ export default function ComparatorView({
             stance: (s) => NEWS_LABELS(d)[s],
             permanentPromo: (t) => `${t} · ${d.promoPermanent}`,
             pending: d.notVerified,
+            hardened: d.hardened,
           })
         : [],
     [picked, d],
@@ -299,6 +314,23 @@ export default function ComparatorView({
   const switchTab = (next: Tab) => {
     setTab(next);
     if (next === 'eval' && sort === 'split') setSort('health');
+    // Les filtres PROPRES à une phase n'ont pas de contrôle sur l'autre onglet :
+    // les laisser actifs filtrerait en silence, sans pastille pour les défaire
+    // (exactement le piège de l'« état actif invisible »). Les filtres transverses
+    // — taille, type de compte, firm, plateforme, prix, vérifié, non-durci —
+    // restent, fidèles à l'intention de garder la même sélection sous l'autre angle.
+    const drop: (keyof OfferFilters)[] =
+      next === 'eval'
+        ? ['fundedDrawdownTypes', 'minProfitSplit', 'maxPayoutFrequencyDays', 'noFundedConsistency', 'newsAllowed']
+        : ['drawdownTypes', 'noConsistency'];
+    if (drop.some((k) => filters[k] !== undefined)) {
+      setPreset(null);
+      setFilters((prev) => {
+        const c = { ...prev };
+        for (const k of drop) delete c[k];
+        return c;
+      });
+    }
   };
 
   const active =
@@ -457,7 +489,7 @@ export default function ComparatorView({
               placeholder="—"
               value={filters.maxTotalPrice ?? ''}
               onChange={(e) =>
-                patch({ maxTotalPrice: e.target.value === '' ? undefined : Number(e.target.value) })
+                patch({ maxTotalPrice: e.target.value === '' ? undefined : Math.max(0, Number(e.target.value)) })
               }
             />
           </fieldset>
@@ -585,7 +617,7 @@ export default function ComparatorView({
                   type="button"
                   className={`cmp-sortpill${sort === o.value ? ' is-on' : ''}`}
                   aria-pressed={sort === o.value}
-                  onClick={() => setSort(o.value as SortKey)}
+                  onClick={() => { setPreset(null); setSort(o.value as SortKey); }}
                 >
                   {o.label}
                 </button>
@@ -719,12 +751,32 @@ function ComparePanel({
   setOnlyDiff: (v: boolean) => void;
   onClose: () => void;
 }) {
+  const bodyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    const body = bodyRef.current;
+    const focusables = () =>
+      [...(body?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ) ?? [])].filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+    // Focus déplacé DANS le dialogue à l'ouverture (sinon il reste sur le bouton
+    // derrière le scrim) ; piège à Tab pour ne pas sortir du dialogue au clavier.
+    (focusables()[0] ?? body)?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key !== 'Tab') return;
+      const f = focusables();
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      prev?.focus?.(); // focus rendu au déclencheur à la fermeture
+    };
   }, [onClose]);
 
   const phases = PHASE_LABEL(d);
@@ -742,7 +794,7 @@ function ComparePanel({
   return (
     <div className="cmp-modal" role="dialog" aria-modal="true" aria-label={d.compare}>
       <div className="cmp-modal-scrim" onClick={onClose} />
-      <div className="cmp-modal-body lg-glass">
+      <div className="cmp-modal-body lg-glass" ref={bodyRef} tabIndex={-1}>
         <header className="cmp-modal-head">
           <h2 className="cmp-modal-t">{d.compare}</h2>
           <label className="check">

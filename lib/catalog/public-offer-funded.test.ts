@@ -274,6 +274,7 @@ describe('lignes de comparaison', () => {
     stance: (s: string) => `[${s}]`,
     permanentPromo: (t: string) => `${t} · permanente`,
     pending: 'à vérifier',
+    hardened: 'durci',
   };
 
   it('marque comme différentes les seules lignes qui divergent', () => {

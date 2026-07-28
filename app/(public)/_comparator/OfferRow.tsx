@@ -199,6 +199,18 @@ function reviewed(o: PublicOffer, d: ComparatorDict) {
     : <Badge variant="warn"><span>{d.notVerified}</span></Badge>;
 }
 
+/* Étiquette de durcissement : montre ce qui CHANGE VRAIMENT entre l'éval et le
+   financé — un changement de TYPE (EOD → TRAIL), sinon un durcissement du MONTANT
+   à type constant ($500 → $800), sinon « durci » (seul le daily loss change).
+   Jamais un « STATIC → STATIC » trompeur qui masque le vrai durcissement. */
+function hardenLabel(o: PublicOffer, fmt: Fmt, d: ComparatorDict): string {
+  const a = o.drawdown;
+  const b = o.funded.drawdown;
+  if (a.type !== b.type) return `${a.type} → ${b.type}`;
+  if (a.amount !== b.amount) return `${fmt.money(a.amount, o.currency)} → ${fmt.money(b.amount, o.currency)}`;
+  return d.hardened;
+}
+
 /* ------------------------------------------------------------------- ligne */
 
 export default function OfferRow({
@@ -288,7 +300,7 @@ export default function OfferRow({
             <span><PlatformStack slugs={o.platforms} names={platformNames} /></span>
             <span className="cmp-ddcell">
               <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.drawdown.type)}`}>{o.drawdown.type}</span><span className="num">{fmt.money(o.drawdown.amount, o.currency)}</span></span>
-              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
+              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{hardenLabel(o, fmt, d)}</span> : null}
             </span>
             <span className="num">{o.profitTarget != null ? fmt.money(o.profitTarget, o.currency) : <span className="cmp-dash">—</span>}</span>
           </>
@@ -297,7 +309,7 @@ export default function OfferRow({
             <span>{o.funded.hasConsistency ? <span className="cmp-warnv num">{o.funded.consistencyPct} %</span> : <span className="cmp-okv">{d.noConsistencyValue}</span>}</span>
             <span className="cmp-ddcell">
               <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.funded.drawdown.type)}`}>{o.funded.drawdown.type}</span><span className="num">{fmt.money(o.funded.drawdown.amount, o.currency)}</span></span>
-              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{o.drawdown.type} → {o.funded.drawdown.type}</span> : null}
+              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{hardenLabel(o, fmt, d)}</span> : null}
             </span>
             <span className="num">{o.funded.splitTiers.length ? o.funded.splitTiers.map((t) => `${t.splitPct}%`).join(' → ') : o.funded.profitSplit != null ? `${o.funded.profitSplit} %` : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
             <span className="num">{o.funded.firstCap.known ? (o.funded.firstCap.value === null ? <span className="cmp-okv">{d.noCap}</span> : fmt.money(o.funded.firstCap.value, o.currency)) : <span className="cmp-unknown">{d.unknownValue}</span>}</span>

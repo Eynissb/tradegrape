@@ -723,6 +723,8 @@ export interface CompareFormat {
   permanentPromo: (text: string) => string;
   /** Libellé d'une offre non vérifiée à la source (reviewed_at NULL). */
   pending: string;
+  /** Libellé court « durci » quand seul le daily loss change (ni type ni montant). */
+  hardened: string;
 }
 
 /** Construit les lignes du comparatif. */
@@ -793,11 +795,19 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
     row(
       'hardening',
       'funded',
-      each((o) =>
-        o.fundedHardening.differs
-          ? V(`${o.drawdown.type} → ${o.funded.drawdown.type}`, 'bad')
-          : V('inchangées', 'ok'),
-      ),
+      each((o) => {
+        if (!o.fundedHardening.differs) return V('inchangées', 'ok');
+        const a = o.drawdown;
+        const b = o.funded.drawdown;
+        // Montre le VRAI changement, jamais un « STATIC → STATIC » trompeur.
+        const label =
+          a.type !== b.type
+            ? `${a.type} → ${b.type}`
+            : a.amount !== b.amount
+              ? `${fmt.money(a.amount, o.currency)} → ${fmt.money(b.amount, o.currency)}`
+              : fmt.hardened;
+        return V(label, 'bad');
+      }),
       { pivotal: true },
     ),
     row('fundedDrawdown', 'funded', each((o) =>

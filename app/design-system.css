@@ -394,6 +394,9 @@ select.input { cursor: pointer; }
 .check input, .radio input, .switch input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .check:hover, .radio:hover, .switch:hover { color: var(--text-1); }
 .check.is-disabled, .radio.is-disabled, .switch.is-disabled { opacity: .45; cursor: not-allowed; }
+/* Case désactivée via l'attribut natif `disabled` (ex. sélection comparateur au
+   max) : même repère visuel que `.is-disabled`, sinon le clic est un no-op muet. */
+.check:has(input:disabled), .radio:has(input:disabled), .switch:has(input:disabled) { opacity: .45; cursor: not-allowed; }
 
 .check-box {
   width: 20px; height: 20px; flex: none; border-radius: var(--r-xs);
