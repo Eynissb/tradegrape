@@ -171,48 +171,85 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* ---- HERO compact, orienté DONNÉES (plus de grappe : l'accent passe au
-             comparatif juste en dessous, à la propfirmmatch mais en notre style).
-             Centré, glows ambiants via .home-hero. ---- */}
+      {/* ---- HERO « donnée vivante » : texte éditorial à gauche, notre produit
+             qui s'ANIME à droite (courbe d'équité qui se dessine, plancher de
+             drawdown, marqueur de payout qui pulse, chips de comparaison qui
+             flottent). Animations CSS pures, respectent prefers-reduced-motion. ---- */}
       <section className="home-hero">
         <div className="home-hero-inner">
-        <div className="home-hero-text">
-          <span className="home-live"><span className="home-live-dot" aria-hidden="true" />{d.heroLive}</span>
-          <h1 className="home-title">{d.heroTitle}</h1>
-          <p className="home-sub">{d.heroSubtitle}</p>
+          <div className="home-hero-grid">
+            <div className="home-hero-text">
+              <span className="home-live"><span className="home-live-dot" aria-hidden="true" />{d.heroLive}</span>
+              <h1 className="home-title">{d.heroTitle}</h1>
+              <p className="home-sub">{d.heroSubtitle}</p>
 
-          <div className="home-cta">
-            <Link href={comparatorHref(l)} className={buttonClasses({ size: 'lg' })}>
-              {d.ctaCompare}
-            </Link>
-            {/* Déconnecté : /signup. Connecté : /app. Bascule côté client. */}
-            <JournalCta signedOutLabel={d.ctaJournal} signedInLabel={d.ctaJournalSignedIn} />
+              <div className="home-cta">
+                <Link href={comparatorHref(l)} className={buttonClasses({ size: 'lg' })}>
+                  {d.ctaCompare}
+                </Link>
+                {/* Déconnecté : /signup. Connecté : /app. Bascule côté client. */}
+                <JournalCta signedOutLabel={d.ctaJournal} signedInLabel={d.ctaJournalSignedIn} />
+              </div>
+
+              <dl className="home-statbar">
+                <div className="home-statcell">
+                  <dd className="home-stat-num num">{nf(stats.firmCount)}</dd>
+                  <dt className="home-stat-label">{d.statFirms}</dt>
+                </div>
+                <div className="home-statcell">
+                  <dd className="home-stat-num num">{nf(stats.offerCount)}</dd>
+                  <dt className="home-stat-label">{d.statOffers}</dt>
+                </div>
+                <div className="home-statcell">
+                  <dd className="home-stat-num num">
+                    {stats.cheapest ? money(stats.cheapest.totalPrice, stats.cheapest.currency) : '—'}
+                  </dd>
+                  <dt className="home-stat-label">
+                    {d.statCheapest}
+                    <span className="home-stat-note">
+                      {' · '}
+                      {stats.cheapest ? stats.cheapest.firmName : d.statCheapestEmpty}
+                    </span>
+                  </dt>
+                </div>
+              </dl>
+            </div>
+
+            {/* Visualisation vivante — décor animé (aria-hidden). */}
+            <div className="home-viz" aria-hidden="true">
+              <div className="home-viz-card">
+                <div className="home-viz-top">
+                  <span className="home-viz-title">{d.heroVizAccount}</span>
+                  <span className="home-viz-live"><i />LIVE</span>
+                </div>
+                <svg className="home-viz-chart" viewBox="0 0 340 168" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="eqfill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="rgba(192,75,255,.42)" />
+                      <stop offset="1" stopColor="rgba(91,63,255,0)" />
+                    </linearGradient>
+                    <linearGradient id="eqline" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stopColor="#5b3fff" />
+                      <stop offset=".55" stopColor="#c04bff" />
+                      <stop offset="1" stopColor="#ff3ba6" />
+                    </linearGradient>
+                  </defs>
+                  <path className="home-viz-grid" d="M0 42h340M0 84h340M0 126h340" />
+                  <path className="home-viz-floor" d="M0 140h340" />
+                  <path className="home-viz-fill" d="M0 128 C40 122 66 104 104 108 S176 74 214 62 S300 34 340 40 V168 H0 Z" fill="url(#eqfill)" />
+                  <path className="home-viz-eq" d="M0 128 C40 122 66 104 104 108 S176 74 214 62 S300 34 340 40" stroke="url(#eqline)" />
+                  <circle className="home-viz-dot" cx="340" cy="40" r="5" />
+                </svg>
+                <div className="home-viz-payout">
+                  <span className="home-viz-plabel">{d.heroVizPayout}</span>
+                  <strong className="home-viz-pval num">{d.heroVizPayoutVal}</strong>
+                </div>
+              </div>
+              <span className="home-viz-chip home-viz-chip--a"><b className="num">10</b> Lucid</span>
+              <span className="home-viz-chip home-viz-chip--b">EOD&nbsp;→&nbsp;TRAIL</span>
+              <span className="home-viz-chip home-viz-chip--c"><b className="num">$99</b></span>
+            </div>
           </div>
-
-          {/* Bloc encadré de 3 chiffres réels, sous les CTA. */}
-          <dl className="home-statbar">
-            <div className="home-statcell">
-              <dd className="home-stat-num num">{nf(stats.firmCount)}</dd>
-              <dt className="home-stat-label">{d.statFirms}</dt>
-            </div>
-            <div className="home-statcell">
-              <dd className="home-stat-num num">{nf(stats.offerCount)}</dd>
-              <dt className="home-stat-label">{d.statOffers}</dt>
-            </div>
-            <div className="home-statcell">
-              <dd className="home-stat-num num">
-                {stats.cheapest ? money(stats.cheapest.totalPrice, stats.cheapest.currency) : '—'}
-              </dd>
-              <dt className="home-stat-label">
-                {d.statCheapest}
-                <span className="home-stat-note">
-                  {' · '}
-                  {stats.cheapest ? stats.cheapest.firmName : d.statCheapestEmpty}
-                </span>
-              </dt>
-            </div>
-          </dl>
-        </div>
         </div>
       </section>
 
