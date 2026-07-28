@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { loadPublicCatalog } from '@/lib/catalog/query';
-import { firmLogo, firmColor } from '@/lib/catalog/logos';
+import { firmLogo, firmColor, platformLogo } from '@/lib/catalog/logos';
 import { buildHomeStats } from '@/lib/catalog/home-stats';
-import { sortOffers } from '@/lib/catalog/public-offer';
 import { HOME_DICTS } from '@/lib/i18n/home';
 import { comparatorHref, isLocale, type Locale } from '@/lib/i18n/comparator';
 import { buttonClasses } from '@/components/ui/Button';
@@ -77,7 +76,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const { offers, generatedAt } = await loadPublicCatalog();
   const stats = buildHomeStats(offers);
-  const preview = sortOffers(offers, 'total_price').slice(0, 8);
   // Meilleure note par firm (nos notes sont au niveau du plan) — pour le carrousel.
   const firmRatings = new Map<string, number>();
   for (const o of offers) {
@@ -87,15 +85,51 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     }
   }
 
+  // CLASSEMENT firm-par-firm (colonnes façon propfirmmatch), enrichi depuis les
+  // offres. Classé sur la note puis la couverture — jamais sur la commission.
+  const bySlug = new Map(offers.map((o) => [o.firm.slug, o.firm]));
+  const firmRows = [...bySlug.values()]
+    .map((firm) => {
+      const fo = offers.filter((o) => o.firm.slug === firm.slug);
+      const maxSize = Math.max(...fo.map((o) => o.size));
+      const stat = stats.firms.find((s) => s.slug === firm.slug);
+      return {
+        slug: firm.slug,
+        name: firm.name,
+        country: firm.country,
+        foundedYear: firm.foundedYear,
+        rating: firmRatings.get(firm.slug) ?? null,
+        platforms: [...new Set(fo.flatMap((o) => o.platforms))].slice(0, 4),
+        maxAlloc: firm.maxAccounts ? maxSize * firm.maxAccounts : maxSize,
+        offerCount: fo.length,
+        currency: fo[0]?.currency ?? 'USD',
+        promo: stat?.promo ?? null,
+      };
+    })
+    .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || b.offerCount - a.offerCount || a.name.localeCompare(b.name));
+
+  const flagEmoji = (code: string | null) =>
+    code && code.length === 2
+      ? String.fromCodePoint(...[...code.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)))
+      : '🏳';
+  const compactMoney = (v: number, c: string) => {
+    const loc = l === 'fr' ? 'fr-FR' : 'en-US';
+    const n =
+      v >= 1_000_000
+        ? `${(v / 1_000_000).toLocaleString(loc, { maximumFractionDigits: 2 })}M`
+        : v >= 1000
+          ? `${(v / 1000).toLocaleString(loc)}k`
+          : `${v}`;
+    return c === 'USD' ? `$${n}` : `${n} ${c}`;
+  };
+
   const nf = (n: number) => n.toLocaleString(l === 'fr' ? 'fr-FR' : 'en-US');
-  const shortSize = (n: number) => (n >= 1000 ? `${n / 1000}k` : String(n));
   const reviewedDate = (() => {
     const dt = new Date(generatedAt);
     return Number.isNaN(dt.getTime())
       ? generatedAt
       : dt.toLocaleDateString(l === 'fr' ? 'fr-FR' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
   })();
-  const ddTone = (t: string) => (t === 'TRAIL' ? 'bad' : t === 'EOD' ? 'warn' : 'ok');
   const noteTone = (r: number | null) => (r == null ? 'na' : r >= 8 ? 'ok' : r >= 4 ? 'warn' : 'bad');
   // Symbole $ devant pour l'USD (cohérent avec le comparateur), sinon code après.
   const money = (v: number, c: string) => (c === 'USD' ? `$${nf(v)}` : `${nf(v)} ${c}`);
@@ -319,14 +353,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
       </section>
 
-      {/* -------------------------- 1. COMPARATIF (pièce maîtresse) */}
+      {/* -------------------------- 1. LE CLASSEMENT (pièce maîtresse, réf. propfirmmatch) */}
       <section id="apercu" className="home-section">
         <div className="home-section-head">
           <div className="home-h2-row">
             <span className="home-ic home-ic--indigo"><Hic name="compare" /></span>
             <div>
-              <h2 className="home-h2">{d.previewTitle}</h2>
-              <p className="home-section-sub">{d.previewSub}</p>
+              <h2 className="home-h2">{d.rankTitle}</h2>
+              <p className="home-section-sub">{d.rankSub}</p>
             </div>
           </div>
           <span className="home-live home-live--sm">
@@ -335,65 +369,103 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </span>
         </div>
 
-        {preview.length === 0 ? (
+        {firmRows.length === 0 ? (
           <p className="home-muted">{d.previewEmpty}</p>
         ) : (
           <div className="table-scroll">
-            <div className="data-list home-preview" role="table" aria-label={d.previewTitle}>
+            <div className="data-list home-rank" role="table" aria-label={d.rankTitle}>
               <div className="data-head" role="row">
+                <span role="columnheader">{d.colRank}</span>
                 <span role="columnheader">{d.previewColFirm}</span>
                 <span role="columnheader">{d.previewColNote}</span>
-                <span role="columnheader">{d.previewColSize}</span>
-                <span role="columnheader">{d.previewColPrice}</span>
-                <span role="columnheader">{d.previewColDrawdown}</span>
+                <span role="columnheader">{d.colCountry}</span>
+                <span role="columnheader">{d.colSince}</span>
+                <span role="columnheader">{d.colPlatforms}</span>
+                <span role="columnheader">{d.colAlloc}</span>
                 <span role="columnheader">{d.previewColPromo}</span>
+                <span role="columnheader" aria-label={d.rankSee} />
               </div>
-              {preview.map((o, idx) => {
-                const logo = firmLogo(o.firm.slug);
+              {firmRows.map((f, idx) => {
+                const logo = firmLogo(f.slug);
                 return (
-                  <div key={o.id} className="data-row" role="row">
+                  <div key={f.slug} className="data-row home-rank-row" role="row">
+                    <span role="cell" data-label={d.colRank} className="home-rank-num num">
+                      <span className={`home-rank-badge${idx < 3 ? ` home-rank-badge--top home-rank-badge--${idx + 1}` : ''}`}>
+                        {idx + 1}
+                      </span>
+                    </span>
                     <span role="cell" data-label={d.previewColFirm} className="home-tfirm">
                       <span className={`home-tlogo${logo && !logo.light ? ' lift' : ''}`} aria-hidden="true">
                         {logo ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={logo.url} alt="" style={{ transform: `scale(${logo.scale})` }} />
                         ) : (
-                          o.firm.name.trim().slice(0, 2).toUpperCase()
+                          f.name.trim().slice(0, 2).toUpperCase()
                         )}
                       </span>
                       <span className="home-tfirm-txt">
-                        <span className="home-tfirm-name">{o.firm.name}</span>
-                        <span className="home-tfirm-plan">{o.plan.name}</span>
-                        {idx === 0 ? <span className="home-best">{d.bestPrice}</span> : null}
+                        <span className="home-tfirm-name">{f.name}</span>
+                        <span className="home-tfirm-plan">{fill(d.rankOffers, { n: nf(f.offerCount) })}</span>
                       </span>
                     </span>
                     <span role="cell" data-label={d.previewColNote}>
-                      <span className={`home-note home-note--${noteTone(o.plan.rating)}`}>
-                        {o.plan.rating ?? '–'}
-                      </span>
+                      {f.rating != null ? (
+                        <span className={`home-note home-note--${noteTone(f.rating)}`}>{f.rating}</span>
+                      ) : (
+                        <span className="home-rank-tbd">{d.rankNoRating}</span>
+                      )}
                     </span>
-                    <span role="cell" data-label={d.previewColSize} className="num">{shortSize(o.size)}</span>
-                    <span role="cell" data-label={d.previewColPrice} className="num home-tprice">
-                      {o.totalPrice.known ? money(o.totalPrice.value, o.currency) : '—'}
+                    <span role="cell" data-label={d.colCountry} className="home-rank-flag">
+                      {f.country ? (
+                        <>
+                          <span className="home-flag" aria-hidden="true">{flagEmoji(f.country)}</span>
+                          <span className="home-rank-cc">{f.country.toUpperCase()}</span>
+                        </>
+                      ) : (
+                        <span className="home-muted">—</span>
+                      )}
                     </span>
-                    <span role="cell" data-label={d.previewColDrawdown} className="home-tdd">
-                      <span className={`home-dd-badge home-dd-badge--${ddTone(o.drawdown.type)}`}>{o.drawdown.type}</span>
-                      <span className="num">{nf(o.drawdown.amount)}</span>
-                      {o.fundedHardening.differs ? (
-                        <span className="home-tbadge home-tbadge-bad">{d.previewHardening}</span>
-                      ) : null}
+                    <span role="cell" data-label={d.colSince} className="num">
+                      {f.foundedYear ?? <span className="home-muted">—</span>}
+                    </span>
+                    <span role="cell" data-label={d.colPlatforms} className="home-rank-plats">
+                      {f.platforms.length ? (
+                        f.platforms.map((p) => {
+                          const pl = platformLogo(p);
+                          return (
+                            <span key={p} className="home-plat" title={p}>
+                              {pl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={pl.url} alt={p} />
+                              ) : (
+                                <span className="home-plat-txt">{p.slice(0, 2)}</span>
+                              )}
+                            </span>
+                          );
+                        })
+                      ) : (
+                        <span className="home-muted">—</span>
+                      )}
+                    </span>
+                    <span role="cell" data-label={d.colAlloc} className="num home-rank-alloc">
+                      {compactMoney(f.maxAlloc, f.currency)}
                     </span>
                     <span role="cell" data-label={d.previewColPromo} className="home-tpromo">
-                      {o.trust.promo ? (
+                      {f.promo ? (
                         <>
-                          <code>{o.trust.promo.code}</code>
-                          {o.trust.promo.discountPct != null ? (
-                            <span className="home-tpromo-pct num"> −{o.trust.promo.discountPct}%</span>
+                          <code>{f.promo.code}</code>
+                          {f.promo.discountPct != null ? (
+                            <span className="home-tpromo-pct num"> −{f.promo.discountPct}%</span>
                           ) : null}
                         </>
                       ) : (
                         <span className="home-muted">—</span>
                       )}
+                    </span>
+                    <span role="cell" className="home-rank-act">
+                      <Link href={comparatorHref(l)} className={`${buttonClasses({ size: 'sm', variant: 'ghost' })} home-rank-btn`}>
+                        {d.rankSee}
+                      </Link>
                     </span>
                   </div>
                 );

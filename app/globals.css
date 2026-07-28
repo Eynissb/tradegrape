@@ -1802,6 +1802,56 @@ body::before {
   width: fit-content;
 }
 
+/* ---- 1bis. LE CLASSEMENT (grand tableau firm-par-firm, réf. propfirmmatch) ---- */
+.home-rank { --cols: 52px minmax(168px, 1.7fr) 60px 78px 66px minmax(118px, 1fr) 96px minmax(96px, .9fr) 84px; margin-top: 22px; }
+@media (min-width: 641px) { .ui .table-scroll > .home-rank { min-width: 900px; } }
+.home-rank.data-list { gap: 10px; }
+.ui .home-rank .data-row {
+  min-height: 66px; padding: 12px 18px; border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .032), rgba(255, 255, 255, .006)), #0e0b1c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -1px 0 rgba(0, 0, 0, .4), 0 1px 2px rgba(0, 0, 0, .5), 0 10px 24px rgba(0, 0, 0, .34);
+  transition: transform .16s, box-shadow .16s, background .16s;
+}
+.ui .home-rank .data-row:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .012)), #100c20;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .11), 0 1px 2px rgba(0, 0, 0, .6), 0 18px 38px rgba(0, 0, 0, .5);
+}
+/* La firm n°1 : liseré dégradé de marque + halo (la plus fiable, pas la moins chère). */
+.ui .home-rank .data-row:first-of-type {
+  box-shadow: inset 0 0 0 1px rgba(150, 110, 240, .42), inset 0 1px 0 rgba(255, 255, 255, .09), 0 1px 2px rgba(0, 0, 0, .5), 0 16px 36px rgba(120, 70, 255, .22);
+}
+.ui .home-rank .data-row:first-of-type::after {
+  content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--grad);
+}
+/* Rang : pastille ronde. Top 3 en dégradé de marque, le reste discret. */
+.home-rank-num { display: flex; align-items: center; }
+.home-rank-badge {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px;
+  font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums;
+  color: var(--ink2); background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+}
+.home-rank-badge--top { color: #fff; background: var(--grad); box-shadow: 0 3px 12px rgba(120, 70, 255, .42); }
+.home-rank-badge--1 { box-shadow: 0 4px 16px rgba(192, 75, 255, .55); }
+/* Note : réutilise .home-note ; "à noter" quand la note n'est pas encore attribuée. */
+.home-rank-tbd { font-size: 11px; color: var(--ink3); font-style: italic; }
+/* Pays : drapeau emoji + code ISO. */
+.home-rank-flag { display: flex; align-items: center; gap: 7px; }
+.home-flag { font-size: 18px; line-height: 1; }
+.home-rank-cc { font-size: 12px; font-weight: 600; color: var(--ink2); letter-spacing: .3px; }
+/* Plateformes : rangée de mini-logos. */
+.home-rank-plats { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.home-plat {
+  width: 26px; height: 26px; flex: none; border-radius: 7px; overflow: hidden;
+  display: grid; place-items: center; background: #14102a; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+}
+.home-plat img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.home-plat-txt { font-size: 10px; font-weight: 700; color: var(--ink2); text-transform: capitalize; }
+.ui .home-rank-alloc { font-weight: 800; font-size: 14px; color: var(--ink); }
+/* Bouton d'action par ligne, aligné à droite. */
+.home-rank-act { display: flex; justify-content: flex-end; }
+.ui .home-rank-btn { min-width: 0; }
+
 /* ---- 2. Firms ---- */
 .home-firms {
   list-style: none; margin: 24px 0 0; padding: 0;
