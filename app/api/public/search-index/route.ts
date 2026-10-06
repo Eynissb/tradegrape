@@ -25,6 +25,11 @@ interface SearchFirm {
   /** Prix TTC (prix + activation) de cette offre, si la firm le publie. */
   priceTtc: number | null;
   currency: string;
+  /** Meilleure note de plan de la firm (pour l'anneau de note). */
+  rating: number | null;
+  /** Code pays ISO (drapeau) et année de création (années d'activité). */
+  country: string | null;
+  foundedYear: number | null;
 }
 
 /** L'offre `b` est-elle un meilleur représentant que `a` (déjà retenu) ? */
@@ -52,8 +57,13 @@ export async function GET() {
   const logoBySlug = new Map((firmRows ?? []).map((f) => [f.slug, f.logo_url]));
 
   const rep = new Map<string, PublicOffer>();
+  const bestRating = new Map<string, number>();
   for (const o of offers) {
     if (!o.trust.verified) continue; // jamais les non-vérifiées
+    if (o.plan.rating != null) {
+      const cur = bestRating.get(o.firm.slug);
+      if (cur == null || o.plan.rating > cur) bestRating.set(o.firm.slug, o.plan.rating);
+    }
     if (isBetter(o, rep.get(o.firm.slug))) rep.set(o.firm.slug, o);
   }
 
@@ -65,6 +75,9 @@ export async function GET() {
       plan: o.plan.name,
       priceTtc: valueOf(o.totalPrice),
       currency: o.currency,
+      rating: bestRating.get(o.firm.slug) ?? null,
+      country: o.firm.country,
+      foundedYear: o.firm.foundedYear,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-29T00:00:00Z",
+  "title": "Design System: Tradegrape — Financial Terminal",
+  "extensions": {
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Terminal Ground", "canonical": "#070510", "tonalRamp": ["#070510", "#0b0818", "#12102a", "#1c1840", "#2b2657", "#453f78", "#6d6699", "#9a8cbe"] },
+      "bg2": { "role": "neutral", "displayName": "Raised Ground", "canonical": "#0b0818", "tonalRamp": ["#07050f", "#0b0818", "#141134", "#201b4a", "#312a63", "#4c4487", "#7269a3", "#a99fc8"] },
+      "ink": { "role": "neutral", "displayName": "Primary Ink", "canonical": "#f2eefb" },
+      "ink2": { "role": "neutral", "displayName": "Secondary Ink", "canonical": "#b6a8d4" },
+      "ink3": { "role": "neutral", "displayName": "Furniture Ink", "canonical": "#7d6f9a" },
+      "muted-scan": { "role": "neutral", "displayName": "Muted Scan (AA-safe small text)", "canonical": "#9a8cbe" },
+      "accent-indigo": { "role": "primary", "displayName": "Accent Indigo", "canonical": "#5b3fff", "tonalRamp": ["#170f4d", "#22167a", "#2e1ca6", "#3a23d1", "#5b3fff", "#7d66ff", "#a394ff", "#cfc6ff"] },
+      "accent-fuchsia": { "role": "primary", "displayName": "Accent Fuchsia", "canonical": "#c04bff", "tonalRamp": ["#3a1250", "#551a75", "#70229a", "#9a2fd6", "#c04bff", "#d078ff", "#e0a6ff", "#efd3ff"] },
+      "hot-magenta": { "role": "secondary", "displayName": "Hot Magenta (punctuation only)", "canonical": "#ff3ba6" },
+      "state-ok": { "role": "tertiary", "displayName": "State Lime (ok / verified / unchanged)", "canonical": "#38ffb0" },
+      "state-warn": { "role": "tertiary", "displayName": "State Amber (caution / trailing / unverified)", "canonical": "#ffb43b" },
+      "state-bad": { "role": "tertiary", "displayName": "State Red (hardening / danger)", "canonical": "#ff4d5e" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Masthead H1 only (Sora 800, ~20ch, fuchsia em)." },
+      "headline": { "displayName": "Headline", "purpose": "Section H2s." },
+      "title": { "displayName": "Title", "purpose": "Step, fact, gauge, FAQ-question titles (Sora 700)." },
+      "body": { "displayName": "Body", "purpose": "Subheads and paragraph copy (Inter, max 62-76ch)." },
+      "data": { "displayName": "Data", "purpose": "Product data numbers off the grid — Inter tabular (.num)." },
+      "grid-number": { "displayName": "Grid Number", "purpose": "Grid figures and readout values only — JetBrains Mono tabular (.tnum). Scoped reopening of the product-wide mono-rejected rule, for this terminal grid alone." },
+      "label": { "displayName": "Label", "purpose": "Column heads, readout keys, badges, status line — JetBrains Mono uppercase." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "term-row-in", "value": "termRowIn .5s cubic-bezier(.16,1,.3,1) both; delay calc(min(var(--i,0),26) * 13ms)", "purpose": "The one authored moment: staggered row cascade on the offer table, gated behind prefers-reduced-motion: no-preference and capped at 26 rows. Content is fully visible without it." },
+      { "name": "row-hover", "value": "background .14s", "purpose": "Faint indigo tint wash on row hover; chevron turns fuchsia and nudges 2px right." }
+    ],
+    "breakpoints": [
+      { "name": "grid-min", "value": "1240px" },
+      { "name": "scroll-band-top", "value": "1320px" },
+      { "name": "stack", "value": "860px" },
+      { "name": "journal-collapse", "value": "1000px" },
+      { "name": "masthead-reflow", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action per view (Compare / Open journal). Indigo resting fill, shifts fuchsia on hover.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Compare prop firms</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-width: 11rem; height: 48px; padding: 0 2.25rem; border-radius: 999px; border: 1px solid transparent; background: linear-gradient(100deg, #5b3fff 0%, #c04bff 100%); color: #fff; font-family: Inter, system-ui, sans-serif; font-weight: 600; font-size: 1rem; text-decoration: none; transition: filter .15s, box-shadow .15s; } .ds-btn-primary:hover { filter: brightness(1.07); } .ds-btn-primary:focus-visible { outline: 2px solid rgba(120,90,255,.6); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral pill for non-primary actions (Open the comparator).",
+      "html": "<a class=\"ds-btn-secondary\" href=\"#\">Open the comparator</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-width: 10rem; height: 40px; padding: 0 1.8rem; border-radius: 999px; background: rgba(255,255,255,.06); color: #b6a8d4; font-family: Inter, system-ui, sans-serif; font-weight: 600; font-size: .92rem; text-decoration: none; transition: color .15s, background .15s; } .ds-btn-secondary:hover { color: #f2eefb; background: rgba(255,255,255,.1); } .ds-btn-secondary:focus-visible { outline: 2px solid rgba(120,90,255,.6); outline-offset: 2px; }"
+    },
+    {
+      "name": "Offer Row",
+      "kind": "custom",
+      "refersTo": "data-row",
+      "description": "The signature data row: a full-bleed link, flat, hairline-separated, indigo tint on hover. The top (most reliable) row carries a 3px solid fuchsia rail — the only accent that is not a state color.",
+      "html": "<a class=\"ds-row ds-row-top\" href=\"#\" aria-label=\"Topstep Pro, rating 9, 50k, $149 — view in the comparator\"><span class=\"ds-rank\">1</span><span class=\"ds-firm\">Topstep <em>Pro</em></span><span class=\"ds-rating\">9</span><span class=\"ds-price\">$149</span><span class=\"ds-badge ds-badge-trail\">TRAIL</span><span class=\"ds-go\">›</span></a>",
+      "css": ".ds-row { display: grid; grid-template-columns: 40px 1.7fr 58px 96px 120px 24px; align-items: center; gap: 14px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.05); color: #f2eefb; text-decoration: none; font-family: Inter, system-ui, sans-serif; transition: background .14s; } .ds-row:hover { background: rgba(120,90,255,.07); } .ds-row:focus-visible { outline: 2px solid rgba(120,90,255,.6); outline-offset: -2px; } .ds-row-top { position: relative; background: rgba(120,90,255,.05); } .ds-row-top::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: #c04bff; } .ds-rank { text-align: center; font-size: 13px; color: #c04bff; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-firm { font-weight: 700; font-size: 14.5px; } .ds-firm em { font-style: normal; color: #7d6f9a; font-weight: 400; } .ds-rating { display: inline-grid; place-items: center; min-width: 28px; height: 24px; border-radius: 7px; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: #38ffb0; background: rgba(56,255,176,.1); box-shadow: inset 0 0 0 1px rgba(56,255,176,.28); } .ds-price { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-badge { justify-self: start; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 3px 6px; border-radius: 5px; } .ds-badge-trail { color: #ffb43b; background: rgba(255,180,59,.12); box-shadow: inset 0 0 0 1px rgba(255,180,59,.3); } .ds-go { text-align: center; color: #7d6f9a; font-size: 20px; transition: color .14s, transform .14s; } .ds-row:hover .ds-go { color: #c04bff; transform: translateX(2px); }"
+    },
+    {
+      "name": "Payout Gradient Block",
+      "kind": "card",
+      "refersTo": "payout-gradient",
+      "description": "The single gradient fill on the page — the 'what you still need to withdraw' signature. Placed on the most decisive block that carries no semantic state color.",
+      "html": "<div class=\"ds-payout\"><span class=\"ds-payout-label\">What you still need to withdraw</span><span class=\"ds-payout-val\">2 profit days and $340</span></div>",
+      "css": ".ds-payout { padding: 16px 18px; border-radius: 12px; background: linear-gradient(100deg, #5b3fff 0%, #c04bff 100%); color: #fff; } .ds-payout-label { display: block; font-family: Inter, system-ui, sans-serif; font-size: 12px; opacity: .92; } .ds-payout-val { display: block; margin-top: 4px; font-family: Sora, system-ui, sans-serif; font-weight: 800; font-size: 1.2rem; }"
+    },
+    {
+      "name": "Numeric Readout Strip",
+      "kind": "custom",
+      "refersTo": "data-row",
+      "description": "Masthead terminal-header strip: hairline-bordered band of key/value cells split by 1px rules. No cards.",
+      "html": "<dl class=\"ds-readout\"><div class=\"ds-read\"><dt class=\"ds-read-k\">prop firms compared</dt><dd class=\"ds-read-v\">13</dd></div><div class=\"ds-read\"><dt class=\"ds-read-k\">accounts compared</dt><dd class=\"ds-read-v\">118</dd></div><div class=\"ds-read\"><dt class=\"ds-read-k\">cheapest offer</dt><dd class=\"ds-read-v\">$99</dd><dd class=\"ds-read-note\">Bulenox</dd></div></dl>",
+      "css": ".ds-readout { display: flex; flex-wrap: wrap; margin: 0; border: 1px solid rgba(150,110,240,.16); border-radius: 12px; background: rgba(255,255,255,.014); overflow: hidden; } .ds-read { padding: 14px 26px; } .ds-read + .ds-read { border-left: 1px solid rgba(150,110,240,.16); } .ds-read-k { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #9a8cbe; } .ds-read-v { display: block; margin: 8px 0 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-size: 1.95rem; line-height: 1; color: #f2eefb; } .ds-read-note { display: block; margin: 6px 0 0; font-size: 12px; color: #9a8cbe; }"
+    },
+    {
+      "name": "FAQ Disclosure",
+      "kind": "custom",
+      "refersTo": "data-row",
+      "description": "Hairline-separated native details; mono +/- marker flips to fuchsia when open.",
+      "html": "<details class=\"ds-faq\" open><summary class=\"ds-faq-q\">EOD vs trailing drawdown: what's the difference?</summary><p class=\"ds-faq-a\">EOD locks to the highest daily close; trailing follows your equity peak, intraday included — the number-one trap.</p></details>",
+      "css": ".ds-faq { border-bottom: 1px solid rgba(255,255,255,.07); } .ds-faq-q { padding: 18px 0; font-family: Sora, system-ui, sans-serif; font-weight: 700; font-size: 15.5px; color: #f2eefb; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 14px; } .ds-faq-q::-webkit-details-marker { display: none; } .ds-faq-q::after { content: '+'; font-family: 'JetBrains Mono', ui-monospace, monospace; color: #7d6f9a; font-size: 18px; } .ds-faq[open] .ds-faq-q::after { content: '−'; color: #c04bff; } .ds-faq-a { margin: 0 0 20px; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.65; color: #b6a8d4; max-width: 76ch; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quotation Terminal",
+    "overview": "The home is not a landing page; it is the screen a futures trader stares at. Its whole argument — we execute the rules competitors merely describe — is carried by one dense, aligned, scannable table of real accounts, dropped straight under a tight masthead. The mood is instrument-panel, not marketing: a flat near-black violet-tinted ground (#070510), 1px hairline rules instead of boxes, monospace column headers, and numbers that hold their column. Depth is almost entirely refused on data surfaces. The one warmth in the room is the indigo→fuchsia brand gradient, and it is spent on exactly one block per page. The palette makes the product's honesty POV visible: risk states (lime/amber/red) do the talking on every rule cell, and the brand accent is forbidden from ever carrying a data value. Confirmed anti-references: pastel rounded fintech; the competitor marketing card-grid; and any blue/cyan, banned outright. Glass and relief are not rejected — they are the product's navigation and app language — but kept off the home's data.",
+    "keyCharacteristics": [
+      "Flat near-black ground; structure drawn with 1px hairlines, never cards or shadows, on data.",
+      "One brand gradient fill per page; everything else that reads as 'signal' is a risk state color.",
+      "Monospace only for measurement (column heads, grid figures, status readouts); Sora display, Inter body.",
+      "Risk semantics (lime/amber/red) own every rule cell; the brand accent never touches data.",
+      "One authored motion: a capped, staggered row cascade — content fully visible without it."
+    ],
+    "rules": [
+      { "name": "The No-Accent-On-Data Rule", "body": "The indigo/fuchsia brand accent may mark a control or an active/emphasis state, but never encodes the value of a datum. Every informational color on a data cell is lime, amber, or red.", "section": "colors" },
+      { "name": "The Muted-Scan Floor", "body": "Small text meant to be read as information uses Muted Scan (#9a8cbe), not Ink-3. Ink-3 is furniture only; if it labels a column or names a plan, it clears AA.", "section": "colors" },
+      { "name": "The Mono-Measures-Only Rule", "body": "JetBrains Mono is confined to measurement chrome and grid figures on this terminal surface — a scoped reopening of the product-wide 'mono rejected for data numbers' decision, for the home grid alone. Everywhere else, data numbers stay Inter tabular.", "section": "typography" },
+      { "name": "The Tabular-Number Rule", "body": "Every figure compared down a column is tabular (mono .tnum on the grid, Inter .num elsewhere) so digits hold width and columns never jitter.", "section": "typography" },
+      { "name": "The Flat-Data Rule", "body": "Data surfaces carry no drop shadow, no backdrop-filter, no card chrome; structure is hairlines and tint. This is the home's boundary against the product's relief/glass system, which is legitimate on the floating nav layer — do not import it onto the terminal, and do not ban glass product-wide.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep data surfaces flat: hairlines and tint washes for structure, never cards or shadows on the table, rows, or readout.",
+      "Do spend exactly one gradient fill per page, on the payout block; make every other signal a lime/amber/red state.",
+      "Do use lime/amber/red for every rule/state cell (TRAIL=amber, funded hardening=red, unchanged/verified/no-consistency=lime, present-consistency=amber).",
+      "Do set grid figures and measurement chrome in JetBrains Mono .tnum; all other data numbers in Inter tabular .num; body and headings in Inter/Sora.",
+      "Do use Muted Scan (#9a8cbe) for small scannable text; reserve Ink-3 for furniture.",
+      "Do gate the row cascade behind prefers-reduced-motion: no-preference and cap the stagger (~13ms x up to 26 rows); content fully visible without it.",
+      "Do stack the table into labeled per-offer cards below 860px; scroll it inside its own box (with the hint) between 861-1320px.",
+      "Do keep whole rows as real links with composed aria-labels and the visual header row aria-hidden."
+    ],
+    "donts": [
+      "Don't use the brand accent (indigo/fuchsia/magenta) to encode a data value — accent marks attention or an active control, never meaning.",
+      "Don't use any blue or cyan, anywhere. The direction is tested and rejected.",
+      "Don't add a second gradient, or make the top-row rail a gradient — it is a solid fuchsia.",
+      "Don't put glass or directional-relief on the home's data; that language belongs to the product's floating nav layer — but don't ban glass across the product either.",
+      "Don't render the table as a <table> or let it scroll the page; it is a grid of links that scrolls only inside its own box.",
+      "Don't pulse the live dot or fake a stream — the dot is static because the data is dated, not real-time.",
+      "Don't promote Ink-3 to carry small informational text on the near-black ground (it fails AA); use Muted Scan."
+    ]
+  }
+}

@@ -11,7 +11,7 @@
  */
 
 import type { OfferRules, Trade } from '../rules/types';
-import { computeDrawdownFloor } from '../rules/futures-engine';
+import { computeDrawdownFloor, evaluateAccount, pnlByDay } from '../rules/futures-engine';
 import { computeDiscipline, type Discipline } from './discipline';
 import { tagLabel } from './tags';
 
@@ -19,6 +19,10 @@ export interface AnalyticsTrade extends Trade {
   /** '' pour une entrée journalière. */
   symbol: string;
   tags: string[];
+  /** 'long' | 'short' pour un trade détaillé, null/absent pour une entrée journalière. */
+  direction?: string | null;
+  /** Durée du trade en secondes (trades détaillés horodatés). */
+  durationSec?: number | null;
 }
 
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -46,6 +50,10 @@ export interface Metrics {
   profitFactor: number | null; // gains bruts / pertes brutes ; null si aucune perte
   maxWinStreak: number;
   maxLossStreak: number;
+  largestWin: number; // plus gros gain net d'une entrée (0 si aucun gain)
+  largestLoss: number; // plus grosse perte nette, magnitude positive (0 si aucune perte)
+  /** Durée moyenne des trades détaillés horodatés, en secondes. null si aucun. */
+  avgDurationSec: number | null;
 }
 
 export function computeMetrics(trades: AnalyticsTrade[]): Metrics {
@@ -63,6 +71,16 @@ export function computeMetrics(trades: AnalyticsTrade[]): Metrics {
   const avgWin = wins.length ? round2(grossWin / wins.length) : 0;
   const avgLoss = losses.length ? round2(grossLoss / losses.length) : 0;
   const expectancy = entries ? round2(netPnl / entries) : 0;
+  const largestWin = wins.length ? round2(Math.max(...wins)) : 0;
+  const largestLoss = losses.length ? round2(Math.abs(Math.min(...losses))) : 0;
+
+  // Durée moyenne : uniquement les trades détaillés dont la durée est renseignée.
+  const durations = trades
+    .map((t) => t.durationSec)
+    .filter((d): d is number => typeof d === 'number' && Number.isFinite(d) && d > 0);
+  const avgDurationSec = durations.length
+    ? Math.round(durations.reduce((s, v) => s + v, 0) / durations.length)
+    : null;
 
   // Enchaînements chronologiques
   const chrono = [...trades].sort(byClosed);
@@ -102,6 +120,98 @@ export function computeMetrics(trades: AnalyticsTrade[]): Metrics {
     profitFactor: grossLoss > 0 ? round2(grossWin / grossLoss) : null,
     maxWinStreak: maxWin,
     maxLossStreak: maxLoss,
+    largestWin,
+    largestLoss,
+    avgDurationSec,
+  };
+}
+
+/* ----------------------------------------------------------- métriques /jour */
+
+export interface DayMetrics {
+  tradingDays: number;
+  winningDays: number;
+  losingDays: number;
+  breakevenDays: number;
+  /** % de jours gagnants parmi les jours décidés (G+P). null si aucun. */
+  dayWinRate: number | null;
+  /** P&L net moyen d'un jour tradé (net total / nb de jours). */
+  avgDailyPnl: number;
+  /** Nombre moyen d'entrées par jour tradé. */
+  avgTradesPerDay: number | null;
+  bestDay: { date: string; pnl: number } | null;
+  worstDay: { date: string; pnl: number } | null;
+  /** Plus longues séries de jours consécutifs gagnants / perdants. */
+  maxWinDayStreak: number;
+  maxLossDayStreak: number;
+}
+
+/**
+ * Métriques agrégées au niveau du JOUR (et non du trade) — Day Win %, séries de
+ * jours, P&L journalier moyen, meilleur/pire jour. Standard des journaux de
+ * référence (TradeZella « Day Win % »), distinct des métriques par trade : un
+ * trader peut avoir 40 % de trades gagnants mais 70 % de journées gagnantes.
+ * Le P&L d'un jour = somme des P&L nets des entrées de ce jour. Fonction pure.
+ */
+export function computeDayMetrics(trades: AnalyticsTrade[]): DayMetrics {
+  const pnlOf = new Map<string, number>();
+  const countOf = new Map<string, number>();
+  for (const t of trades) {
+    pnlOf.set(t.tradeDate, round2((pnlOf.get(t.tradeDate) ?? 0) + net(t)));
+    countOf.set(t.tradeDate, (countOf.get(t.tradeDate) ?? 0) + 1);
+  }
+
+  const days = [...pnlOf.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const tradingDays = days.length;
+
+  let winningDays = 0;
+  let losingDays = 0;
+  let breakevenDays = 0;
+  let netTotal = 0;
+  let bestDay: { date: string; pnl: number } | null = null;
+  let worstDay: { date: string; pnl: number } | null = null;
+  let maxWin = 0;
+  let maxLoss = 0;
+  let curWin = 0;
+  let curLoss = 0;
+
+  for (const [date, pnl] of days) {
+    netTotal = round2(netTotal + pnl);
+    if (pnl > 0) winningDays++;
+    else if (pnl < 0) losingDays++;
+    else breakevenDays++;
+    if (!bestDay || pnl > bestDay.pnl) bestDay = { date, pnl };
+    if (!worstDay || pnl < worstDay.pnl) worstDay = { date, pnl };
+
+    if (pnl > 0) {
+      curWin++;
+      curLoss = 0;
+      if (curWin > maxWin) maxWin = curWin;
+    } else if (pnl < 0) {
+      curLoss++;
+      curWin = 0;
+      if (curLoss > maxLoss) maxLoss = curLoss;
+    } else {
+      curWin = 0;
+      curLoss = 0;
+    }
+  }
+
+  const decided = winningDays + losingDays;
+  const totalEntries = [...countOf.values()].reduce((s, v) => s + v, 0);
+
+  return {
+    tradingDays,
+    winningDays,
+    losingDays,
+    breakevenDays,
+    dayWinRate: decided ? round2((winningDays / decided) * 100) : null,
+    avgDailyPnl: tradingDays ? round2(netTotal / tradingDays) : 0,
+    avgTradesPerDay: tradingDays ? round2(totalEntries / tradingDays) : null,
+    bestDay,
+    worstDay,
+    maxWinDayStreak: maxWin,
+    maxLossDayStreak: maxLoss,
   };
 }
 
@@ -277,6 +387,90 @@ export function computeMaxDrawdown(series: { date: string; value: number }[]): M
   };
 }
 
+/* ------------------------------------------------------ analyse de cohérence */
+
+export interface ConsistencyAnalysis {
+  /** La règle de cohérence s'applique-t-elle (seuil strict entre 0 et 100) ? */
+  applies: boolean;
+  /** Seuil de la firm en % (part max d'un seul jour dans le profit). */
+  thresholdPct: number | null;
+  /** Part du meilleur jour dans la somme des jours gagnants (%). null si aucun gain. */
+  bestDaySharePct: number | null;
+  /** Meilleur jour gagnant (celui qui pèse le plus). */
+  bestDay: { date: string; pnl: number } | null;
+  /** Somme des P&L des jours gagnants — base de la règle de cohérence. */
+  grossWinningDays: number;
+  /** Conforme aujourd'hui ? null si la règle ne s'applique pas ou aucun gain. */
+  compliant: boolean | null;
+  /**
+   * Profit net supplémentaire (réparti sur d'AUTRES jours que le meilleur) qu'il
+   * faudrait réaliser pour rendre le meilleur jour conforme au seuil. 0 si déjà
+   * conforme ou non applicable. C'est le « profit needed for consistency » que
+   * les concurrents décrivent sans jamais le chiffrer.
+   */
+  profitNeeded: number;
+}
+
+/**
+ * Analyse de cohérence — la signature prop firm. On ne réimplémente pas la
+ * RÈGLE (part max d'un jour) : on consomme le verdict du moteur
+ * (`evaluateAccount().consistency`, value = part du meilleur jour, limit =
+ * seuil) et on y ajoute deux choses que le moteur ne donne pas pour l'affichage :
+ * quel jour est le meilleur, et combien de profit en plus rendrait le compte
+ * conforme.
+ *
+ * `profitNeeded` : le seuil est `bestDay / gross ≤ t/100`. Ajouter du profit sur
+ * d'autres jours augmente `gross` sans toucher `bestDay`, donc il faut
+ * `gross ≥ bestDay·100/t`, soit `x = max(0, bestDay·100/t − gross)`.
+ */
+export function computeConsistencyAnalysis(
+  rules: OfferRules,
+  startingBalance: number,
+  trades: Trade[],
+): ConsistencyAnalysis {
+  const ev = evaluateAccount(rules, startingBalance, trades);
+  const cons = ev.consistency;
+
+  const byDay = pnlByDay(trades);
+  const winning = [...byDay.entries()].filter(([, v]) => v > 0);
+  const grossWinningDays = round2(winning.reduce((s, [, v]) => s + v, 0));
+  const best = winning.reduce<{ date: string; pnl: number } | null>(
+    (acc, [date, pnl]) => (!acc || pnl > acc.pnl ? { date, pnl } : acc),
+    null,
+  );
+
+  // La règle ne s'applique pas : pas de seuil exploitable.
+  if (!cons) {
+    return {
+      applies: false,
+      thresholdPct: null,
+      bestDaySharePct: null,
+      bestDay: best,
+      grossWinningDays,
+      compliant: null,
+      profitNeeded: 0,
+    };
+  }
+
+  const thresholdPct = cons.limit;
+  const bestDaySharePct = grossWinningDays > 0 ? round2(cons.value) : null;
+  const compliant = grossWinningDays > 0 ? cons.state === 'ok' : null;
+  const profitNeeded =
+    best && thresholdPct > 0 && compliant === false
+      ? round2(Math.max(0, (best.pnl * 100) / thresholdPct - grossWinningDays))
+      : 0;
+
+  return {
+    applies: true,
+    thresholdPct,
+    bestDaySharePct,
+    bestDay: best,
+    grossWinningDays,
+    compliant,
+    profitNeeded,
+  };
+}
+
 /* -------------------------------------------------------------------- période */
 
 export type PeriodPreset = 'month' | 'quarter' | 'all' | 'custom';
@@ -320,7 +514,10 @@ export interface Analytics {
   range: ResolvedRange;
   rangeEntries: number;
   metrics: Metrics;
+  dayMetrics: DayMetrics;
+  consistency: ConsistencyAnalysis;
   bySymbol: Bucket[];
+  byDirection: Bucket[];
   byWeekday: Bucket[];
   byHour: Bucket[];
   bySetup: Bucket[];
@@ -339,6 +536,13 @@ function famKeys(t: AnalyticsTrade, family: 'setup' | 'emotion'): string[] | nul
   return keys.length ? keys : null;
 }
 
+/** Clé de direction — seuls les trades détaillés en portent une (long/short). */
+function directionKeys(t: AnalyticsTrade): string[] | null {
+  if (t.direction === 'long' || t.direction === 'short') return [t.direction];
+  return null;
+}
+const directionLabel = (k: string): string => (k === 'long' ? 'Long' : k === 'short' ? 'Short' : k);
+
 export function buildAnalytics(params: {
   rules: OfferRules;
   startingBalance: number;
@@ -351,6 +555,7 @@ export function buildAnalytics(params: {
   const bySymbol = bucketize(windowed, (t) => (t.symbol ? [t.symbol] : null), (k) => k).sort(
     byEntriesDesc,
   );
+  const byDirection = bucketize(windowed, directionKeys, directionLabel).sort(byEntriesDesc);
   const byWeekday = bucketize(
     windowed,
     (t) => [String(weekdayIndex(t.tradeDate))],
@@ -381,8 +586,11 @@ export function buildAnalytics(params: {
     range,
     rangeEntries: windowed.length,
     metrics: computeMetrics(windowed),
+    dayMetrics: computeDayMetrics(windowed),
+    consistency: computeConsistencyAnalysis(rules, startingBalance, windowed),
     maxDrawdown,
     bySymbol,
+    byDirection,
     byWeekday,
     byHour,
     bySetup,
@@ -410,7 +618,9 @@ export interface AggregateAnalytics {
   rangeEntries: number;
   accounts: number;
   metrics: Metrics;
+  dayMetrics: DayMetrics;
   bySymbol: Bucket[];
+  byDirection: Bucket[];
   byWeekday: Bucket[];
   byHour: Bucket[];
   bySetup: Bucket[];
@@ -458,7 +668,9 @@ export function buildAggregateAnalytics(params: {
     rangeEntries: windowed.length,
     accounts: labels.size,
     metrics: computeMetrics(windowed),
+    dayMetrics: computeDayMetrics(windowed),
     bySymbol: bucketize(windowed, (t) => (t.symbol ? [t.symbol] : null), (k) => k).sort(byEntriesDesc),
+    byDirection: bucketize(windowed, directionKeys, directionLabel).sort(byEntriesDesc),
     byWeekday: bucketize(windowed, (t) => [String(weekdayIndex(t.tradeDate))], (k) => WEEKDAYS_FR[Number(k)]).sort(
       (a, b) => Number(a.key) - Number(b.key),
     ),

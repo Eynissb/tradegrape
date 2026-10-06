@@ -5,6 +5,8 @@ import {
   buildCumulative,
   buildDistribution,
   buildEquityCurve,
+  computeConsistencyAnalysis,
+  computeDayMetrics,
   computeMaxDrawdown,
   computeMetrics,
   resolveRange,
@@ -49,6 +51,8 @@ function t(
     fees: opts.fees ?? 0,
     symbol: opts.symbol ?? 'ES',
     tags: opts.tags ?? [],
+    direction: opts.direction ?? null,
+    durationSec: opts.durationSec ?? null,
   };
 }
 
@@ -358,5 +362,141 @@ describe('maxDrawdown dans buildAggregateAnalytics', () => {
     expect(agg.maxDrawdown.amount).toBe(242);
     // Un % rapporté à un pic de P&L cumulé donnerait 110 % : trompeur.
     expect(agg.maxDrawdown.pct).toBeNull();
+  });
+});
+
+/* Règle avec cohérence active (seuil strict) pour les tests dédiés. */
+const CONS_40: OfferRules = {
+  marketType: 'futures',
+  accountSize: 50_000,
+  drawdownType: 'STATIC',
+  drawdownAmount: 2_000,
+  profitTarget: 3_000,
+  dailyLossLimit: 1_000,
+  consistencyPct: 40,
+  minTradingDays: 1,
+};
+
+describe('computeMetrics — plus gros gain/perte et durée moyenne', () => {
+  it('largestWin, largestLoss (magnitude) et avgDurationSec sur les trades horodatés', () => {
+    const m = computeMetrics([
+      t('2026-01-01', 400, { durationSec: 600 }),
+      t('2026-01-02', -200, { durationSec: 1200 }),
+      t('2026-01-03', 100), // pas de durée → ignoré dans la moyenne
+    ]);
+    expect(m.largestWin).toBe(400);
+    expect(m.largestLoss).toBe(200);
+    expect(m.avgDurationSec).toBe(900); // (600 + 1200) / 2
+  });
+
+  it('avgDurationSec null quand aucune durée', () => {
+    expect(computeMetrics([t('2026-01-01', 100)]).avgDurationSec).toBeNull();
+    expect(computeMetrics([]).largestWin).toBe(0);
+    expect(computeMetrics([]).largestLoss).toBe(0);
+  });
+});
+
+describe('computeDayMetrics', () => {
+  it('Day Win %, séries de jours, meilleur/pire jour, P&L journalier moyen', () => {
+    const d = computeDayMetrics([
+      t('2026-01-01', 100),
+      t('2026-01-02', -50),
+      t('2026-01-03', 30),
+      t('2026-01-04', 30),
+      t('2026-01-05', 30),
+      t('2026-01-06', -10),
+    ]);
+    expect(d.tradingDays).toBe(6);
+    expect(d.winningDays).toBe(4);
+    expect(d.losingDays).toBe(2);
+    expect(d.dayWinRate).toBeCloseTo(66.67, 1);
+    expect(d.maxWinDayStreak).toBe(3); // 03→05
+    expect(d.maxLossDayStreak).toBe(1);
+    expect(d.bestDay).toEqual({ date: '2026-01-01', pnl: 100 });
+    expect(d.worstDay).toEqual({ date: '2026-01-02', pnl: -50 });
+    expect(d.avgDailyPnl).toBeCloseTo(21.67, 1); // 130 / 6
+    expect(d.avgTradesPerDay).toBe(1);
+  });
+
+  it('agrège plusieurs trades du même jour en une journée', () => {
+    const d = computeDayMetrics([
+      t('2026-02-01', 60),
+      t('2026-02-01', -30), // même jour → net +30, une seule journée gagnante
+      t('2026-02-02', 20),
+    ]);
+    expect(d.tradingDays).toBe(2);
+    expect(d.winningDays).toBe(2);
+    expect(d.avgTradesPerDay).toBe(1.5); // 3 entrées / 2 jours
+    expect(d.bestDay).toEqual({ date: '2026-02-01', pnl: 30 });
+  });
+
+  it('jour à zéro compté en breakeven, casse les séries', () => {
+    const d = computeDayMetrics([t('2026-03-01', 10), daily('2026-03-02', 0), t('2026-03-03', 10)]);
+    expect(d.breakevenDays).toBe(1);
+    expect(d.maxWinDayStreak).toBe(1); // le jour neutre coupe la série
+  });
+});
+
+describe('byDirection', () => {
+  it('ventile long/short et exclut les entrées journalières', () => {
+    const allTrades = [
+      t('2026-01-01', 100, { direction: 'long' }),
+      t('2026-01-02', -40, { direction: 'long' }),
+      t('2026-01-03', 60, { direction: 'short' }),
+      daily('2026-01-04', 50), // pas de direction → exclu
+    ];
+    const range = resolveRange('all', '2026-01-31', allTrades);
+    const a = buildAnalytics({ rules: STATIC_25K, startingBalance: 25_000, allTrades, range });
+    const longB = a.byDirection.find((b) => b.key === 'long');
+    const shortB = a.byDirection.find((b) => b.key === 'short');
+    expect(a.byDirection).toHaveLength(2);
+    expect(longB?.label).toBe('Long');
+    expect(longB?.entries).toBe(2);
+    expect(longB?.netPnl).toBe(60);
+    expect(shortB?.entries).toBe(1);
+    expect(shortB?.netPnl).toBe(60);
+  });
+});
+
+describe('computeConsistencyAnalysis', () => {
+  it('non conforme : chiffre le profit manquant pour respecter le seuil', () => {
+    // Jours gagnants : 600 (meilleur) + 200 + 200 = 1000 ; part = 60 % > 40 %.
+    const c = computeConsistencyAnalysis(CONS_40, 50_000, [
+      t('2026-01-01', 600),
+      t('2026-01-02', 200),
+      t('2026-01-03', 200),
+    ]);
+    expect(c.applies).toBe(true);
+    expect(c.thresholdPct).toBe(40);
+    expect(c.bestDay).toEqual({ date: '2026-01-01', pnl: 600 });
+    expect(c.grossWinningDays).toBe(1000);
+    expect(c.bestDaySharePct).toBe(60);
+    expect(c.compliant).toBe(false);
+    // besoin : 600·100/40 − 1000 = 1500 − 1000 = 500
+    expect(c.profitNeeded).toBe(500);
+  });
+
+  it('conforme : aucun profit requis', () => {
+    const c = computeConsistencyAnalysis(CONS_40, 50_000, [
+      t('2026-01-01', 300),
+      t('2026-01-02', 400),
+      t('2026-01-03', 300),
+    ]);
+    expect(c.compliant).toBe(true);
+    expect(c.profitNeeded).toBe(0);
+  });
+
+  it("ne s'applique pas quand la règle est absente (100 %)", () => {
+    const c = computeConsistencyAnalysis(STATIC_25K, 25_000, [t('2026-01-01', 500)]);
+    expect(c.applies).toBe(false);
+    expect(c.compliant).toBeNull();
+    expect(c.profitNeeded).toBe(0);
+  });
+
+  it('aucun jour gagnant : part et conformité indéterminées', () => {
+    const c = computeConsistencyAnalysis(CONS_40, 50_000, [t('2026-01-01', -100)]);
+    expect(c.applies).toBe(true);
+    expect(c.bestDaySharePct).toBeNull();
+    expect(c.compliant).toBeNull();
   });
 });

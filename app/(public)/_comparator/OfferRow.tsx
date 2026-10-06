@@ -5,6 +5,8 @@ import Badge from '@/components/ui/Badge';
 import type { ComparatorDict } from '@/lib/i18n/comparator';
 import type { PublicOffer, RuleStance } from '@/lib/catalog/public-offer';
 import { firmLogo, platformLogo, firmColor } from '@/lib/catalog/logos';
+import NoteRing from '@/app/(public)/_home/NoteRing';
+import CopyCode from '@/app/(public)/_home/CopyCode';
 
 /**
  * Ligne d'offre dépliable — LE composant partagé par les deux onglets (Éval /
@@ -103,26 +105,6 @@ function CountryFlag({ code }: { code: string | null }) {
   return <span className="cmp-flag cmp-flag--txt num" title={c}>{c}</span>;
 }
 
-/* Jauge de note circulaire : lime ≥8, ambre 4-7, rouge ≤3 (jamais l'accent).
-   Sans note : anneau gris en place, prêt à recevoir le score. */
-function Gauge({ rating }: { rating: number | null }) {
-  const tone = rating == null ? 'var(--ink3)' : rating >= 8 ? 'var(--lime)' : rating >= 4 ? 'var(--amber)' : 'var(--red)';
-  const circ = 2 * Math.PI * 15;
-  const off = rating == null ? circ : circ * (1 - Math.max(0, Math.min(10, rating)) / 10);
-  return (
-    <span className="cmp-gauge">
-      <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
-        <circle className="cmp-gauge-track" cx="21" cy="21" r="15" fill="none" strokeWidth="4" />
-        {rating != null ? (
-          <circle cx="21" cy="21" r="15" fill="none" stroke={tone} strokeWidth="4" strokeLinecap="round"
-            strokeDasharray={circ} strokeDashoffset={off} transform="rotate(-90 21 21)" />
-        ) : null}
-      </svg>
-      <b className="num" style={{ color: tone }}>{rating != null ? rating : '–'}</b>
-    </span>
-  );
-}
-
 function PlatformStack({ slugs, names }: { slugs: string[]; names: Record<string, string> }) {
   if (!slugs.length) return <span className="cmp-dash">—</span>;
   return (
@@ -132,7 +114,35 @@ function PlatformStack({ slugs, names }: { slugs: string[]; names: Record<string
   );
 }
 
-const ddClass = (t: string) => (t === 'TRAIL' ? 'cmp-dd-trail' : t === 'STATIC' ? 'cmp-dd-static' : 'cmp-dd-eod');
+/** Mini-glyphe de courbe de drawdown (repris de la home) : TRAIL monte (le piège),
+ *  EOD en marches, STATIC plat. Porté par le badge `.term-badge`. */
+function DrawGlyph({ type }: { type: 'EOD' | 'TRAIL' | 'STATIC' }) {
+  return (
+    <svg className="term-badge-gl" viewBox="0 0 22 13" aria-hidden="true">
+      {type === 'STATIC' ? (
+        <line x1="2" y1="7" x2="20" y2="7" />
+      ) : type === 'EOD' ? (
+        <path d="M2 11 H8 V7.5 H14 V4 H20" />
+      ) : (
+        <>
+          <path d="M2 11 L19 3" />
+          <circle className="term-badge-dot" cx="19" cy="3" r="2.1" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Badge drawdown façon home : glyphe + label, ambre pour le TRAIL (le piège),
+ *  neutre pour EOD / STATIC. */
+function DrawBadge({ type }: { type: 'EOD' | 'TRAIL' | 'STATIC' }) {
+  return (
+    <span className={`term-badge term-badge--${type === 'TRAIL' ? 'warn' : 'flat'}`}>
+      <DrawGlyph type={type} />
+      {type}
+    </span>
+  );
+}
 
 /* --------------------------------------------------------------- sous-cartes */
 
@@ -277,30 +287,31 @@ export default function OfferRow({
 
         {tab === 'eval' ? (
           <>
-            <span className={`cmp-price${o.priceRegular != null ? ' cmp-price--promo' : ''}`}>
+            <span className={`cmp-price${o.totalPrice.known && o.priceRegular != null && o.priceRegular > o.totalPrice.value ? ' cmp-price--promo' : ''}`}>
               {o.totalPrice.known ? (
                 <>
-                  <b className="num">
-                    {fmt.money(o.totalPrice.value, o.currency)}
-                    {o.priceRegular != null ? (
-                      <span className="cmp-price-tag" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none">
-                          <path d="M13.4 3H6.5A2.5 2.5 0 0 0 4 5.5v6.9a2 2 0 0 0 .586 1.414l7 7a2 2 0 0 0 2.828 0l6.5-6.5a2 2 0 0 0 0-2.828l-7-7A2 2 0 0 0 13.4 3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-                          <circle cx="8.6" cy="8.6" r="1.5" fill="currentColor" />
-                        </svg>
-                      </span>
+                  <span className="cmp-price-row">
+                    <b className="num">{fmt.money(o.totalPrice.value, o.currency)}</b>
+                    {o.priceRegular != null && o.priceRegular > o.totalPrice.value ? (
+                      <span className="cmp-price-off num">−{Math.round((1 - o.totalPrice.value / o.priceRegular) * 100)}%</span>
                     ) : null}
-                  </b>
-                  {o.priceRegular != null ? <s className="num">{fmt.money(o.priceRegular, o.currency)}</s> : null}
+                  </span>
+                  {o.priceRegular != null && o.priceRegular > o.totalPrice.value ? (
+                    <s className="num">{fmt.money(o.priceRegular, o.currency)}</s>
+                  ) : null}
                 </>
               ) : <span className="cmp-unknown">{d.priceUnknown}</span>}
             </span>
-            <span>{o.trust.promo ? <span className="cmp-promo"><code>{o.trust.promo.code}</code>{o.trust.promo.discountPct != null ? <span className="num"> −{o.trust.promo.discountPct}%</span> : null}</span> : dash()}</span>
+            <span className="cmp-cell-center">{o.trust.promo ? (
+              <span className="po-coupon">
+                <span className="pcc-stub">{d.promoCodeLabel}</span>
+                <span className="pcc-code"><CopyCode code={o.trust.promo.code} label={d.copyCode} /></span>
+              </span>
+            ) : dash()}</span>
             <span className={o.activationFee === 0 ? 'cmp-okv' : 'num'}>{o.activationFee === 0 ? d.activationIncluded : fmt.money(o.activationFee, o.currency)}</span>
             <span><PlatformStack slugs={o.platforms} names={platformNames} /></span>
             <span className="cmp-ddcell">
-              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.drawdown.type)}`}>{o.drawdown.type}</span><span className="num">{fmt.money(o.drawdown.amount, o.currency)}</span></span>
-              {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{hardenLabel(o, fmt, d)}</span> : null}
+              <span className="cmp-dd"><DrawBadge type={o.drawdown.type} /><span className="num">{fmt.money(o.drawdown.amount, o.currency)}</span></span>
             </span>
             <span className="num">{o.profitTarget != null ? fmt.money(o.profitTarget, o.currency) : <span className="cmp-dash">—</span>}</span>
           </>
@@ -308,18 +319,37 @@ export default function OfferRow({
           <>
             <span>{o.funded.hasConsistency ? <span className="cmp-warnv num">{o.funded.consistencyPct} %</span> : <span className="cmp-okv">{d.noConsistencyValue}</span>}</span>
             <span className="cmp-ddcell">
-              <span className="cmp-dd"><span className={`cmp-dd-badge ${ddClass(o.funded.drawdown.type)}`}>{o.funded.drawdown.type}</span><span className="num">{fmt.money(o.funded.drawdown.amount, o.currency)}</span></span>
+              <span className="cmp-dd"><DrawBadge type={o.funded.drawdown.type} /><span className="num">{fmt.money(o.funded.drawdown.amount, o.currency)}</span></span>
               {o.fundedHardening.differs ? <span className="cmp-harden" title={d.hardeningHint}>{hardenLabel(o, fmt, d)}</span> : null}
             </span>
-            <span className="num">{o.funded.splitTiers.length ? o.funded.splitTiers.map((t) => `${t.splitPct}%`).join(' → ') : o.funded.profitSplit != null ? `${o.funded.profitSplit} %` : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
+            {(() => {
+              const tiers = o.funded.splitTiers;
+              const pct = o.funded.profitSplit ?? (tiers.length ? tiers[tiers.length - 1].splitPct : null);
+              if (pct == null) return <span className="cmp-unknown">{d.unknownValue}</span>;
+              const label = tiers.length ? tiers.map((t) => `${t.splitPct}%`).join(' → ') : `${pct} %`;
+              return (
+                <span className="cmp-splitcell">
+                  <span className="term-split">
+                    <span className="num term-split-val">{label}</span>
+                    <span className="term-split-bar" style={{ '--v': `${Math.max(0, Math.min(100, pct))}%` } as React.CSSProperties} aria-hidden="true" />
+                  </span>
+                </span>
+              );
+            })()}
             <span className="num">{o.funded.firstCap.known ? (o.funded.firstCap.value === null ? <span className="cmp-okv">{d.noCap}</span> : fmt.money(o.funded.firstCap.value, o.currency)) : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
             <span className="num">{o.funded.frequencyDays != null ? `${o.funded.frequencyDays} ${d.fDays}` : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
             <span>{o.funded.news.stance ? <span className={o.funded.news.stance === 'forbidden' ? 'cmp-badv' : o.funded.news.stance === 'allowed' ? 'cmp-okv' : 'cmp-warnv'} title={o.funded.news.note ?? undefined}>{newsLabel(o.funded.news.stance)}</span> : <span className="cmp-unknown">{d.unknownValue}</span>}</span>
           </>
         )}
 
-        {/* Note */}
-        <span className="cmp-notecell"><Gauge rating={o.plan.rating} /></span>
+        {/* Note — NoteRing (anneau néon designé sur la home) ; repli discret. */}
+        <span className="cmp-notecell">
+          {o.plan.rating != null ? (
+            <NoteRing rating={o.plan.rating} size={44} />
+          ) : (
+            <span className="cmp-dash">—</span>
+          )}
+        </span>
       </div>
 
       {/* Panneau déplié — sous-cartes en relief. */}

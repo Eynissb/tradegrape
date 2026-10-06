@@ -92,7 +92,7 @@ export default async function WeekReviewPage({
   return (
     <main className="ui jwrap jwrap-acct">
       <nav className="jcrumb">
-        <Link href="/app" className="link-accent">Mes comptes</Link>{' / '}
+        <Link href="/app/accounts" className="link-accent">Comptes</Link>{' / '}
         <Link href={`/app/accounts/${id}`} className="link-accent">{account.label ?? 'Compte'}</Link>{' / '}
         Revue de la semaine
       </nav>

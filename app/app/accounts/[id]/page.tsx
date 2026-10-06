@@ -49,7 +49,7 @@ import MonthCalendar from './MonthCalendar';
 import AccountViewTabs from './AccountViewTabs';
 import AnalyticsPanel from './AnalyticsPanel';
 import HistoryPanel, { type HistoryRow } from './HistoryPanel';
-import { Stat } from '@/app/app/_components/analytics-ui';
+import { Amount, Stat, fmtShortDate } from '@/app/app/_components/analytics-ui';
 import { CalendarDays, TrendingDown, Hash, Percent, Flame } from 'lucide-react';
 
 type AccountView = 'calendrier' | 'analytics' | 'historique';
@@ -91,6 +91,7 @@ interface AccountRow {
 interface TradeListRow extends DbTradeRow {
   symbol: string;
   direction: string | null;
+  duration_sec: number | null;
   tags: string[];
   notes: string | null;
   source: string;
@@ -141,7 +142,7 @@ export default async function AccountPage({
 
   const { data: tradeRows } = await supabase
     .from('trades')
-    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, tags, notes, source, import_batch, import_platform')
+    .select('id, trade_date, closed_at, pnl, fees, symbol, direction, duration_sec, tags, notes, source, import_batch, import_platform')
     .eq('account_id', id)
     .order('trade_date', { ascending: false })
     .order('closed_at', { ascending: false })
@@ -287,6 +288,8 @@ export default async function AccountPage({
     ...toEngineTrade(t),
     symbol: t.symbol ?? '',
     tags: t.tags,
+    direction: t.direction,
+    durationSec: t.duration_sec,
   }));
   const range = resolveRange(preset, today, analyticsTrades, fromParam, toParam);
   const analytics =
@@ -297,8 +300,8 @@ export default async function AccountPage({
   return (
     <main className="jwrap jwrap-acct dash">
       <nav className="jcrumb">
-        <Link href="/app" className="link-accent">
-          Mes comptes
+        <Link href="/app/accounts" className="link-accent">
+          Comptes
         </Link>{' '}
         / {account.label ?? 'Compte'}
       </nav>
@@ -588,7 +591,7 @@ export default async function AccountPage({
                 <CardTitle icon={Hash}>Totaux</CardTitle>
                 <div className="acct2-monthstats">
                   <Stat icon={Hash} label="Entrées" value={String(trades.length)} />
-                  <Stat icon={TrendingUp} label="P&L net cumulé" value={signed(ev.netProfit, currency)} color={pnlColor(ev.netProfit)} />
+                  <Stat icon={TrendingUp} label="P&L net cumulé" value={<Amount value={ev.netProfit} signed currency={currency} />} color={pnlColor(ev.netProfit)} />
                   <Stat icon={Percent} label="Taux de réussite" value={winRate === null ? '—' : `${winRate}%`} sub={decidedCount ? `${winCount} G · ${lossCount} P` : undefined} />
                 </div>
               </div>
@@ -672,11 +675,11 @@ export default async function AccountPage({
                     <div className="card">
                       <CardTitle icon={CalendarDays}>Récap de {monthView.label}</CardTitle>
                       <div className="acct2-monthstats">
-                        <Stat icon={TrendingUp} label="Total du mois" value={signed(monthTotal, currency)} color={pnlColor(monthTotal)} />
+                        <Stat icon={TrendingUp} label="Total du mois" value={<Amount value={monthTotal} signed currency={currency} />} color={pnlColor(monthTotal)} />
                         <Stat icon={CalendarDays} label="Jours actifs" value={String(monthActiveDays)} />
                         <Stat icon={CalendarCheck} label="Jours validés" value={String(monthTradingDays)} />
-                        <Stat icon={TrendingUp} label="Meilleur jour" value={bestDay ? signed(bestDay.pnl, currency) : '—'} sub={bestDay?.date} />
-                        <Stat icon={TrendingDown} label="Pire jour" value={worstDay ? signed(worstDay.pnl, currency) : '—'} sub={worstDay?.date} />
+                        <Stat icon={TrendingUp} label="Meilleur jour" value={bestDay ? <Amount value={bestDay.pnl} signed currency={currency} /> : '—'} sub={bestDay ? fmtShortDate(bestDay.date) : undefined} />
+                        <Stat icon={TrendingDown} label="Pire jour" value={worstDay ? <Amount value={worstDay.pnl} signed currency={currency} /> : '—'} sub={worstDay ? fmtShortDate(worstDay.date) : undefined} />
                         <Stat icon={Flame} label="Série en cours" value={streak === 0 ? '—' : String(streak)} sub={streak > 0 ? streakLabel : undefined} />
                       </div>
                     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BookOpen, Settings, LayoutDashboard, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { signout } from '@/app/(auth)/actions';
 import { LOCALES, comparatorHref, type Locale } from '@/lib/i18n/comparator';
@@ -15,6 +16,7 @@ const STAFF_ROLES = new Set(['owner', 'admin', 'editor', 'moderator', 'analyst']
 
 interface HeaderProfile {
   name: string;
+  email: string;
   initials: string;
   avatarUrl: string | null;
   staff: boolean;
@@ -57,10 +59,10 @@ function navItems(l: Locale) {
 /** Entrées du menu profil (hors « Déconnexion », qui est une action serveur). */
 function profileLinks(l: Locale, staff: boolean) {
   const items = [
-    { label: l === 'fr' ? 'Mon journal' : 'My journal', href: '/app' },
-    { label: l === 'fr' ? 'Préférences' : 'Preferences', href: '/settings' },
+    { label: l === 'fr' ? 'Mon journal' : 'My journal', href: '/app', Icon: BookOpen },
+    { label: l === 'fr' ? 'Préférences' : 'Preferences', href: '/settings', Icon: Settings },
   ];
-  if (staff) items.push({ label: 'Admin', href: '/admin' });
+  if (staff) items.push({ label: 'Admin', href: '/admin', Icon: LayoutDashboard });
   return items;
 }
 
@@ -93,6 +95,7 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   const [drawer, setDrawer] = useState(false);
   const [topDismissed, setTopDismissed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const profRef = useRef<HTMLDivElement>(null);
 
@@ -110,6 +113,7 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
       const name = data?.display_name ?? user.email?.split('@')[0] ?? 'Trader';
       setProfile({
         name,
+        email: user.email ?? '',
         initials: name.trim().slice(0, 2).toUpperCase(),
         avatarUrl: data?.avatar_url ?? null,
         staff: data ? STAFF_ROLES.has(data.role) : false,
@@ -145,6 +149,20 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Recherche : ⌘K / Ctrl+K ouvre le popup, Échap le ferme.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      } else if (e.key === 'Escape') {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
   useEffect(() => {
@@ -193,9 +211,9 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
   const menu = profile ? profileLinks(l, profile.staff) : [];
   const topMsg = l === 'fr' ? 'Données vérifiées à la source et datées.' : 'Data verified at source and dated.';
 
-  // Le comparateur est une app plein écran : il fournit son propre chrome (logo,
-  // journal, barre d'actions). On masque donc le header capsule sur cette route.
-  if (pathname && (pathname.endsWith('/comparateur') || pathname.endsWith('/compare'))) return null;
+  // Le comparateur affiche désormais le header du site (navigation cohérente).
+  // Sa coquille plein écran passe sous le header via `.pub-shell:has(.cmp-app)`
+  // (CSS pur : flex-colonne, header dans le flux, `.cmp-app` remplit le reste).
 
   return (
     <>
@@ -216,14 +234,12 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
           </div>
         ) : null}
 
-        {/* UNE seule capsule : tout sur une ligne. */}
-        <header className="pub-header">
+        {/* UNE seule capsule : tout sur une ligne. Fond uni dès qu'on scrolle
+            (sinon transparent sur le hero — le contenu passerait derrière). */}
+        <header className={`pub-header${scrolled ? ' is-scrolled' : ''}`}>
           <Link href={`/${l}`} className="pub-brand" aria-label="Tradegrape">
             <Logo />
           </Link>
-
-          {/* Recherche au centre — prend l'espace. */}
-          <SearchBar locale={l} />
 
           {/* Nav ; l'onglet actif en `.control--active` (repris du journal). */}
           <nav className="pub-nav" aria-label="Navigation principale">
@@ -243,6 +259,18 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
           </nav>
 
           <div className="pub-header-actions">
+            <button
+              type="button"
+              className="pub-search-btn"
+              aria-label={l === 'fr' ? 'Rechercher' : 'Search'}
+              onClick={() => setSearchOpen(true)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <path d="m20 20-3.2-3.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+
             <div className="pub-lang" ref={langRef}>
               <button
                 type="button"
@@ -297,21 +325,32 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
                 {profOpen && profile ? (
                   <div className="pub-prof-pop" role="menu">
                     <div className="pub-prof-head">
-                      <span className="pub-prof-name">{profile.name}</span>
+                      <span className="pub-prof-avatar">
+                        <Avatar profile={profile} />
+                      </span>
+                      <div className="pub-prof-id">
+                        <span className="pub-prof-name">{profile.name}</span>
+                        {profile.email ? <span className="pub-prof-email">{profile.email}</span> : null}
+                      </div>
                     </div>
-                    {menu.map((m) => (
-                      <Link
-                        key={m.href}
-                        href={m.href}
-                        className="pub-prof-item"
-                        role="menuitem"
-                        onClick={() => setProfOpen(false)}
-                      >
-                        {m.label}
-                      </Link>
-                    ))}
+                    <div className="pub-prof-list">
+                      {menu.map((m) => (
+                        <Link
+                          key={m.href}
+                          href={m.href}
+                          className="pub-prof-item"
+                          role="menuitem"
+                          onClick={() => setProfOpen(false)}
+                        >
+                          <m.Icon size={17} aria-hidden="true" />
+                          {m.label}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="pub-prof-sep" />
                     <form action={signout}>
                       <button type="submit" className="pub-prof-item pub-prof-out" role="menuitem">
+                        <LogOut size={17} aria-hidden="true" />
                         {logoutLabel}
                       </button>
                     </form>
@@ -370,6 +409,21 @@ export default function PublicHeader({ locale }: { locale: Locale }) {
           )}
         </nav>
       </div>
+
+      {/* Popup de recherche design (icône → overlay verre centré). */}
+      {searchOpen ? (
+        <div
+          className="pub-search-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={l === 'fr' ? 'Rechercher une prop firm' : 'Search a prop firm'}
+        >
+          <div className="pub-search-scrim" onClick={() => setSearchOpen(false)} />
+          <div className="pub-search-modal">
+            <SearchBar locale={l} variant="modal" onNavigate={() => setSearchOpen(false)} />
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

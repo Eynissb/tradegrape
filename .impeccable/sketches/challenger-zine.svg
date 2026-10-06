@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs></defs>
+  <rect width="1280" height="800" fill="#070510"/>
+  
+  <!-- construction margin, deliberately visible -->
+  <rect x="54" y="54" width="1172" height="692" fill="none" stroke="#7d6f9a" stroke-width="1" stroke-dasharray="2 6" opacity="0.22"/>
+  
+  <!-- wordmark (real) -->
+  <g transform="translate(74, 88)">
+    <circle cx="-2" cy="-6" r="7" fill="#c04bff"/>
+    <circle cx="10" cy="-6" r="7" fill="#5b3fff"/>
+    <circle cx="4" cy="4" r="7" fill="#ff3ba6"/>
+    <text x="30" y="1" font-size="21" font-weight="800" letter-spacing="-0.5" fill="#f2eefb">Tradegrape</text>
+  </g>
+  <text x="74" y="162" font-size="40" font-weight="800" letter-spacing="-1.2" fill="#f2eefb">Ne choisis pas ta prop firm.</text>
+  <text x="74" y="210" font-size="40" font-weight="800" letter-spacing="-1.2" fill="#f2eefb"><tspan fill="#c04bff">Teste-la d’abord.</tspan></text>
+  
+    <!-- mascot grape scribble -->
+    <g transform="translate(1016, 284)">
+      <circle cx="0" cy="0" r="26" fill="none" stroke="#c04bff" stroke-width="3"/>
+      <circle cx="-9" cy="-4" r="3.4" fill="#f2eefb"/><circle cx="9" cy="-4" r="3.4" fill="#f2eefb"/>
+      <path d="M -10 9 Q 0 17 10 9" fill="none" stroke="#f2eefb" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M -4 -30 q 6 -12 14 -6" fill="none" stroke="#38ffb0" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+    <rect x="78" y="288" width="300" height="120" rx="10" fill="none" stroke="#5b3fff" stroke-width="2.4"/><rect x="94" y="308" width="260" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="94" y="323" width="230" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="94" y="338" width="210" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/>
+    <rect x="78" y="454" width="340" height="110" rx="10" fill="none" stroke="#ff3ba6" stroke-width="2.4"/><rect x="94" y="474" width="300" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="94" y="489" width="270" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="94" y="504" width="250" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/>
+    <rect x="796" y="434" width="300" height="130" rx="10" fill="none" stroke="#c04bff" stroke-width="2.4"/><rect x="812" y="454" width="260" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="812" y="469" width="230" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/><rect x="812" y="484" width="210" height="6" rx="3" fill="#b6a8d4" opacity="0.25"/>
+    <!-- highlighter swipe over one line (amber) -->
+    <rect x="94" y="478" width="250" height="18" rx="4" fill="#ffb43b" opacity="0.32"/>
+    <path d="M 384 348 Q 591.6365643362196 401.9529352987565 786 474" fill="none" stroke="#c04bff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 778 470 l 14 4 l -6 -12" fill="none" stroke="#c04bff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 354 514 Q 673.4145469736195 423.1102772021009 976 324" fill="none" stroke="#5b3fff" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M 968 330 l 14 4 l -6 -12" fill="none" stroke="#5b3fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- underline scribble under headline -->
+    <path d="M 76 224 q 120 10 250 2 t 250 0" fill="none" stroke="#ff3ba6" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  
+</svg>

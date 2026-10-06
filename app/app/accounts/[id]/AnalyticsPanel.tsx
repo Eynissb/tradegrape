@@ -1,5 +1,5 @@
 import type { Analytics } from '@/lib/journal/analytics';
-import { Breakdown, DisciplineCard, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
+import { Breakdown, ConsistencyCard, DayStats, DisciplineCard, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
 import EquityChart from './EquityChart';
 import AnalyticsControls from './AnalyticsControls';
 
@@ -28,12 +28,20 @@ export default function AnalyticsPanel({
         <div className="card acct2-empty">Aucune entrée sur cette période. Change de période ou saisis un P&L.</div>
       ) : (
         <>
-          <DisciplineCard discipline={analytics.discipline} />
+          <div className="acct2-rulescards">
+            <DisciplineCard discipline={analytics.discipline} />
+            <ConsistencyCard consistency={analytics.consistency} currency={currency} />
+          </div>
 
-          <div className="card">
+          <section className="acct2-statsblock">
             <h3 className="acct-rules-title">Métriques · {analytics.rangeEntries} entrée(s)</h3>
             <MetricsGrid metrics={analytics.metrics} currency={currency} maxDrawdown={analytics.maxDrawdown} />
-          </div>
+          </section>
+
+          <section className="acct2-statsblock">
+            <h3 className="acct-rules-title">Par jour de trading · {analytics.dayMetrics.tradingDays} jour(s)</h3>
+            <DayStats day={analytics.dayMetrics} currency={currency} />
+          </section>
 
           <div className="card">
             <h3 className="acct-rules-title">Équité & plancher de drawdown</h3>
@@ -47,6 +55,7 @@ export default function AnalyticsPanel({
 
           <div className="acct2-breakdowns">
             <Breakdown title="Par symbole" buckets={analytics.bySymbol} currency={currency} catHeader="Symbole" emptyHint="Aucun trade détaillé sur la période (les entrées journalières sont exclues)." />
+            <Breakdown title="Long / Short" buckets={analytics.byDirection} currency={currency} catHeader="Sens" emptyHint="Aucun trade détaillé avec un sens sur la période." />
             <Breakdown title="Par jour de la semaine" buckets={analytics.byWeekday} currency={currency} catHeader="Jour" emptyHint="Aucune entrée sur la période." />
             <Breakdown title="Par heure" buckets={analytics.byHour} currency={currency} catHeader="Heure" emptyHint="Aucun trade détaillé horodaté sur la période." />
             <Breakdown title="Par setup" buckets={analytics.bySetup} currency={currency} catHeader="Setup" emptyHint="Aucun tag de setup sur la période." />

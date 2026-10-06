@@ -84,7 +84,7 @@ export interface PublicOfferRow {
     max_funded_accounts: number | null;
   };
   /** Promo active de la firm, si elle en a une. */
-  promo?: { code: string; discount_pct: number | null; ends_at: string | null } | null;
+  promo?: { code: string; discount_pct: number | null; ends_at: string | null; is_exclusive?: boolean | null } | null;
   /** Plafonds par cycle de retrait, triés par `cycle_from` croissant. */
   payout_caps?: PayoutCapRow[] | null;
   /** Posture de la firm sur le trading pendant les annonces (`firm_style_rules`). */
@@ -202,6 +202,8 @@ export interface PublicOffer {
       endsAt: string | null;
       /** Remise affichée en permanence, sans échéance — 7 firms sur 8. */
       permanent: boolean;
+      /** Code négocié par nous → badge « exclusif » (§7). */
+      exclusive: boolean;
     } | null;
   };
 }
@@ -405,6 +407,7 @@ export function toPublicOffer(row: PublicOfferRow): PublicOffer {
             discountPct: n(row.promo.discount_pct),
             endsAt: row.promo.ends_at,
             permanent: row.promo.ends_at === null,
+            exclusive: row.promo.is_exclusive === true,
           }
         : null,
     },
@@ -445,6 +448,28 @@ export interface OfferFilters {
   maxPayoutFrequencyDays?: number;
   /** Ne garder que les firms qui n'interdisent pas le trading sur annonces. */
   newsAllowed?: boolean;
+
+  /* ---- filtres additionnels (fiabilité, tarif, style, promo) ---- */
+  /** Health score minimum de la firm. */
+  minHealthScore?: number;
+  /** Note de plan minimum. */
+  minRating?: number;
+  /** Jours de trading minimum ≤ X (payout plus rapide). */
+  maxMinTradingDays?: number;
+  /** Trailing qui se verrouille au breakeven uniquement. */
+  lockingTrailing?: boolean;
+  /** Activation gratuite (frais = 0). */
+  freeActivation?: boolean;
+  /** Paiement unique (pas d'abonnement). */
+  oneTimePayment?: boolean;
+  /** Scalping explicitement autorisé. */
+  scalpingAllowed?: boolean;
+  /** Sans perte journalière. */
+  noDailyLoss?: boolean;
+  /** Uniquement les offres avec un code promo. */
+  withPromo?: boolean;
+  /** Uniquement les codes promo exclusifs (négociés par nous). */
+  exclusivePromo?: boolean;
 }
 
 export function filterOffers(offers: PublicOffer[], f: OfferFilters): PublicOffer[] {
@@ -475,6 +500,23 @@ export function filterOffers(offers: PublicOffer[], f: OfferFilters): PublicOffe
        laissent trader sous conditions — les écarter serait trop sévère, et un
        `null` (posture non collectée) ne doit pas se lire comme une interdiction. */
     if (f.newsAllowed && o.funded.news.stance === 'forbidden') return false;
+
+    /* Filtres additionnels. Même règle honnête que le prix : une valeur absente
+       (null / inconnue) ne satisfait JAMAIS un seuil — l'écarter est honnête. */
+    if (f.minHealthScore != null) {
+      if (o.firm.healthScore == null || o.firm.healthScore < f.minHealthScore) return false;
+    }
+    if (f.minRating != null) {
+      if (o.plan.rating == null || o.plan.rating < f.minRating) return false;
+    }
+    if (f.maxMinTradingDays != null && o.minTradingDays > f.maxMinTradingDays) return false;
+    if (f.lockingTrailing && !o.drawdown.locksAtBreakeven) return false;
+    if (f.freeActivation && o.activationFee !== 0) return false;
+    if (f.oneTimePayment && o.isRecurring) return false;
+    if (f.scalpingAllowed && o.scalping?.stance !== 'allowed') return false;
+    if (f.noDailyLoss && o.dailyLossLimit !== null) return false;
+    if (f.withPromo && o.trust.promo == null) return false;
+    if (f.exclusivePromo && o.trust.promo?.exclusive !== true) return false;
 
     if (f.maxTotalPrice != null) {
       /* Un prix inconnu ne peut PAS satisfaire « moins de X ». L'écarter est le
@@ -632,7 +674,81 @@ export function buildFacets(offers: PublicOffer[]) {
     withFundedHardening: offers.filter((o) => o.fundedHardening.differs).length,
     withoutSplit: offers.filter((o) => o.funded.profitSplit === null).length,
     withoutNewsStance: offers.filter((o) => o.funded.news.stance === null).length,
+    healthSteps: [60, 70, 80, 90].filter((s) => offers.some((o) => (o.firm.healthScore ?? -1) >= s)),
+    ratingSteps: [6, 7, 8, 9].filter((s) => offers.some((o) => (o.plan.rating ?? -1) >= s)),
+    minDaysSteps: [...new Set(offers.map((o) => o.minTradingDays))].sort((a, b) => a - b),
   };
+}
+
+/* ------------------------------------------------------- agrégat par firm */
+
+export interface FirmRow {
+  slug: string;
+  name: string;
+  /** Meilleure note de plan de la firm. */
+  rating: number | null;
+  country: string | null;
+  foundedYear: number | null;
+  offerCount: number;
+  /** Prix TTC d'entrée (offre la moins chère à prix connu). */
+  entryPrice: number | null;
+  currency: string;
+  /** Jusqu'à 4 plateformes (aperçu) + total réel. */
+  platforms: string[];
+  platformTotal: number;
+  /** Allocation max théorique : plus grande taille × comptes simultanés. */
+  maxAlloc: number;
+  promo: { code: string; discountPct: number | null; permanent: boolean; exclusive: boolean } | null;
+}
+
+/**
+ * Agrège une liste d'offres en UNE ligne par firm (vue « Firm »). Partagé entre
+ * la home et le comparateur pour un rendu identique. Trié par note, puis nombre
+ * d'offres, puis nom. Pur — aucun réseau ni DB.
+ */
+export function buildFirmRows(offers: PublicOffer[]): FirmRow[] {
+  const acc = new Map<
+    string,
+    {
+      slug: string; name: string; rating: number | null; country: string | null;
+      foundedYear: number | null; maxAccounts: number | null; offerCount: number;
+      entryPrice: number | null; currency: string; platforms: Set<string>; maxSize: number;
+      promo: FirmRow['promo'];
+    }
+  >();
+  for (const o of offers) {
+    let cur = acc.get(o.firm.slug);
+    if (!cur) {
+      cur = {
+        slug: o.firm.slug, name: o.firm.name, rating: o.plan.rating, country: o.firm.country,
+        foundedYear: o.firm.foundedYear, maxAccounts: o.firm.maxAccounts, offerCount: 0,
+        entryPrice: null, currency: o.currency, platforms: new Set<string>(), maxSize: 0,
+        promo: o.trust.promo
+          ? { code: o.trust.promo.code, discountPct: o.trust.promo.discountPct, permanent: o.trust.promo.permanent, exclusive: o.trust.promo.exclusive }
+          : null,
+      };
+      acc.set(o.firm.slug, cur);
+    }
+    cur.offerCount += 1;
+    if (o.plan.rating != null && (cur.rating == null || o.plan.rating > cur.rating)) cur.rating = o.plan.rating;
+    const entry = o.totalPrice.known ? o.totalPrice.value : null;
+    if (entry != null && (cur.entryPrice == null || entry < cur.entryPrice)) cur.entryPrice = entry;
+    for (const p of o.platforms) cur.platforms.add(p);
+    if (o.size > cur.maxSize) cur.maxSize = o.size;
+    if (!cur.promo && o.trust.promo) {
+      cur.promo = { code: o.trust.promo.code, discountPct: o.trust.promo.discountPct, permanent: o.trust.promo.permanent, exclusive: o.trust.promo.exclusive };
+    }
+  }
+  return [...acc.values()]
+    .map((f) => ({
+      slug: f.slug, name: f.name, rating: f.rating, country: f.country, foundedYear: f.foundedYear,
+      offerCount: f.offerCount, entryPrice: f.entryPrice, currency: f.currency,
+      platforms: [...f.platforms].slice(0, 4),
+      platformTotal: f.platforms.size,
+      maxAlloc: f.maxAccounts ? f.maxSize * f.maxAccounts : f.maxSize,
+      promo: f.promo,
+    }))
+    .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1) || b.offerCount - a.offerCount || a.name.localeCompare(b.name));
 }
 
 /* ------------------------------------------------------- comparaison 2 à 4 */
@@ -670,7 +786,8 @@ export const COMPARE_ROW_KEYS = [
   'totalPrice', 'price', 'activation', 'promo',
   'drawdown', 'lock', 'dailyLoss', 'target', 'consistency', 'minDays',
   'hardening', 'fundedDrawdown', 'fundedDailyLoss', 'fundedConsistency', 'split',
-  'firstCap', 'frequency', 'minProfitDays', 'buffer', 'method', 'news',
+  'firstCap', 'payoutMin', 'frequency', 'minProfitDays', 'buffer', 'method',
+  'fundedSizing', 'maxAccounts', 'news',
   'health', 'rating', 'reviewed',
 ] as const;
 
@@ -808,7 +925,10 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
               : fmt.hardened;
         return V(label, 'bad');
       }),
-      { pivotal: true },
+      /* Pivot (mise en relief amber) UNIQUEMENT si au moins une offre durcit :
+         amber-marquer une ligne où toutes sont « inchangées » serait un faux
+         signal. Toujours affichée quand même (info « aucune ne durcit »). */
+      { pivotal: offers.some((o) => o.fundedHardening.differs), alwaysShow: true },
     ),
     row('fundedDrawdown', 'funded', each((o) =>
       V(`${o.funded.drawdown.type} ${fmt.num(o.funded.drawdown.amount)}`),
@@ -831,10 +951,28 @@ export function buildCompareRows(offers: PublicOffer[], fmt: CompareFormat): Com
       const t = money(o, o.funded.firstCap.value);
       return V(o.funded.capVaries ? fmt.varies(t) : t);
     })),
+    /* Seuil de retrait minimum : le profit qu'il faut atteindre AVANT de pouvoir
+       demander un payout. Question n°1 du financé (recherche marché). */
+    row('payoutMin', 'funded', each((o) =>
+      o.funded.minAmount === null ? U : V(money(o, o.funded.minAmount)),
+    )),
     row('frequency', 'funded', each((o) => days(o.funded.frequencyDays))),
     row('minProfitDays', 'funded', each((o) => days(o.funded.minProfitDays))),
     row('buffer', 'funded', each((o) => (o.funded.buffer === null ? N : V(money(o, o.funded.buffer))))),
     row('method', 'funded', each((o) => (o.funded.method ? V(o.funded.method) : U))),
+    /* Contrats en financé (scaling) : souvent différent de l'éval, le web insiste
+       beaucoup dessus. « X minis / Y micros ». */
+    row('fundedSizing', 'funded', each((o) => {
+      const s = o.funded.sizing;
+      const parts: string[] = [];
+      if (s.minis !== null) parts.push(`${fmt.num(s.minis)} minis`);
+      if (s.micros !== null) parts.push(`${fmt.num(s.micros)} micros`);
+      return parts.length ? V(parts.join(' / ')) : U;
+    })),
+    /* Comptes financés cumulables (niveau firm). */
+    row('maxAccounts', 'funded', each((o) =>
+      o.firm.maxAccounts === null ? U : V(fmt.num(o.firm.maxAccounts)),
+    )),
     row('news', 'funded', each((o) => {
       const s = o.funded.news.stance;
       if (s === null) return U;

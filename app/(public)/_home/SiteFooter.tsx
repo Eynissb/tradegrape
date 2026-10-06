@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { COMPARATOR_PATH, comparatorHref, LOCALES, type Locale } from '@/lib/i18n/comparator';
 import { HOME_DICTS } from '@/lib/i18n/home';
 import { FlagRound } from '@/app/(public)/_components/Flags';
+import SocialLinks from '@/app/(public)/_home/SocialLinks';
 
 /**
  * Pied de page public — reprend le langage visuel de la capsule (relief, drapeaux
@@ -35,6 +36,7 @@ export default function SiteFooter({
               <img src="/brand/logo.svg" alt="Tradegrape" className="pub-footer-logo-img" />
             </Link>
             <p className="pub-footer-tag">{d.footerTagline}</p>
+            <SocialLinks locale={locale} />
           </div>
 
           <nav className="pub-footer-col" aria-label={d.footerNavTitle}>

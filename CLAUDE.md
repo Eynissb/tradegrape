@@ -67,6 +67,16 @@ JetBrains Mono **réservé au vrai code et aux codes promo à copier** — plus 
 chiffres de données (le mono faisait « technique », il ne collait pas au design ;
 décision révisée après essai sur les vrais écrans). `.num`/`.tabular` = Inter tabulaire.
 
+> **Exception verrouillée (2026-07, home « terminal »)** : la home publique
+> `app/(public)/[locale]/page.tsx` a été refondue en direction *terminal financier
+> data-first* (choix utilisateur qui bat le tirage — mode Persuade, table de 100+
+> offres comme pièce maîtresse). L'identité vient de la **typo des chiffres, de la
+> densité et de la hiérarchie des colonnes**. Sur cette surface uniquement, les
+> chiffres **de la grille comparateur** repassent en **JetBrains Mono tabulaire**
+> (classe `.tnum`) — la §2 « mono rejeté » est rouverte *pour la grille de la home
+> seule*, jamais pour l'app/journal/admin, qui restent en Inter tabulaire (`.num`).
+> Le reste de la home (titres, corps, libellés) reste Sora/Inter. Voir `DESIGN.md`.
+
 **Jamais de bleu/cyan** — direction testée et rejetée.
 Les **états** (ok/warning/danger) restent lime/amber/red, jamais l'accent de marque :
 la lisibilité du risque prime sur l'esthétique.

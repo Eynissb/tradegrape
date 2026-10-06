@@ -36,12 +36,15 @@ export default function EntryForms({
   today,
   trade,
   title,
+  defaultShowTags = false,
 }: {
   accountId: string;
   currency: string;
   today: string;
   trade?: TradeValues;
   title?: string;
+  /** Déplie tags & notes dès l'ouverture (ex. modal « Ajouter un trade »). */
+  defaultShowTags?: boolean;
 }) {
   const editing = !!trade;
   // Deux natures d'entrée annoncées par les onglets ; tags & notes se déplient.
@@ -49,7 +52,7 @@ export default function EntryForms({
     trade && trade.symbol ? 'detailed' : 'daily',
   );
   const [showTags, setShowTags] = useState(
-    editing && (((trade?.tags?.length ?? 0) > 0) || !!trade?.notes),
+    defaultShowTags || (editing && (((trade?.tags?.length ?? 0) > 0) || !!trade?.notes)),
   );
   const [dateValue, setDateValue] = useState<string>(trade?.trade_date ?? today);
   const detailed = mode === 'detailed';

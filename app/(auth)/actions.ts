@@ -30,13 +30,28 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const email = String(formData.get('email') ?? '');
   const password = String(formData.get('password') ?? '');
+  const fullName = String(formData.get('full_name') ?? '').trim();
+  const referral = String(formData.get('referral_code') ?? '').trim();
+  const marketing = formData.get('marketing') != null;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    // Métadonnées utilisateur : nom, opt-in marketing, code de parrainage capté
+    // (le système de parrainage n'existe pas encore — on stocke pour plus tard).
+    options: { data: { full_name: fullName, marketing_opt_in: marketing, referral_code: referral || null } },
+  });
 
   if (error) {
     const params = new URLSearchParams({ error: error.message });
     redirect(`/signup?${params.toString()}`);
+  }
+
+  // Si l'utilisateur a coché l'opt-in marketing, on l'ajoute aussi à la liste
+  // d'alertes (best-effort : ignoré si la migration 0016 n'est pas encore appliquée).
+  if (marketing && email) {
+    await supabase.rpc('record_email_signup', { p_email: email, p_locale: 'fr', p_source: 'signup' });
   }
 
   // Selon la config Supabase, une confirmation par email peut être requise :

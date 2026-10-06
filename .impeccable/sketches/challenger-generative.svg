@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs></defs>
+  <rect width="1280" height="800" fill="#070510"/>
+  
+  <rect x="54" y="54" width="1172" height="692" fill="none" stroke="#7d6f9a" stroke-width="1" stroke-dasharray="2 6" opacity="0.22"/>
+  
+  <g transform="translate(74, 88)">
+    <circle cx="-2" cy="-6" r="7" fill="#c04bff"/>
+    <circle cx="10" cy="-6" r="7" fill="#5b3fff"/>
+    <circle cx="4" cy="4" r="7" fill="#ff3ba6"/>
+    <text x="30" y="1" font-size="21" font-weight="800" letter-spacing="-0.5" fill="#f2eefb">Tradegrape</text>
+  </g>
+  <text x="74" y="162" font-size="40" font-weight="800" letter-spacing="-1.2" fill="#f2eefb">Ne choisis pas ta prop firm.</text>
+  <text x="74" y="210" font-size="40" font-weight="800" letter-spacing="-1.2" fill="#f2eefb"><tspan fill="#c04bff">Teste-la d’abord.</tspan></text>
+  <g transform="translate(74, 284)">
+    <rect x="0" y="0" width="360" height="76" rx="10" fill="#0b0818" stroke="#5b3fff" stroke-opacity="0.4" stroke-width="1"/>
+    <rect x="16" y="16" width="26" height="26" rx="6" fill="#5b3fff" opacity="0.5"/>
+    <rect x="56" y="22" width="200" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/><rect x="56" y="40" width="150" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/></g><g transform="translate(74, 380)">
+    <rect x="0" y="0" width="360" height="76" rx="10" fill="#0b0818" stroke="#c04bff" stroke-opacity="0.4" stroke-width="1"/>
+    <rect x="16" y="16" width="26" height="26" rx="6" fill="#c04bff" opacity="0.5"/>
+    <rect x="56" y="22" width="200" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/><rect x="56" y="40" width="150" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/></g><g transform="translate(74, 476)">
+    <rect x="0" y="0" width="360" height="76" rx="10" fill="#0b0818" stroke="#5b3fff" stroke-opacity="0.4" stroke-width="1"/>
+    <rect x="16" y="16" width="26" height="26" rx="6" fill="#5b3fff" opacity="0.5"/>
+    <rect x="56" y="22" width="200" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/><rect x="56" y="40" width="150" height="7" rx="3" fill="#b6a8d4" opacity="0.16"/></g><polygon points="1040,354 1004,375 1004,333" fill="none" stroke="#5b3fff" stroke-width="1.6" opacity="0.30"/><polygon points="1052,370 1000,390 980,338 1032,318" fill="none" stroke="#5b3fff" stroke-width="1.6" opacity="0.38"/><polygon points="1052,394 989,401 963,343 1010,300 1065,332" fill="none" stroke="#5b3fff" stroke-width="1.6" opacity="0.47"/><polygon points="1037,420 970,405 949,340 995,288 1062,303 1083,368" fill="none" stroke="#c04bff" stroke-width="1.6" opacity="0.55"/><polygon points="1007,438 948,305 1093,320" fill="none" stroke="#c04bff" stroke-width="1.6" opacity="0.63"/><polygon points="967,440 930,305 1066,268 1102,403" fill="none" stroke="#c04bff" stroke-width="1.6" opacity="0.72"/><polygon points="924,421 924,287 1051,246 1130,354 1051,462" fill="none" stroke="#c04bff" stroke-width="1.6" opacity="0.80"/><g transform="translate(976, 596)">
+    <rect x="0" y="0" width="230" height="120" rx="10" fill="#0b0818" stroke="#7d6f9a" stroke-opacity="0.4"/>
+    <line x1="18" y1="28" x2="212" y2="28" stroke="#7d6f9a" stroke-opacity="0.5"/><circle cx="60" cy="28" r="7" fill="#5b3fff"/><line x1="18" y1="58" x2="212" y2="58" stroke="#7d6f9a" stroke-opacity="0.5"/><circle cx="110" cy="58" r="7" fill="#ff3ba6"/><line x1="18" y1="88" x2="212" y2="88" stroke="#7d6f9a" stroke-opacity="0.5"/><circle cx="160" cy="88" r="7" fill="#c04bff"/>
+  </g>
+</svg>

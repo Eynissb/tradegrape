@@ -70,7 +70,7 @@ export async function loadPublicCatalog(): Promise<CatalogSnapshot> {
       .select('firm_id, code, discount_pct, ends_at, is_exclusive, firm:firms!inner ( slug )')
       .eq('is_active', true)
       .order('discount_pct', { ascending: false, nullsFirst: false })
-      .returns<{ code: string; discount_pct: number | null; ends_at: string | null; firm: unknown }[]>(),
+      .returns<{ code: string; discount_pct: number | null; ends_at: string | null; is_exclusive: boolean | null; firm: unknown }[]>(),
     /* Postures de style par firm : `news` (colonne en phase financée) ET
        `scalping` (sous-carte du déplié). Le reste des styles vit dans les guides. */
     supabase
@@ -107,13 +107,13 @@ export async function loadPublicCatalog(): Promise<CatalogSnapshot> {
     licsByFirm.set(firm.slug, cur);
   }
 
-  const promoByFirm = new Map<string, { code: string; discount_pct: number | null; ends_at: string | null }>();
+  const promoByFirm = new Map<string, { code: string; discount_pct: number | null; ends_at: string | null; is_exclusive: boolean | null }>();
   for (const p of promoRows ?? []) {
     const firm = one<{ slug: string }>(p.firm as never);
     if (!firm) continue;
     // `order` place la meilleure remise en tête : on ne garde que la première.
     if (!promoByFirm.has(firm.slug)) {
-      promoByFirm.set(firm.slug, { code: p.code, discount_pct: p.discount_pct, ends_at: p.ends_at });
+      promoByFirm.set(firm.slug, { code: p.code, discount_pct: p.discount_pct, ends_at: p.ends_at, is_exclusive: p.is_exclusive });
     }
   }
 

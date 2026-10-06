@@ -44,8 +44,8 @@ export default async function EditTrade({
   return (
     <main className="jwrap jwrap-narrow">
       <nav className="jcrumb">
-        <Link href="/app" className="link-accent">
-          Mes comptes
+        <Link href="/app/accounts" className="link-accent">
+          Comptes
         </Link>{' / '}
         <Link href={`/app/accounts/${id}`} className="link-accent">
           {account.label ?? 'Compte'}

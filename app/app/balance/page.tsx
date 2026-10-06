@@ -60,7 +60,7 @@ export default async function BalancePage() {
   return (
     <main className="jwrap jwrap-acct">
       <nav className="jcrumb">
-        <Link href="/app" className="link-accent">Mes comptes</Link>{' / '}Bilan financier
+        <Link href="/app" className="link-accent">Tableau de bord</Link>{' / '}Bilan financier
       </nav>
       <div className="acct2-top">
         <h1 className="jh1">Bilan financier</h1>

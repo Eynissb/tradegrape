@@ -7,7 +7,7 @@ import {
   type AggregateTrade,
   type PeriodPreset,
 } from '@/lib/journal/analytics';
-import { Breakdown, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
+import { Breakdown, DayStats, DistributionBars, MetricsGrid } from '@/app/app/_components/analytics-ui';
 import AnalyticsControls from '@/app/app/accounts/[id]/AnalyticsControls';
 import AccountPicker from './AccountPicker';
 import CumulativeChart from './CumulativeChart';
@@ -29,6 +29,8 @@ interface TradeRow {
   pnl: number | string;
   fees: number | string | null;
   symbol: string | null;
+  direction: string | null;
+  duration_sec: number | null;
   tags: string[] | null;
 }
 
@@ -43,7 +45,7 @@ export default async function AggregateAnalytics({
   const supabase = await createClient();
   const [{ data: accountsData }, { data: tradesData }] = await Promise.all([
     supabase.from('journal_accounts').select('id, label, rules_snapshot').order('created_at', { ascending: true }).returns<AccountRow[]>(),
-    supabase.from('trades').select('id, account_id, trade_date, closed_at, pnl, fees, symbol, tags').returns<TradeRow[]>(),
+    supabase.from('trades').select('id, account_id, trade_date, closed_at, pnl, fees, symbol, direction, duration_sec, tags').returns<TradeRow[]>(),
   ]);
 
   const accounts = accountsData ?? [];
@@ -58,6 +60,8 @@ export default async function AggregateAnalytics({
     pnl: Number(r.pnl),
     fees: r.fees === null ? 0 : Number(r.fees),
     symbol: r.symbol ?? '',
+    direction: r.direction,
+    durationSec: r.duration_sec,
     tags: r.tags ?? [],
     accountId: r.account_id,
     accountLabel: labels.get(r.account_id) ?? 'Compte',
@@ -70,7 +74,7 @@ export default async function AggregateAnalytics({
   return (
     <main className="jwrap jwrap-acct">
       <nav className="jcrumb">
-        <Link href="/app" className="link-accent">Mes comptes</Link>{' / '}Analytics
+        <Link href="/app" className="link-accent">Tableau de bord</Link>{' / '}Analytics
       </nav>
       <div className="acct2-top">
         <div className="acct2-top-row">
@@ -107,10 +111,15 @@ export default async function AggregateAnalytics({
           <div className="card acct2-empty">Aucune entrée sur cette période.</div>
         ) : (
           <>
-            <div className="card">
+            <section className="acct2-statsblock">
               <h3 className="acct-rules-title">Métriques consolidées · {a.rangeEntries} entrée(s)</h3>
               <MetricsGrid metrics={a.metrics} currency={currency} maxDrawdown={a.maxDrawdown} />
-            </div>
+            </section>
+
+            <section className="acct2-statsblock">
+              <h3 className="acct-rules-title">Par jour de trading · {a.dayMetrics.tradingDays} jour(s)</h3>
+              <DayStats day={a.dayMetrics} currency={currency} />
+            </section>
 
             <div className="card">
               <h3 className="acct-rules-title">P&L net cumulé (tous comptes)</h3>
@@ -125,6 +134,7 @@ export default async function AggregateAnalytics({
             <div className="acct2-breakdowns">
               <Breakdown title="Par compte" buckets={a.byAccount} currency={currency} catHeader="Compte" emptyHint="Aucune entrée." />
               <Breakdown title="Par symbole" buckets={a.bySymbol} currency={currency} catHeader="Symbole" emptyHint="Aucun trade détaillé (entrées journalières exclues)." />
+              <Breakdown title="Long / Short" buckets={a.byDirection} currency={currency} catHeader="Sens" emptyHint="Aucun trade détaillé avec un sens." />
               <Breakdown title="Par jour de la semaine" buckets={a.byWeekday} currency={currency} catHeader="Jour" emptyHint="Aucune entrée." />
               <Breakdown title="Par heure" buckets={a.byHour} currency={currency} catHeader="Heure" emptyHint="Aucun trade détaillé horodaté." />
               <Breakdown title="Par setup" buckets={a.bySetup} currency={currency} catHeader="Setup" emptyHint="Aucun tag de setup." />
